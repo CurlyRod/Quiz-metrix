@@ -1,5 +1,5 @@
 <?php
-$con = mysqli_connect("localhost", "root", "", "quiz_creator");
+$con = mysqli_connect("localhost", "root", "", "quizmetrix");
 require_once('../includes/db_config.php');
 
 // Get quiz ID from request

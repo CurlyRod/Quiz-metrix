@@ -3,7 +3,7 @@
 
 <style>
     .microsoft-login {
-    background-color: #0078D4;
+    background: linear-gradient(135deg, #4e91f9 0%, #6a7efc 40%, #8664e2 70%, #a36fd6 100%);;
     color: white;
     font-size: 1.2rem;
     border-radius: 15px;
@@ -38,7 +38,10 @@
                    <!-- Stylish Microsoft 365 Login Button -->
                    <a href="<?php  echo $authUrl  ?>" 
                     class="btn microsoft-login w-100 d-flex align-items-center justify-content-center">
-                        <span>Login with Microsoft 365</span>
+                    <span>
+                        <img src="https://365cloudstore.com/wp-content/uploads/2025/01/m365icon.webp" alt="m365 Logo "style="height: 100px; width: 100px;">
+                        Login with Microsoft 365
+                    </span>
                     </a>
 
 

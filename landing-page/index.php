@@ -69,9 +69,9 @@
         <div class="section-content">
           <div class="hero-details">
             <h3 class="subtitle">"I thought making quizzes was hard… <br>then I found QuizMetrix!"</h3>
-            <p class="description">is an intelligent and interactive quiz platform designed to enhance learning and assessment</p>
+            <p class="description">An interactive quiz platform designed to enhance learning and assessment</p>
             <div class="buttons">
-              <a href="#" class="button order-now">Join Now</a>
+              <a href="#" class="button order-now">Try Now</a>
               <a href="#contact" class="button contact-us">Learn More</a>
             </div>
           </div>

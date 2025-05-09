@@ -1,9 +1,9 @@
 <?php
 // Database configuration
-$host = "localhost";
-$username = "root"; // Default XAMPP username
-$password = ""; // Default XAMPP password is empty
-$database = "quizmetrix"; // Database name
+$host = 'localhost';
+$username = 'root'; // Default XAMPP username
+$password = ''; // Default XAMPP password is empty
+$database = 'quizmetrix'; // Database name
 
 // Create connection
 $conn = new mysqli($host, $username, $password, $database);

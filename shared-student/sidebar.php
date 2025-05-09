@@ -1,6 +1,8 @@
 <!-- SIDEBAR -->
 <section id="sidebar">
-		<a  href="../home" class="brand text-decoration-none"><i class='bx bxs-smile icon'></i> Quizmetrix</a>
+		<a  href="../home" class="brand text-decoration-none">
+		<img src="logo.png" alt="m365 Logo "style="height: 24px; width: 24px;">
+		Quizmetrix</a>
 		<ul class="side-menu">
 			<li><a class="nav-link"  href="../home/index.php" class="active"><i class='bx bx-home-alt icon' ></i> Home</a></li>
 			<li><a class="nav-link" href="#"><i class='bx bx-folder-open icon'></i> File Manager </a></li>
