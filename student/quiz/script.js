@@ -23,7 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
     settings: {
       timed: false,
       time: 5,
-      answerTypes: ["multiple"], // Default to multiple choice
+      answerTypes: [""], // Default to multiple choice
     },
   }
 

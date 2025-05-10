@@ -156,7 +156,19 @@ body {
   -webkit-box-orient: vertical;
 }
 
+.note-title-truncated {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 6;
+  -webkit-box-orient: vertical;
+}
+
 .note-content-full {
+  white-space: pre-wrap;
+}
+
+.note-content-full{
   white-space: pre-wrap;
 }
 

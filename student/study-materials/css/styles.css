@@ -1,0 +1,396 @@
+:root {
+    --primary-color: #6366f1;
+    --secondary-color: #34a853;
+    --danger-color: #ea4335;
+    --warning-color: #fbbc05;
+    --folder-color: #6366f1;
+    --dark-bg: #202124;
+    --dark-card: #2d2e31;
+    --dark-border: #5f6368;
+    --dark-text: #e8eaed;
+    --dark-text-secondary: #9aa0a6;
+    --light-bg: #f8f9fa;
+    --light-card: #ffffff;
+    --light-border: #dadce0;
+    --light-text: #202124;
+    --light-text-secondary: #5f6368;
+  }
+  
+  body {
+    background-color: var(--light-bg);
+    color: var(--light-text);
+    font-family: "Roboto", Arial, sans-serif;
+    transition: background-color 0.3s, color 0.3s;
+  }
+  
+  body.dark-theme {
+    background-color: var(--dark-bg);
+    color: var(--dark-text);
+  }
+  
+  /* Search bar */
+  .search-container {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  
+  .search-form .input-group {
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s;
+  }
+  
+  .dark-theme .search-form .input-group {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  }
+  
+  .search-form .input-group:focus-within {
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.2);
+  }
+  
+  .search-form .form-control,
+  .search-form .input-group-text {
+    border-color: var(--light-border);
+    background-color: var(--light-card);
+    color: var(--light-text);
+    transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+  }
+  
+  .dark-theme .search-form .form-control,
+  .dark-theme .search-form .input-group-text {
+    border-color: var(--dark-border);
+    background-color: var(--dark-card);
+    color: var(--dark-text);
+  }
+  
+  .search-form .form-control {
+    height: 48px;
+    font-size: 1rem;
+  }
+  
+  .search-form .form-control:focus {
+    box-shadow: none;
+  }
+  
+  /* Section titles */
+  .section-title {
+    font-size: 1rem;
+    font-weight: 500;
+    margin-bottom: 1rem;
+    color: var(--light-text);
+    transition: color 0.3s;
+  }
+  
+  .dark-theme .section-title {
+    color: var(--dark-text);
+  }
+  
+  /* Cards */
+  .card {
+    border: 1px solid var(--light-border);
+    border-radius: 8px;
+    transition: border-color 0.3s, background-color 0.3s, transform 0.2s, box-shadow 0.2s;
+    background-color: var(--light-card);
+    overflow: hidden;
+    position: relative;
+  }
+  
+  .dark-theme .card {
+    border-color: var(--dark-border);
+    background-color: var(--dark-card);
+  }
+  
+  .card:hover {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+  }
+  
+  .dark-theme .card:hover {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  }
+  
+  /* Make card titles smaller */
+  .card-title {
+    font-size: 0.85rem; /* Reduced from 0.9rem */
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--light-text);
+    transition: color 0.3s;
+  }
+  
+  .dark-theme .card-title {
+    color: var(--dark-text);
+  }
+  
+  /* Make card text smaller */
+  .card-text {
+    font-size: 0.7rem; /* Reduced from 0.75rem */
+    color: var(--light-text-secondary);
+    transition: color 0.3s;
+  }
+  
+  .dark-theme .card-text {
+    color: var(--dark-text-secondary);
+  }
+  
+  /* Reduce card body padding */
+  .card-body {
+    padding: 0.6rem; /* Reduced from 0.75rem */
+  }
+  
+  /* Update the card-preview height */
+  .card-preview {
+    height: 100px; /* Reduced from 150px */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f5f5f5;
+    border-bottom: 1px solid var(--light-border);
+    transition: background-color 0.3s, border-color 0.3s;
+  }
+  
+  .dark-theme .card-preview {
+    background-color: #3c3c3c;
+    border-color: var(--dark-border);
+  }
+  
+  .preview-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+  }
+  
+  .preview-placeholder i {
+    font-size: 3rem;
+  }
+  
+  .preview-placeholder.pdf i {
+    color: #e74c3c;
+  }
+  
+  .preview-placeholder.docx i {
+    color: #3498db;
+  }
+  
+  .preview-placeholder.txt i {
+    color: #95a5a6;
+  }
+  
+  /* Make folder cards smaller */
+  .folder-card .card-body {
+    padding: 0.75rem; /* Reduced padding */
+    cursor: pointer;
+  }
+  
+  /* Make folder icon smaller */
+  .folder-icon {
+    font-size: 1.75rem; /* Reduced from 2rem */
+    color: var(--folder-color);
+  }
+  
+  /* Card actions */
+  .card-actions {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 10;
+  }
+  
+  .card-actions .dropdown-toggle {
+    background: rgba(255, 255, 255, 0.8);
+    border: none;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s;
+  }
+  
+  .dark-theme .card-actions .dropdown-toggle {
+    background: rgba(60, 64, 67, 0.8);
+  }
+  
+  .card-actions .dropdown-toggle:hover,
+  .card-actions .dropdown-toggle:focus {
+    background: rgba(255, 255, 255, 1);
+  }
+  
+  .dark-theme .card-actions .dropdown-toggle:hover,
+  .dark-theme .card-actions .dropdown-toggle:focus {
+    background: rgba(60, 64, 67, 1);
+  }
+  
+  .card-actions .dropdown-toggle::after {
+    display: none;
+  }
+  
+  .card-actions .dropdown-toggle.no-arrow {
+    padding: 0;
+  }
+  
+  /* Empty state */
+  .empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--light-text-secondary);
+    transition: color 0.3s;
+  }
+  
+  .dark-theme .empty-state {
+    color: var(--dark-text-secondary);
+  }
+  
+  /* List view */
+  .list-view table {
+    color: var(--light-text);
+    transition: color 0.3s;
+  }
+  
+  .dark-theme .list-view table {
+    color: var(--dark-text);
+  }
+  
+  .list-view th {
+    font-weight: 500;
+    color: var(--light-text-secondary);
+    transition: color 0.3s;
+  }
+  
+  .dark-theme .list-view th {
+    color: var(--dark-text-secondary);
+  }
+  
+  .list-view td {
+    vertical-align: middle;
+  }
+  
+  .list-view i {
+    font-size: 1.25rem;
+  }
+  
+  .list-view i.bxs-file-pdf {
+    color: #e74c3c;
+  }
+  
+  .list-view i.bxs-file-doc {
+    color: #3498db;
+  }
+  
+  .list-view i.bxs-file-txt {
+    color: #95a5a6;
+  }
+  
+  /* Drag and drop */
+  .sortable-ghost {
+    opacity: 0.5;
+    background-color: #f8f9fa;
+  }
+  
+  .dark-theme .sortable-ghost {
+    background-color: #3c3c3c;
+  }
+  
+  .sortable-chosen {
+    background-color: #e9ecef;
+  }
+  
+  .dark-theme .sortable-chosen {
+    background-color: #4d4d4d;
+  }
+  
+  /* Preview modal */
+  #previewContent {
+    min-height: 400px;
+    max-height: 70vh;
+    overflow: auto;
+  }
+  
+  #previewContent embed,
+  #previewContent iframe {
+    width: 100%;
+    height: 100%;
+    min-height: 400px;
+  }
+  
+  /* Toast customization */
+  .toast {
+    background-color: var(--light-card);
+    color: var(--light-text);
+    transition: background-color 0.3s, color 0.3s;
+  }
+  
+  .dark-theme .toast {
+    background-color: var(--dark-card);
+    color: var(--dark-text);
+  }
+  
+  .toast-header {
+    background-color: rgba(0, 0, 0, 0.03);
+    color: var(--light-text);
+    transition: background-color 0.3s, color 0.3s;
+  }
+  
+  .dark-theme .toast-header {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: var(--dark-text);
+  }
+  
+  .toast-body {
+    padding: 0.75rem;
+  }
+  
+  .toast-body .btn-link {
+    padding: 0;
+    text-decoration: none;
+    color: var(--primary-color);
+  }
+  
+  /* Modals */
+  .modal-content {
+    background-color: var(--light-card);
+    color: var(--light-text);
+    transition: background-color 0.3s, color 0.3s;
+  }
+  
+  .dark-theme .modal-content {
+    background-color: var(--dark-card);
+    color: var(--dark-text);
+  }
+  
+  .modal-header {
+    border-bottom-color: var(--light-border);
+    transition: border-color 0.3s;
+  }
+  
+  .dark-theme .modal-header {
+    border-bottom-color: var(--dark-border);
+  }
+  
+  .modal-footer {
+    border-top-color: var(--light-border);
+    transition: border-color 0.3s;
+  }
+  
+  .dark-theme .modal-footer {
+    border-top-color: var(--dark-border);
+  }
+  
+  /* Update responsive adjustments */
+  @media (max-width: 767.98px) {
+    .search-form .form-control {
+      height: 40px;
+    }
+  
+    .card-preview {
+      height: 100px; /* Reduced from 120px */
+    }
+  }
+  

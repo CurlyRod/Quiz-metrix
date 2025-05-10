@@ -247,22 +247,34 @@ document.addEventListener("DOMContentLoaded", () => {
     updateNavigationButtons()
   }
 
-  function createMultipleChoiceInterface(index, question) {
-    let content = `<div class="multiple-choice-container mt-3">`
+function createMultipleChoiceInterface(index, question) {
+  let content = `<div class="multiple-choice-container mt-3">`
 
-    question.options.forEach((option, i) => {
-      const checked = userAnswers[index] === option ? "checked" : ""
-      content += `
-                <div class="quiz-option">
-                    <input type="radio" name="q${index}" id="q${index}opt${i}" value="${option}" ${checked}>
-                    <label for="q${index}opt${i}">${option}</label>
-                </div>
-            `
-    })
+  question.options.forEach((option, i) => {
+    const checked = userAnswers[index] === option ? "checked" : ""
+    content += `
+      <div class="quiz-option">
+        <label for="q${index}opt${i}">
+          <input type="radio" name="q${index}" id="q${index}opt${i}" value="${option}" ${checked}>
+          ${option}
+        </label>
+      </div>
+    `
+    document.addEventListener("click", function (e) {
+  const option = e.target.closest(".quiz-option");
+  if (option && option.querySelector("input[type='radio']")) {
+    option.querySelector("input[type='radio']").checked = true;
 
-    content += `</div>`
-    return content
+    // Optional: trigger change event if needed
+    option.querySelector("input[type='radio']").dispatchEvent(new Event("change"));
   }
+});
+
+})
+
+  content += `</div>`
+  return content
+}
 
   function createTypedAnswerInterface(index, question) {
     return `
