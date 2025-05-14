@@ -1,7 +1,9 @@
 <?php include 'modal.php'; ?>
+
+
 <!-- SIDEBAR -->
 <section id="sidebar">
-	<a href="../home" class="brand text-decoration-none"><img class="icon" src="../../assets/img/logo.png" alt="" style="height:43px">Quizmetrix</a>
+	<a href="../home" class="brand text-decoration-none"><img class="icon" src="../../assets/img/logo/apple-touch-icon.png" alt="" style="height:43px">Quizmetrix</a>
 	<ul class="side-menu">
 		<li><a class="nav-link" href="../home/index.php" class="active"><i class='bx bx-home-alt icon'></i> Home</a></li>
 		<li><a class="nav-link" href="../study-materials"><i class='bx bx-folder-open icon'></i> File Manager </a></li>
@@ -21,3 +23,4 @@
 	</ul>
 </section>
 <!-- SIDEBAR -->
+

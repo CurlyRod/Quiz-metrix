@@ -34,12 +34,11 @@ $recentFiles = getRecentFiles(5);
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
     <!-- Custom CSS -->
     <link href="css/styles.css" rel="stylesheet">
-    <link rel="stylesheet" href="notes.css">
     <link rel="stylesheet" href="../../vendor/student/home/home.css">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
 </head>
 
-<body>
+<body style="padding: 20px background: #f5f7fb;">
     <?php
     session_start();
     // Check if user is logged in
@@ -57,7 +56,7 @@ $recentFiles = getRecentFiles(5);
     ?>
     <div class="container-fluid px-0">
         <!-- Main content -->
-        <main class="container-fluid py-4">
+        <main class="container-fluid py-4" style="height: 100vh; background-color: #f5f7fb; padding: 20px 20px 20px 20px;">
             <!-- Search bar -->
             <div class="search-container mb-4">
                 <form action="index.php" method="GET" id="searchForm" class="search-form">
@@ -81,7 +80,7 @@ $recentFiles = getRecentFiles(5);
             <!-- Action buttons and filters -->
             <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
                 <div class="action-buttons mb-3 mb-md-0">
-                    <button type="button" class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#uploadModal">
+                    <button type="button" class="btn primary-btn" data-bs-toggle="modal" data-bs-target="#uploadModal" style="background-color: #6366f1; color: white;">
                         <i class="bx bx-upload me-1"></i> Upload
                     </button>
                     <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#newFolderModal">
@@ -90,7 +89,7 @@ $recentFiles = getRecentFiles(5);
                 </div>
                 <div class="filters d-flex flex-wrap">
                     <div class="view-toggle btn-group">
-                        <button type="button" class="btn btn-outline-primary view-toggle active" data-view="grid">
+                        <button type="button" class="btn btn-outline-primary view-toggle active" data-view="grid" >
                             <i class="bx bxs-grid-alt"></i>
                         </button>
                         <button type="button" class="btn btn-outline-primary view-toggle" data-view="list">
@@ -354,7 +353,7 @@ $recentFiles = getRecentFiles(5);
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" id="uploadButton">Upload</button>
+                    <button type="button" class="btn btn-primary" id="uploadButton" style="background-color: #6366f1; color: white;">Upload</button>
                 </div>
             </div>
         </div>
