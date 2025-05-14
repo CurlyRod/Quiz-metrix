@@ -25,7 +25,7 @@
 include '../../shared-student/sidebar.php';
 include '../../shared-student/navbar.php';
 ?>
-    <ul class="nav nav-underline ">
+    <ul class="nav nav-underline " style="padding: 20px;">
                     <li class="nav-item">
                         <a class="nav-link active" href="index.php">Create</a>
                     </li>

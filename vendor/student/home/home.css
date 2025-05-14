@@ -27,7 +27,7 @@ html {
 }
 
 body {
-	background: var(--grey);
+	background: #f5f7fb;
 	overflow-x: hidden;
 }
 
@@ -208,6 +208,9 @@ li {
 	width: calc(100% - 260px);
 	left: 260px;
 	transition: all .3s ease;
+	padding: 20px;
+	background: #f5f7fb;
+	height: 100vh;
 }
 #sidebar.hide + #content {
 	width: calc(100% - 60px);
@@ -261,8 +264,8 @@ nav .nav-link {
 	position: relative;
 }
 nav .nav-link .icon {
-	font-size: 18px;
-	color: var(--dark);
+	font-size: 20px;
+	color: var(--primary);
 }
 nav .nav-link .badge {
 	position: absolute;

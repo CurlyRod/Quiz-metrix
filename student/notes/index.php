@@ -52,7 +52,7 @@
                 <div id="note-expanded" class="card shadow-sm d-none">
                     <div class="card-body">
                         <input type="text" id="note-title" class="form-control border-0 fw-bold mb-2" placeholder="Title" maxlength="20">
-                        <textarea id="note-content" class="form-control border-0" placeholder="Take a note..." maxlength="500"></textarea>
+                        <textarea id="note-content" class="form-control border-0" placeholder="Take a note..." maxlength="1000"></textarea>
 
                         <!-- Color Palette -->
                         <div id="color-palette" class="color-palette mt-3">

@@ -23,7 +23,7 @@ session_start();
     include '../../shared-student/navbar.php';
     ?>
 
-    <ul class="nav nav-underline">
+    <ul class="nav nav-underline " style="padding: 20px;">
         <li class="nav-item">
             <a class="nav-link " href="index.php">Create</a>
         </li>
@@ -33,15 +33,15 @@ session_start();
     </ul>
 
 
-    <div class="container mt-4" id="quizManager">
+    <div class="container mt-4" >
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h5>Manage Quizzes</h5>
-            <a href="index.php" class="btn btn-primary">Create New Quiz</a>
+            <a href="index.php" class="btn" style="background-color: #6366f1; color: white;">Create New Quiz</a>
         </div>
 
         <div class="alert alert-info d-none" id="statusMessage"></div>
 
-        <div class="table-responsive">
+        <div class="table">
             <table id="mainQuizTable" class="table table-striped">
                 <thead>
                     <tr>
