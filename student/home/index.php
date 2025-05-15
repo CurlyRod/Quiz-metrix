@@ -68,13 +68,20 @@
         </div>
       </div>
 
-      <!-- Recent Section -->
-      <div class="recent-section">
-        <h3>Recent</h3>
-        <div id="recent-items">
-          <!-- Recent items will be displayed here -->
+     <!-- Recent Quizzes Section -->
+      <div class="card recent-quizzes-card" style="max-width: none;">
+        <div class="card-header">
+          <h3> Recent Quizzes</h3>
+        </div>
+        <div class="card-body">
+          <div class="row" id="recentQuizzes">
+
+            <!-- Quiz cards will be generated here -->
+          
+          </div>
         </div>
       </div>
+
     </div>
 
     <!-- Right Column -->
@@ -258,6 +265,8 @@
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
   <!-- Custom JS -->
+  <script src="js/recent.js"></script>
+
   <script src="js/calendar.js"></script>
   <script src="js/todo.js"></script>
   <script src="js/goals.js"></script>
