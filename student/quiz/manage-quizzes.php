@@ -16,13 +16,12 @@ session_start();
     <?php include '../../shared-student/header.php'; ?>
 </head>
 
-<body>
+<body style="height: 100vh; background-color: #f8f9fa;">
 
     <?php
     include '../../shared-student/sidebar.php';
     include '../../shared-student/navbar.php';
     ?>
-
     <ul class="nav nav-underline " style="padding: 20px;">
         <li class="nav-item">
             <a class="nav-link " href="index.php">Create</a>
@@ -39,10 +38,21 @@ session_start();
             <a href="index.php" class="btn" style="background-color: #6366f1; color: white;">Create New Quiz</a>
         </div>
 
+        <!-- Search Bar -->
+        <div class="row mb-4">
+            <div class="col-md-6 col-lg-4" style="width: 50%;">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    <input type="text" class="form-control" id="searchQuiz" placeholder="Search quizzes..." maxlength="30">
+                    <button class="btn btn-outline-secondary" type="button" id="clearSearch">Clear</button>
+                </div>
+            </div>
+        </div>
+        
         <div class="alert alert-info d-none" id="statusMessage"></div>
-
+        
         <div class="table">
-            <table id="mainQuizTable" class="table table-striped">
+            <table class="table table-striped">
                 <thead>
                     <tr>
                         <th>Title</th>
@@ -53,7 +63,6 @@ session_start();
                         <th>Actions</th>
                     </tr>
                 </thead>
-
                 <tbody id="quizTable">
                     <tr>
                         <td colspan="6" class="text-center">
@@ -66,6 +75,28 @@ session_start();
                 </tbody>
             </table>
         </div>
+        
+        <!-- Pagination -->
+        <nav aria-label="Quiz pagination" class="mt-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <span id="paginationInfo">Showing 1-10 of 0 quizzes</span>
+                </div>
+                <ul class="pagination" id="paginationControls">
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#" id="prevPage" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#" id="nextPage" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
     </div>
 
     <!-- Delete Confirmation Modal -->

@@ -40,7 +40,7 @@ include '../../shared-student/navbar.php';
                 <h3 class="mb-0">Create Quiz</h3>
                 <div>
                     <button class="btn btn-outline-secondary me-2" id="clearFormBtn">Clear Form</button>
-                    <button class="btn btn-primary me-2" id="createQuizBtn">Create Quiz</button>
+                    <button class="btn me-2" id="createQuizBtn" style="background-color: #6366f1; color: white;">Create Quiz</button>
                     <button class="btn btn-success" id="startQuizBtn">Start Quiz</button>
                 </div>
             </div>
@@ -72,11 +72,11 @@ include '../../shared-student/navbar.php';
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <label for="quizTitle" class="form-label">Title</label>
-                        <input type="text" class="form-control" id="quizTitle" placeholder="Enter quiz title">
+                        <input type="text" class="form-control" id="quizTitle" placeholder="Enter quiz title" maxlength="30">
                     </div>
                     <div class="col-md-6">
                         <label for="quizDescription" class="form-label">Description</label>
-                        <input type="text" class="form-control" id="quizDescription" placeholder="Enter quiz description">
+                        <input type="text" class="form-control" id="quizDescription" placeholder="Enter quiz description" maxlength="100">
                     </div>
                 </div>
             </div>
