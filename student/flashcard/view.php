@@ -20,7 +20,7 @@ if (!$set) {
 <!DOCTYPE html>
 <html lang="en">
 
-<head>
+<head >
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>View Flashcard Set - <?php echo htmlspecialchars($set['title']); ?></title>
@@ -28,7 +28,7 @@ if (!$set) {
     <?php include '../../shared-student/header.php'; ?>
 </head>
 
-<body>
+<body style="padding: 0;">
     <?php
     session_start();
     // Check if user is logged in
@@ -44,7 +44,7 @@ if (!$set) {
     include '../../shared-student/sidebar.php';
     include '../../shared-student/navbar.php';
     ?>
-    <div class="container">
+    <div class="container" style="margin-top: 50px;">
         <header>
             <h1><?php echo htmlspecialchars($set['title']); ?></h1>
             <div class="header-actions">

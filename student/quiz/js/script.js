@@ -532,7 +532,7 @@ document.addEventListener("DOMContentLoaded", () => {
       // Add click event to load the quiz
       quizCard.querySelector(".recent-quiz-card").addEventListener("click", function () {
         const quizId = this.getAttribute("data-quiz-id")
-        window.location.href = `index.php?id=${quizId}`
+        window.location.href = `../edit.php?id=${quizId}`
       })
     })
   }

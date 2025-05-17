@@ -28,10 +28,10 @@ include '../../shared-student/navbar.php';
 ?>
     <ul class="nav nav-underline " style="padding: 20px;">
                     <li class="nav-item">
-                        <a class="nav-link active" href="index.php" style="color: #6366f1">Create</a>
+                        <a class="nav-link " href="index.php" style="color:rgba(99, 101, 241, 0.8)">Create</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="edit.php" style="color:rgba(99, 101, 241, 0.8)">Edit</a>
+                        <a class="nav-link active" href="edit.php" style="color: #6366f1">Edit</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link " href="manage-quizzes.php" style="color:rgba(99, 101, 241, 0.8)">Manage Quizzes</a>
@@ -44,7 +44,7 @@ include '../../shared-student/navbar.php';
                 <h3 class="mb-0">Create Quiz</h3>
                 <div>
                     <button class="btn btn-outline-secondary me-2" id="clearFormBtn">Clear Form</button>
-                    <button class="btn me-2" id="createQuizBtn" style="background-color: #6366f1; color: white;">Create Quiz</button>
+                    <button class="btn me-2" id="createQuizBtn" style="background-color: #6366f1; color: white;">Edit Quiz</button>
                     <button class="btn btn-success" id="startQuizBtn">Start Quiz</button>
                 </div>
             </div>
