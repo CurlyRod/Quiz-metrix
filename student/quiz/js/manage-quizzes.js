@@ -255,7 +255,7 @@ document.addEventListener("DOMContentLoaded", () => {
             </button>
             <ul class="dropdown-menu dropdown-menu-end">
               <li><a class="dropdown-item" href="quiz.php?id=${quiz.quiz_id}" data-action="take">Take Quiz</a></li>
-              <li><a class="dropdown-item" href="index.php?id=${quiz.quiz_id}" data-action="edit">Edit Quiz</a></li>
+              <li><a class="dropdown-item" href="edit.php?id=${quiz.quiz_id}" data-action="edit">Edit Quiz</a></li>
               <li><a class="dropdown-item dropdown-item-results" href="#" data-action="results" data-quiz-id="${quiz.quiz_id}" data-quiz-title="${quiz.title}">View Results</a></li>
               <li><hr class="dropdown-divider"></li>
               <li><a class="dropdown-item text-danger dropdown-item-delete" href="#" data-action="delete" data-quiz-id="${quiz.quiz_id}">Delete Quiz</a></li>

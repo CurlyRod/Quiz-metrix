@@ -14,7 +14,7 @@ $flashcardSets = getAllFlashcardSets();
     <?php include '../../shared-student/header.php'; ?>
 </head>
 
-<body>
+<body style="padding: 0;">
     <?php
     session_start();
     // Check if user is logged in
@@ -30,7 +30,7 @@ $flashcardSets = getAllFlashcardSets();
     include '../../shared-student/sidebar.php';
     include '../../shared-student/navbar.php';
     ?>
-    <div class="container">
+    <div class="container" style="margin-top: 50px;">
         <header>
             <h4>My Flashcards</h4>
             <a href="create.php" style="text-decoration: none;" class="btn-primary">+ Create New</a>

@@ -49,7 +49,7 @@
       <!-- Calendar Card -->
       <div class="card calendar-card">
         <div class="calendar-header">
-          <button class="today-button" id="todayButton">Today</button>
+          <button class="today-button" id="todayButton" style="color: #6366f1"><u>Today</u></button>
           <div class="month-navigation">
             <button class="nav-button" id="prevMonth">
               <i class="fas fa-chevron-left"></i>

@@ -9,8 +9,8 @@
     <title>Create Flashcard Set</title>
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
-<body>
-    <div class="container">
+<body style="padding: 0;">
+    <div class="container" style="margin-top: 50px;">
         <header>
             <h1>Create Flashcard Set</h1>
             <a href="index.php" class="btn-secondary">Back to All Sets</a>

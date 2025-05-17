@@ -28,7 +28,7 @@ if (!$set) {
     <?php include '../../shared-student/header.php'; ?>
 </head>
 
-<body>
+<body style="padding: 0;">
     <?php
     session_start();
     // Check if user is logged in
@@ -44,7 +44,7 @@ if (!$set) {
     include '../../shared-student/sidebar.php';
     include '../../shared-student/navbar.php';
     ?>
-    <div class="container">
+    <div class="container" style="margin-top: 50px;">
         <header>
             <h1>Edit Flashcard Set</h1>
             <a href="index.php" class="btn-secondary">Back to All Sets</a>
