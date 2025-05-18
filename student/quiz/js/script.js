@@ -14,6 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const successAlert = document.getElementById("successAlert")
   const errorAlert = document.getElementById("errorAlert")
   const recentQuizzes = document.getElementById("recentQuizzes")
+  const importQuestionsBtn = document.getElementById("importQuestionsBtn")
 
   // Quiz data
   let quizData = {
@@ -30,9 +31,10 @@ document.addEventListener("DOMContentLoaded", () => {
   // Drag and drop variables
   let draggedCard = null
 
-  // Check if we're editing an existing quiz
+  // Check if we're editing an existing quiz or coming from import
   const urlParams = new URLSearchParams(window.location.search)
   const quizId = urlParams.get("id")
+  const importFlag = urlParams.get("import")
 
   let quizSaveModal // Declare quizSaveModal here
   let quizSettingsModal // Declare quizSettingsModal here
@@ -40,6 +42,9 @@ document.addEventListener("DOMContentLoaded", () => {
   if (quizId) {
     // Load quiz for editing
     loadQuiz(quizId)
+  } else if (importFlag === "true") {
+    // Process imported cards
+    processImportedCards()
   } else {
     // Add default question cards
     for (let i = 0; i < 5; i++) {
@@ -71,8 +76,12 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     })
 
-
-   
+    // Import questions button
+    if (importQuestionsBtn) {
+      importQuestionsBtn.addEventListener("click", () => {
+        window.location.href = "import-questions.php"
+      })
+    }
 
     // Create quiz button
     createQuizBtn.addEventListener("click", () => {
@@ -80,7 +89,6 @@ document.addEventListener("DOMContentLoaded", () => {
       createQuiz(true)
     })
 
-    
     // Start quiz button
     startQuizBtn.addEventListener("click", () => {
       // First save the quiz
@@ -108,6 +116,66 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       })
     })
+  }
+
+  // Process imported cards from localStorage if available
+  function processImportedCards() {
+    const importedCardsJson = localStorage.getItem("importedCards")
+    if (importedCardsJson) {
+      try {
+        const importedCards = JSON.parse(importedCardsJson)
+        
+        // Clear existing cards if we have imported ones
+        if (importedCards.length > 0) {
+          questionCards.innerHTML = ""
+        }
+        
+        // Add each imported card
+        importedCards.forEach((card, index) => {
+          const newCard = document.createElement("div")
+          newCard.className = "card question-card mb-3"
+          newCard.setAttribute("data-card-id", index + 1)
+          newCard.setAttribute("draggable", "true")
+          
+          newCard.innerHTML = `
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span class="card-number">${index + 1}</span>
+                <div>
+                    <button class="btn btn-sm btn-light move-card-btn" title="Drag to reorder"><i class="bi bi-grip-vertical"></i></button>
+                    <button class="btn btn-sm btn-light delete-card-btn"><i class="bi bi-trash"></i></button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3 mb-md-0">
+                        <label class="form-label">Answer (Term)</label>
+                        <input type="text" class="form-control term-input" placeholder="Enter the answer" value="${card.term}">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Question (Description)</label>
+                        <input type="text" class="form-control description-input" placeholder="Enter the question" value="${card.description}">
+                    </div>
+                </div>
+            </div>
+          `
+          
+          questionCards.appendChild(newCard)
+          addCardEventListeners(newCard)
+          initCardDragAndDrop(newCard)
+        })
+        
+        // Update card numbers
+        updateCardNumbers()
+        
+        // Clear the imported cards from localStorage
+        localStorage.removeItem("importedCards")
+        
+        // Show success message
+        showSuccess(`Successfully imported ${importedCards.length} cards.`)
+      } catch (error) {
+        console.error("Error processing imported cards:", error)
+      }
+    }
   }
 
   function getSelectedAnswerTypes() {
@@ -237,10 +305,6 @@ document.addEventListener("DOMContentLoaded", () => {
     })
   }
 
-
-
-
-
   function createQuiz(showSettingsModal = false) {
     // Get quiz title and description
     quizData.title = document.getElementById("quizTitle").value || "Untitled Quiz"
@@ -291,6 +355,8 @@ document.addEventListener("DOMContentLoaded", () => {
             // Reload recent quizzes
             loadRecentQuizzes()
             
+            // Clear the form after successful creation
+            clearForm()
           } else {
             
           }
@@ -303,8 +369,6 @@ document.addEventListener("DOMContentLoaded", () => {
         showError("Error saving quiz. Please try again.")
       })
   }
-
-
 
   function saveQuiz(showSettingsModal = false) {
     // Get quiz title and description

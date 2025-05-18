@@ -43,6 +43,9 @@ include '../../shared-student/navbar.php';
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h3 class="mb-0">Create Quiz</h3>
                 <div>
+                    <button class="btn btn-outline-primary me-2" id="importQuestionsBtn">
+                    <i class="bi bi-upload"></i> Import Questions
+                </button>
                     <button class="btn btn-outline-secondary me-2" id="clearFormBtn">Clear Form</button>
                     <button class="btn me-2" id="createQuizBtn" style="background-color: #6366f1; color: white;">Create Quiz</button>
                     <button class="btn btn-success" id="startQuizBtn">Start Quiz</button>
@@ -90,7 +93,7 @@ include '../../shared-student/navbar.php';
             <div id="questionCards">
                 <!-- Question cards will be dynamically added here -->
             </div>
-            
+
             <!-- Add Card Button -->
             <button class="btn btn-light w-100 add-card-btn mt-3" id="addCardBtn">
                 Add question <i class="bi bi-plus"></i>
