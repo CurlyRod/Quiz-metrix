@@ -251,7 +251,6 @@ document.addEventListener("DOMContentLoaded", () => {
         <td>
           <div class="dropdown">
             <button class="btn btn-sm btn-light dropdown-toggle" type="button" aria-expanded="false">
-              <i class="bi bi-three-dots-vertical"></i>
             </button>
             <ul class="dropdown-menu dropdown-menu-end">
               <li><a class="dropdown-item" href="quiz.php?id=${quiz.quiz_id}" data-action="take">Take Quiz</a></li>
