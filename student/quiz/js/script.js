@@ -104,6 +104,8 @@ document.addEventListener("DOMContentLoaded", () => {
         return
       }
 
+      // Ensure the quiz data has the correct answer types
+      quizData.settings.answerTypes = selectedTypes;
       startQuiz()
     })
 
@@ -441,8 +443,14 @@ document.addEventListener("DOMContentLoaded", () => {
     // Assign random answer types to each question
     quizData.questions.forEach((question) => {
       // Randomly select one of the chosen answer types for this question
-      const randomIndex = Math.floor(Math.random() * quizData.settings.answerTypes.length)
-      question.answerType = quizData.settings.answerTypes[randomIndex]
+      const availableTypes = quizData.settings.answerTypes;
+      if (availableTypes.length > 0) {
+        const randomIndex = Math.floor(Math.random() * availableTypes.length);
+        question.answerType = availableTypes[randomIndex];
+      } else {
+        // Default to typed if no types are selected (shouldn't happen due to validation)
+        question.answerType = "typed";
+      }
     })
 
     // Update quiz with settings

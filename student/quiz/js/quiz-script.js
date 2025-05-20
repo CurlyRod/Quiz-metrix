@@ -91,6 +91,16 @@ document.addEventListener("DOMContentLoaded", () => {
   function prepareQuizQuestions() {
     // Process each question based on its answer type
     currentQuiz.questions.forEach((question, index) => {
+      // Only process the question if its answer type is one of the selected types
+      
+      if (!currentQuiz.settings.answerTypes.includes(question.answerType)) {
+        // If the question's type isn't in the selected types, force it to be one that is
+        const availableTypes = currentQuiz.settings.answerTypes.length > 0 
+          ? currentQuiz.settings.answerTypes 
+          : ['typed']; // fallback
+        const randomIndex = Math.floor(Math.random() * availableTypes.length);
+        question.answerType = availableTypes[randomIndex];
+      }
       switch (question.answerType) {
         case "multiple":
           // For multiple choice, we need to generate options

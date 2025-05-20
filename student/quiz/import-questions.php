@@ -18,7 +18,7 @@
                     <h2 class="mb-0">Import Questions</h2>
                     <div>
                         <button class="btn btn-outline-secondary me-2" id="cancelBtn">Cancel</button>
-                        <button class="btn btn-primary" id="importBtn">Import</button>
+                        <button class="btn btn-primary" id="importBtn" style="background-color: #6366f1; color: white;">Import</button>
                     </div>
                 </div>
 
@@ -47,7 +47,7 @@
                         <div class="mb-3">
                             <h6>Between Cards</h6>
                             <div class="form-check">
-                                <input class="form-check-input" type="radio" name="cardSeparator" id="semicolonCardSeparator" value=";">
+                                <input class="form-check-input" type="radio" name="cardSeparator" id="semicolonCardSeparator" value=";" checked>
                                 <label class="form-check-label" for="semicolonCardSeparator">
                                     Semicolon (;)
                                 </label>
