@@ -569,7 +569,7 @@
     color: #9ca3af;
   }
   
-  /* Modals */
+  /* Modals
   .modal {
     display: none;
     position: fixed;
@@ -626,7 +626,7 @@
     border-top: 1px solid #f0f0f0;
     display: flex;
     justify-content: space-between;
-  }
+  } */
   
   /* Form Elements */
   .form-group {
@@ -710,7 +710,10 @@
 .form-group input{
     padding: 6px 0px 6px 10px;
 }
-
+.shortcut-url img {
+  margin-left:10px; 
+  height:30px;
+}
   /* Responsive Design */
   @media (max-width: 992px) {
     .dashboard-grid {

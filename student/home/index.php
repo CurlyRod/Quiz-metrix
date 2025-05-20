@@ -26,18 +26,33 @@
 </head>
 
 <body>
-  <?php
-  session_start();
+  <?php   
+  session_start(); 
   // Check if user is logged in
   if (!isset($_SESSION['user'])) {
     header("Location: ../../landing-page/");
     exit();
-  }
+  }  
 
-  $userData = $_SESSION['user'];
-  $_SESSION['USER_NAME'] = $userData['displayName'];
-  ?>
-  <?php
+  require '../../middleware/Auth/UserAuthenticate.php';  
+  require '../../student/home/db_connect.php'; 
+  
+  $userAthenticate = new UserAuthenticate($conn);
+  $userData = $_SESSION['user']; 
+  $email = $userData['mail']; 
+
+  $getUser = $userAthenticate->GetUserLogin($email); 
+
+  if (!$getUser['isAuthenticate']) {
+      $registerNewUser = $userAthenticate->RegisterUser($email);  
+  
+      if ($registerNewUser['isAuthenticate']) {
+          $_SESSION['USER_EMAIL'] = $registerNewUser['userinfo'][0]; 
+      }
+  } else {
+      $_SESSION['USER_EMAIL'] = $getUser['userinfo'][0];
+  }
+  
   include '../../shared-student/sidebar.php';
   include '../../shared-student/navbar.php';
   ?>
@@ -260,7 +275,6 @@
       </div>
     </div>
   </div>
- 
   <!-- jQuery -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
@@ -271,10 +285,15 @@
   <script src="js/todo.js"></script>
   <script src="js/goals.js"></script>
   <script src="js/timer.js"></script>
-  <script src="js/main.js"></script>
+  <script src="js/main.js"></script>   
+  <script src="js/shortcut-browser.js"></script> 
+  <script src="js/validate-user.js"></script> 
+
   <?php include '../../shared-student/script.php'; ?>
 
-  
+  <script src ="../../shortcut-url/shorcut-url.js"></script> 
+
+
 </body>
 
 </html>
