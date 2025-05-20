@@ -36,13 +36,9 @@ document.addEventListener("DOMContentLoaded", () => {
     // Process the input based on selected separators
     let cards
 
-    if (cardSeparator === "\n") {
-      // Split by new lines
-      cards = inputText.split(/\r?\n/)
-    } else {
-      // Split by semicolon
-      cards = inputText.split(";")
-    }
+    if (cards = inputText.split(";")) {
+      
+    } 
 
     // Filter out empty lines
     cards = cards.filter((card) => card.trim() !== "")
