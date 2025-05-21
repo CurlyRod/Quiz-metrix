@@ -75,6 +75,22 @@
     margin-top: 3px;
     margin-bottom: 0;
   }
+
+  .disabled-date {
+    color: #ccc;
+    cursor: not-allowed;
+  }
+
+  /* Style for invalid dates */
+  input[type="date"]:invalid {
+      border-color: #ff4444;
+      background-color: #fff0f0;
+  }
+
+  /* Style for valid dates */
+  input[type="date"]:valid {
+      border-color: #4CAF50;
+  }
   
   .card-body {
     padding: 15px;

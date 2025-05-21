@@ -16,10 +16,43 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('eventId').value = '';
         document.getElementById('eventTitle').value = '';
         
-        // Set default date to today
-        document.getElementById('eventDate').value = formatDate(new Date());
+        // Set default date to today and configure date input
+        const eventDateInput = document.getElementById('eventDate');
+        const todayFormatted = formatDate(new Date());
+        eventDateInput.value = todayFormatted;
+        eventDateInput.min = todayFormatted;
+        
+        // Completely prevent past date selection
+        eventDateInput.addEventListener('input', function() {
+            const selectedDate = new Date(this.value);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            if (selectedDate < today) {
+                alert("You cannot select past dates. Please choose today or a future date.");
+                this.value = todayFormatted;
+                // Force the date picker to reopen with correct date
+                this.blur();
+                setTimeout(() => this.showPicker(), 100);
+            }
+        });
+        
+        // Also validate on form submission
+        document.getElementById('eventForm').addEventListener('submit', function(e) {
+            const selectedDate = new Date(eventDateInput.value);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            if (selectedDate < today) {
+                e.preventDefault();
+                alert("Please select a current or future date for your event.");
+                eventDateInput.value = todayFormatted;
+                eventDateInput.focus();
+            }
+        });
     });
     
+    // Rest of your modal opening handlers...
     document.getElementById('setGoalBtn').addEventListener('click', function() {
         openModal('goalModal');
     });
@@ -69,4 +102,28 @@ document.addEventListener('DOMContentLoaded', function() {
         const day = String(date.getDate()).padStart(2, '0');
         return `${year}-${month}-${day}`;
     }
+    
+    // Enhanced date validation for the entire page
+    function validateAllDateInputs() {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const todayFormatted = formatDate(today);
+        
+        document.querySelectorAll('input[type="date"]').forEach(input => {
+            // Set min attribute to today
+            input.min = todayFormatted;
+            
+            // Add validation on change
+            input.addEventListener('change', function() {
+                const selectedDate = new Date(this.value);
+                if (selectedDate < today) {
+                    alert("Please select today or a future date");
+                    this.value = todayFormatted;
+                }
+            });
+        });
+    }
+    
+    // Initialize date validation
+    validateAllDateInputs();
 });
