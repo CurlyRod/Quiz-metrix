@@ -10,7 +10,14 @@ document.addEventListener("DOMContentLoaded", () => {
     // Current date
     let currentDate = new Date()
     let selectedDate = new Date()
-  
+    
+    // Helper function to check if a date is in the past (before today)
+    function isPastDate(date) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // Reset time to compare dates only
+        return date < today;
+    }
+
     // Initialize calendar
     renderCalendar(currentDate)
     updateCurrentDateDisplay()
@@ -26,6 +33,185 @@ document.addEventListener("DOMContentLoaded", () => {
       currentDate.setMonth(currentDate.getMonth() + 1)
       renderCalendar(currentDate)
     })
+  
+    todayButton.addEventListener("click", () => {
+      currentDate = new Date()
+      selectedDate = new Date()
+      renderCalendar(currentDate)
+      updateCurrentDateDisplay()
+      loadEventsForDate(formatDate(selectedDate))
+    })
+  
+    // Function to update current date display
+    function updateCurrentDateDisplay() {
+      const options = { weekday: "long", year: "numeric", month: "long", day: "numeric" }
+      currentDateElement.textContent = selectedDate.toLocaleDateString("en-US", options)
+    }
+  
+    // Function to render the calendar
+    function renderCalendar(date) {
+      // Update month title
+      const monthNames = [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+      ]
+      currentMonthElement.textContent = `${monthNames[date.getMonth()]} ${date.getFullYear()}`
+  
+      // Clear calendar container
+      calendarContainer.innerHTML = ""
+  
+      // Create day headers
+      const dayHeaders = document.createElement("div")
+      dayHeaders.className = "calendar-grid"
+  
+      const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+      daysOfWeek.forEach((day) => {
+        const dayHeader = document.createElement("div")
+        dayHeader.className = "calendar-day-header"
+        dayHeader.textContent = day
+        dayHeaders.appendChild(dayHeader)
+      })
+  
+      calendarContainer.appendChild(dayHeaders)
+  
+      // Create calendar days
+      const calendarDays = document.createElement("div")
+      calendarDays.className = "calendar-grid"
+  
+      // Get first day of month
+      const firstDay = new Date(date.getFullYear(), date.getMonth(), 1)
+      const startingDay = firstDay.getDay()
+  
+      // Get last day of month
+      const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0)
+      const totalDays = lastDay.getDate()
+  
+      // Get last day of previous month
+      const prevMonthLastDay = new Date(date.getFullYear(), date.getMonth(), 0).getDate()
+  
+      // Days from previous month
+      for (let i = startingDay - 1; i >= 0; i--) {
+        const day = document.createElement("div")
+        day.className = "calendar-day other-month"
+        day.textContent = prevMonthLastDay - i
+  
+        // Create a date object for this day
+        const dayDate = new Date(date.getFullYear(), date.getMonth() - 1, prevMonthLastDay - i)
+        day.dataset.date = formatDate(dayDate)
+        
+        // Disable past dates
+        if (isPastDate(dayDate)) {
+            day.classList.add("disabled-date")
+            day.style.pointerEvents = "none";
+            day.style.opacity = "0.5";
+        } else {
+            day.addEventListener("click", function () {
+              selectDate(this)
+            })
+        }
+  
+        calendarDays.appendChild(day)
+      }
+  
+      // Days from current month
+      const today = new Date()
+      for (let i = 1; i <= totalDays; i++) {
+        const day = document.createElement("div")
+        day.className = "calendar-day"
+        day.textContent = i
+  
+        // Create a date object for this day
+        const dayDate = new Date(date.getFullYear(), date.getMonth(), i)
+        day.dataset.date = formatDate(dayDate)
+  
+        // Check if this day is today
+        if (date.getFullYear() === today.getFullYear() && date.getMonth() === today.getMonth() && i === today.getDate()) {
+          day.classList.add("today")
+        }
+  
+        // Check if this day is selected
+        if (
+          date.getFullYear() === selectedDate.getFullYear() &&
+          date.getMonth() === selectedDate.getMonth() &&
+          i === selectedDate.getDate()
+        ) {
+          day.classList.add("selected")
+        }
+        
+        // Disable past dates
+        if (isPastDate(dayDate)) {
+            day.classList.add("disabled-date")
+            day.style.pointerEvents = "none";
+            day.style.opacity = "0.5";
+        } else {
+            day.addEventListener("click", function () {
+              selectDate(this)
+            })
+        }
+  
+        calendarDays.appendChild(day)
+      }
+  
+      // Days from next month
+      const totalCells = 42 // 6 rows x 7 days
+      const remainingCells = totalCells - (startingDay + totalDays)
+  
+      for (let i = 1; i <= remainingCells; i++) {
+        const day = document.createElement("div")
+        day.className = "calendar-day other-month"
+        day.textContent = i
+  
+        // Create a date object for this day
+        const dayDate = new Date(date.getFullYear(), date.getMonth() + 1, i)
+        day.dataset.date = formatDate(dayDate)
+        
+        // Disable past dates
+        if (isPastDate(dayDate)) {
+            day.classList.add("disabled-date")
+            day.style.pointerEvents = "none";
+            day.style.opacity = "0.5";
+        } else {
+            day.addEventListener("click", function () {
+              selectDate(this)
+            })
+        }
+  
+        calendarDays.appendChild(day)
+      }
+  
+      calendarContainer.appendChild(calendarDays)
+  
+      // Load events for the current month
+      loadEvents()
+    }
+  
+    // Function to select a date
+    function selectDate(dayElement) {
+      // Remove selected class from all days
+      document.querySelectorAll(".calendar-day").forEach((day) => {
+        day.classList.remove("selected")
+      })
+  
+      // Add selected class to clicked day
+      dayElement.classList.add("selected")
+  
+      // Update selected date
+      selectedDate = new Date(dayElement.dataset.date)
+      updateCurrentDateDisplay()
+  
+      // Load events for selected date
+      loadEventsForDate(dayElement.dataset.date)
+    }
   
     todayButton.addEventListener("click", () => {
       currentDate = new Date()
