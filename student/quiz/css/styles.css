@@ -7,7 +7,17 @@ body {
   max-width: 1200px;
 }
 
+#speakQuestionBtn {
+  transition: all 0.2s ease;
+}
 
+#speakQuestionBtn:hover {
+  transform: scale(1.05);
+}
+
+#speakQuestionBtn:active {
+  transform: scale(0.95);
+}
 
 .main-content {
   padding: 0px 50px 50px 50px;
@@ -122,6 +132,20 @@ body {
 .typed-answer-container,
 .true-false-container {
   margin-top: 20px;
+}
+
+#exitWarningModal .modal-header {
+  border-radius: 0.3rem 0.3rem 0 0;
+}
+
+#exitWarningModal .modal-content {
+  border: none;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+#exitWarningModal .btn-danger:hover {
+  background-color: #c82333;
+  border-color: #bd2130;
 }
 
 .quiz-option {

@@ -9,6 +9,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const submitQuizBtn = document.getElementById("submitQuizBtn")
   const timerDisplay = document.getElementById("timerDisplay")
   const timer = document.getElementById("timer")
+  const speakQuestionBtn = document.getElementById("speakQuestionBtn");
+
+  // Initialize exit warning modal
+  let exitWarningModal = new bootstrap.Modal(document.getElementById("exitWarningModal"), {
+    backdrop: 'static',
+    keyboard: false
+  });
 
   // Quiz state
   let currentQuiz = null
@@ -17,6 +24,10 @@ document.addEventListener("DOMContentLoaded", () => {
   let userAnswers = []
   let timerInterval
   let timeRemaining
+  let speechSynthesis = window.speechSynthesis;
+  let currentSpeech = null;
+  let isQuizSubmitted = false;
+  let exitDestination = "index.php";
 
   // Store the correct answers for each question
   const correctAnswers = []
@@ -32,6 +43,12 @@ document.addEventListener("DOMContentLoaded", () => {
     // No quiz ID, redirect to home
     window.location.href = "index.php"
   }
+
+  // Set up exit confirmation button
+  document.getElementById("confirmExitBtn").addEventListener("click", function() {
+    window.removeEventListener("beforeunload", beforeUnloadHandler);
+    window.location.href = exitDestination;
+  });
 
   function loadQuizFromDatabase(quizId) {
     fetch(`api/get_quiz.php?id=${quizId}`)
@@ -62,6 +79,9 @@ document.addEventListener("DOMContentLoaded", () => {
     // Initialize user answers array
     userAnswers = Array(currentQuiz.questions.length).fill(null)
 
+    // Set up navigation interception
+    setupNavigationInterception();
+
     // Prepare the questions based on their answer types
     prepareQuizQuestions()
 
@@ -73,6 +93,8 @@ document.addEventListener("DOMContentLoaded", () => {
       startTimer()
     }
 
+    speakQuestionBtn.addEventListener("click", speakCurrentQuestion);
+
     // Show first question
     showQuestion(0)
 
@@ -81,8 +103,7 @@ document.addEventListener("DOMContentLoaded", () => {
     nextBtn.addEventListener("click", showNextQuestion)
     submitQuizBtn.addEventListener("click", submitQuiz)
 
-    // Hide submit button initially
-    submitQuizBtn.style.display = "none"
+
 
     // Disable previous button on first question
     prevBtn.disabled = true
@@ -138,6 +159,102 @@ document.addEventListener("DOMContentLoaded", () => {
           break
       }
     })
+  }
+
+  function speakCurrentQuestion() {
+    // Stop any ongoing speech
+    if (speechSynthesis.speaking) {
+      speechSynthesis.cancel();
+    }
+    
+    // Get current question
+    const question = currentQuiz.questions[currentQuestionIndex];
+    let textToSpeak = "";
+    
+    // Format text based on question type
+    switch (question.answerType) {
+      case "multiple":
+      case "typed":
+        textToSpeak = question.description;
+        break;
+      case "truefalse":
+        textToSpeak = "True or False: " + question.statement;
+        break;
+    }
+    
+    // Create speech utterance
+    const speak = () => {
+      const utterance = new SpeechSynthesisUtterance(textToSpeak);
+      
+      // Configure speech settings for modern voice
+      utterance.rate = 1.0; // Normal speed
+      utterance.pitch = 1.0; // Normal pitch
+      utterance.volume = 1.0; // Full volume
+      
+      // Try to get a good voice
+      const voices = speechSynthesis.getVoices();
+      
+      // Look for premium voices first (often more natural sounding)
+      let selectedVoice = voices.find(voice => 
+        (voice.name.includes("Premium") || voice.name.includes("Enhanced")) && 
+        voice.lang.includes(navigator.language.split('-')[0])
+      );
+      
+      // If no premium voice, try to find a good native voice
+      if (!selectedVoice) {
+        selectedVoice = voices.find(voice => 
+          voice.localService && 
+          voice.lang.includes(navigator.language.split('-')[0])
+        );
+      }
+      
+      // Fallback to any voice in the user's language
+      if (!selectedVoice) {
+        selectedVoice = voices.find(voice => 
+          voice.lang.includes(navigator.language.split('-')[0])
+        );
+      }
+      
+      // Last resort - just use the first available voice
+      if (!selectedVoice && voices.length > 0) {
+        selectedVoice = voices[0];
+      }
+      
+      // Set the selected voice if found
+      if (selectedVoice) {
+        utterance.voice = selectedVoice;
+      }
+      
+      // Add visual feedback when speaking
+      utterance.onstart = () => {
+        speakQuestionBtn.classList.add("btn-primary");
+        speakQuestionBtn.classList.remove("btn-outline-primary");
+      };
+      
+      utterance.onend = () => {
+        speakQuestionBtn.classList.remove("btn-primary");
+        speakQuestionBtn.classList.add("btn-outline-primary");
+      };
+      
+      // Speak the text
+      speechSynthesis.speak(utterance);
+      currentSpeech = utterance;
+    };
+
+    // Wait for voices to be loaded if needed
+    if (speechSynthesis.getVoices().length === 0) {
+      speechSynthesis.onvoiceschanged = speak;
+    } else {
+      speak();
+    }
+  }
+
+  // Add this to ensure voices are loaded (some browsers need this)
+  if (speechSynthesis.onvoiceschanged !== undefined) {
+    speechSynthesis.onvoiceschanged = () => {
+      // Voices are now loaded
+      console.log("Voices loaded:", speechSynthesis.getVoices().length);
+    };
   }
 
   function generateMultipleChoiceOptions(question, questionIndex) {
@@ -253,17 +370,22 @@ document.addEventListener("DOMContentLoaded", () => {
       })
     }
 
+    // Stop any ongoing speech when changing questions
+    if (speechSynthesis.speaking) {
+      speechSynthesis.cancel();
+    }
+
     // Update navigation buttons
     updateNavigationButtons()
   }
 
-function createMultipleChoiceInterface(index, question) {
-  let content = `<div class="multiple-choice-container mt-3">`
+  function createMultipleChoiceInterface(index, question) {
+    let content = `<div class="multiple-choice-container mt-3">`
 
-  question.options.forEach((option, i) => {
-    const checked = userAnswers[index] === option ? "checked" : ""
-    content += `
-      <div class="quiz-option">
+    question.options.forEach((option, i) => {
+      const checked = userAnswers[index] === option ? "checked" : ""
+      content += `
+             <div class="quiz-option">
         <label for="q${index}opt${i}">
           <input type="radio" name="q${index}" id="q${index}opt${i}" value="${option}" ${checked}>
           ${option}
@@ -279,12 +401,11 @@ function createMultipleChoiceInterface(index, question) {
     option.querySelector("input[type='radio']").dispatchEvent(new Event("change"));
   }
 });
+    })
 
-})
-
-  content += `</div>`
-  return content
-}
+    content += `</div>`
+    return content
+  }
 
   function createTypedAnswerInterface(index, question) {
     return `
@@ -311,6 +432,7 @@ function createMultipleChoiceInterface(index, question) {
       </div>
     `;
   }
+
   window.selectOption = function(div, inputId) {
     document.getElementById(inputId).checked = true;
   
@@ -334,15 +456,15 @@ function createMultipleChoiceInterface(index, question) {
 
   function updateNavigationButtons() {
     // Disable previous button on first question
-    prevBtn.disabled = currentQuestionIndex === 0
+    prevBtn.disabled = currentQuestionIndex === 0;
 
     // Show/hide next and submit buttons on last question
     if (currentQuestionIndex === currentQuiz.questions.length - 1) {
-      nextBtn.style.display = "none"
-      submitQuizBtn.style.display = "block"
+        nextBtn.classList.add("d-none");
+        submitQuizBtn.classList.remove("d-none");
     } else {
-      nextBtn.style.display = "block"
-      submitQuizBtn.style.display = "none"
+        nextBtn.classList.remove("d-none");
+        submitQuizBtn.classList.add("d-none");
     }
   }
 
@@ -359,12 +481,17 @@ function createMultipleChoiceInterface(index, question) {
   }
 
   function updateTimerDisplay() {
+    if (timeRemaining <= 0) {
+      timer.textContent = "00:00";
+      return;
+    }
     const minutes = Math.floor(timeRemaining / 60)
     const seconds = timeRemaining % 60
     timer.textContent = `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`
   }
 
   function submitQuiz() {
+    isQuizSubmitted = true;
     // Stop timer if it's running
     if (timerInterval) {
       clearInterval(timerInterval)
@@ -457,6 +584,9 @@ function createMultipleChoiceInterface(index, question) {
   }
 
   function showResults(score, totalQuestions, results) {
+    isQuizSubmitted = true;
+    // Remove the beforeunload event listener
+    window.removeEventListener("beforeunload", beforeUnloadHandler);
     const scoreDisplay = document.getElementById("scoreDisplay")
     const percentageDisplay = document.getElementById("percentageDisplay")
     const answerReview = document.getElementById("answerReview")
@@ -504,6 +634,35 @@ function createMultipleChoiceInterface(index, question) {
       resultsModal.hide()
       resetQuiz()
     })
+  }
+
+  function setupNavigationInterception() {
+    // Use event delegation instead of adding listeners to each link
+    document.body.addEventListener('click', function(e) {
+      if (isQuizSubmitted) return;
+      
+      const link = e.target.closest('a');
+      if (!link || link.id === 'confirmExitBtn') return;
+      
+      const href = link.getAttribute('href');
+      if (!href || href === '#' || href.startsWith('javascript:')) return;
+      
+      e.preventDefault();
+      exitDestination = href;
+      exitWarningModal.show();
+    });
+
+    window.addEventListener('beforeunload', beforeUnloadHandler);
+  }
+
+  function beforeUnloadHandler(e) {
+    // Don't show the confirmation if the quiz is already submitted
+    if (isQuizSubmitted) return;
+    
+    // Standard way of showing a confirmation message
+    const confirmationMessage = "Are you sure you want to leave? Your quiz progress will be lost.";
+    e.returnValue = confirmationMessage;
+    return confirmationMessage;
   }
 
   function resetQuiz() {

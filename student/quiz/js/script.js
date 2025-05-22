@@ -16,6 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const recentQuizzes = document.getElementById("recentQuizzes")
   const importQuestionsBtn = document.getElementById("importQuestionsBtn")
 
+
   // Quiz data
   let quizData = {
     title: "",
@@ -669,6 +670,3 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 })
 
-$(document).ready(function(){
-  $('#mainQuizTable').DataTable();
-});
