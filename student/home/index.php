@@ -21,6 +21,7 @@
   <!-- Custom CSS -->
   <link rel="stylesheet" href="css/styles.css">
 
+  
 
 
 </head>
@@ -121,36 +122,36 @@
       </div>
 
       <!-- Goal Card -->
-      <div class="card goal-card">
-        <div class="card-header">
-          <h3><i class="fas fa-bullseye"></i> Goal Tracker</h3>
-        </div>
-        <div class="card-body">
-          <div id="current-goal">
-            <h4 id="goalTitle">Complete Final Project</h4>
-            <p id="goalTarget" class="text-muted">Target: June 4, 2025</p>
+        <div class="card goal-card">
+          <div class="card-header">
+            <h3><i class="fas fa-bullseye"></i> Goal Tracker</h3>
+          </div>
+          <div class="card-body">
+            <div id="current-goal">
+              <h4 id="goalTitle">Complete 5 sets of Quiz</h4>
+              <p id="goalTarget" class="text-muted">Target: June 4, 2025</p>
 
-            <div class="progress-container">
-              <div class="progress-label">
-                <span>Progress</span>
-                <span id="progressPercentage">0%</span>
+              <div class="progress-container">
+                <div class="progress-label">
+                  <span>Progress</span>
+                  <span id="progressPercentage">0%</span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                </div>
               </div>
-              <div class="progress-bar">
-                <div class="progress-fill" id="progressFill" style="width: 0%"></div>
-              </div>
+
+              <p id="daysRemaining" class="text-muted">30 days remaining</p>
             </div>
-
-            <p id="daysRemaining" class="text-muted">30 days remaining</p>
+            <div id="no-goal" style="display: none;">
+              <p class="text-muted text-center py-4">No active goal set</p>
+            </div>
           </div>
-          <div id="no-goal" style="display: none;">
-            <p class="text-muted text-center py-4">No active goal set</p>
+          <div class="card-footer">
+            <button id="setGoalBtn" class="btn outline-btn">Set New Goal</button>
+            <button id="achievedBtn" class="btn primary-btn">Achieved</button>
           </div>
         </div>
-        <div class="card-footer">
-          <button id="setGoalBtn" class="btn outline-btn">Set New Goal</button>
-          <button id="achievedBtn" class="btn primary-btn">Achieved</button>
-        </div>
-      </div>
 
       <!-- Timer Card -->
       <div class="card timer-card">
@@ -218,12 +219,32 @@
       </div>
       <div class="modal-body">
         <div class="form-group">
-          <label for="goalTitleInput">Goal Title</label>
-          <input type="text" id="goalTitleInput" placeholder="Enter your goal">
+          <label class="goal-sentence-label">Your Goal</label>
+          <div class="goal-sentence">
+            <span>Finish</span>
+            <select id="setsCount" class="inline-dropdown" style="width: 50px;">
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5" selected>5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+              <option value="8">8</option>
+              <option value="9">9</option>
+              <option value="10">10</option>
+            </select>
+            <span id="setsLabel">set/s</span>
+            <span>of</span>
+            <select id="activityType" class="inline-dropdown" style="width:100px;">
+              <option value="Quiz" selected>Quiz</option>
+              <option value="Flashcard">Flashcard</option>
+            </select>
+          </div>
         </div>
         <div class="form-group">
           <label for="goalDateInput">Target Date</label>
-          <input type="date" id="goalDateInput">
+          <input type="date" id="goalDateInput" class="form-control">
         </div>
       </div>
       <div class="modal-footer">
