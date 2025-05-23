@@ -1,0 +1,180 @@
+  body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .profile-container {
+            max-width: 1000px;
+            margin: 50px auto;
+        }
+        .profile-card {
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .avatar-container {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            margin-bottom: 15px;
+        }
+        .avatar-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        .avatar-toggle {
+            position: absolute;
+            bottom: -5px;
+            right: -5px;
+            background-color: #fff;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #ddd;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .profile-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .profile-info:last-child {
+            border-bottom: none;
+        }
+        .info-label {
+            font-weight: 500;
+            color: #333;
+        }
+        .info-value {
+            text-align: right;
+            color: #666;
+        }
+        .password-form {
+            background-color: #f1f1f1;
+            border-radius: 5px;
+            padding: 0;
+            margin-top: 15px;
+            display: none;
+            opacity: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.5s ease-in-out;
+        }
+
+        .password-form.active {
+            display: block;
+            opacity: 1;
+            max-height: 300px;
+        }
+
+        .password-form .stats-header {
+            border-top-left-radius: 5px;
+            border-top-right-radius: 5px;
+            margin-bottom: 0;
+        }
+
+        .password-form-content {
+            padding: 15px;
+        }
+        .stats-card {
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+        .stats-header {
+            background-color: #e9ecef;
+            padding: 8px 15px;
+            border-top-left-radius: 5px;
+            border-top-right-radius: 5px;
+            font-weight: 500;
+        }
+        .stats-body {
+            padding: 0;
+        }
+        .stats-row {
+            display: flex;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .stats-row:last-child {
+            border-bottom: none;
+        }
+        .stats-cell {
+            flex: 1;
+            padding: 10px 15px;
+            text-align: center;
+        }
+        .stats-cell:first-child {
+            border-right: 1px solid #dee2e6;
+        }
+        .btn-change {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            color: #333;
+            padding: 4px 12px;
+            font-size: 14px;
+            border-radius: 4px;
+        }
+        .btn-change:hover {
+            background-color: #f8f9fa;
+        }
+        .avatar-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            z-index: 100;
+            display: none;
+            width: 150px;
+        }
+        .avatar-option {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            cursor: pointer;
+        }
+        .avatar-option:last-child {
+            margin-bottom: 0;
+        }
+        .avatar-option img {
+            width: 30px;
+            height: 30px;
+            margin-right: 10px;
+            border-radius: 3px;
+        }
+        .password-input-wrapper {
+            position: relative;
+        }
+        .password-toggle-btn {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #6c757d;
+            padding: 0;
+            font-size: 18px;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+        }
+        .password-toggle-btn:hover {
+            color: #495057;
+        }
