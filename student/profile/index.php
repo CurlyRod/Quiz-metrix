@@ -8,10 +8,29 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Boxicons CSS -->
     <link href="https://cdn.jsdelivr.net/npm/boxicons@latest/css/boxicons.min.css" rel="stylesheet">
+
+    <?php include '../../shared-student/header.php'; ?>
+
     <!-- Custom CSS -->
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <?php
+        session_start();
+        // Check if user is logged in
+        if (!isset($_SESSION['user'])) {
+        header("Location: ../../landing-page/");
+        exit();
+        } 
+
+        $userData = $_SESSION['user']; 
+        $_SESSION['USER_NAME'] = $userData['displayName'];
+        ?>
+<?php
+include '../../shared-student/sidebar.php';
+include '../../shared-student/navbar.php';
+?>
+
     <div class="container profile-container">
         <div class="row">
             <!-- Profile Information -->
@@ -36,7 +55,7 @@
                         </div>
                     </div>
                     
-                    <div class="mt-4">
+                    <div class="information-container">
                         <div class="profile-info">
                             <div class="info-label">Name</div>
                             <div class="info-value" id="user-name">Mj Despi</div>
@@ -69,7 +88,7 @@
                             </div>
                             <div class="d-flex justify-content-end">
                                 <button class="btn btn-light me-2" id="cancel-current-password">Cancel</button>
-                                <button class="btn btn-dark" id="verify-current-password">Done</button>
+                                <button class="btn" id="verify-current-password" style="background-color: #6366f1; color: #ffffff">Done</button>
                             </div>
                         </div>
                     </div>
@@ -98,7 +117,7 @@
                             </div>
                             <div class="d-flex justify-content-end">
                                 <button class="btn btn-light me-2" id="cancel-password-change">Cancel</button>
-                                <button class="btn btn-dark" id="submit-password-change">Change Password</button>
+                                <button class="btn " id="submit-password-change" style="background-color: #6366f1; color: #ffffff">Change Password</button>
                             </div>
                         </div>
                     </div>
@@ -147,6 +166,7 @@
     <!-- Bootstrap 5 JS Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="script.js"></script>
+    <?php include '../../shared-student/script.php'; ?>
 
 </body>
 </html>
