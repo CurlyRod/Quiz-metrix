@@ -42,6 +42,8 @@ include '../../shared-student/navbar.php';
         <div class="quiz-creator">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h3 class="mb-0">Create Quiz</h3>
+                <input type="text" name="user-current-id" id="user-current-id">
+
                 <div>
                     <button class="btn btn-outline-primary me-2" id="importQuestionsBtn">
                     <i class="bi bi-upload"></i> Import Questions

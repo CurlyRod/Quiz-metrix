@@ -20,11 +20,11 @@ $userAuthenticate = new UserAuthenticate($conn);
 
 if (
     isset($_POST['action']) && $_POST['action'] === "check-users" &&
-    isset($_SESSION['USER_NAME'])
+    isset($_SESSION['USER_EMAIL'])
 ) {
-    $email = $_SESSION['USER_NAME'];
-    $checkUser = $userAuthenticate->GetUserLogin($email);
-    echo json_encode($checkUser);
+    $email = $_SESSION['USER_EMAIL'];
+    $checkUser = $userAuthenticate->GetUserLogin($email); 
+    echo json_encode($checkUser); 
     exit;
 } 
 else
