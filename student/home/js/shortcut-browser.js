@@ -1,4 +1,3 @@
-// this is for creating dynamic browser icon and list... -dor
 function clearShortcutLinks() {
     const list = document.getElementById("side-menu");
     const shortcuts = list.querySelectorAll(".shortcut-url");

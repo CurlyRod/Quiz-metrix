@@ -1,7 +1,4 @@
 
-
-// upon loading make sure populate all data in browser and validate base on id.... dor
-
 $(document).ready(function () {
     fetchUserAndShortcuts();
   });
@@ -19,6 +16,7 @@ $(document).ready(function () {
   
           $("#user-email-log").val(userEmail);
           $("#user-id-log").val(userId);
+         
   
           fetchUserShortcuts(userId);
         } else {

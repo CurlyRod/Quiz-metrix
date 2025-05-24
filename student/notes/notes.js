@@ -7,12 +7,34 @@ function autoResizeTextarea(textarea) {
   textarea.style.height = textarea.scrollHeight + "px"
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", () => { 
+
+ // for getting id for user 
+    $.ajax({
+      url: "../../middleware/auth/ValidateUser.php",
+      type: "POST",
+      data: { action: "check-users" },
+      dataType: "json",
+      success: function (data) {
+        if (data.userinfo) {  
+           $("#user-current-id").val(data?.userinfo[1]) 
+           console.log(data?.userinfo[1]);          
+        } else {
+          console.error("Invalid user info:", data);
+        }
+      },
+      error: function (xhr, status, error) {
+        console.error("User check error:", error);
+      }
+    });
+
+
   // DOM Elements
   const noteCollapsed = document.getElementById("note-collapsed")
   const noteExpanded = document.getElementById("note-expanded")
   const noteTitle = document.getElementById("note-title")
-  const noteContent = document.getElementById("note-content")
+  const noteContent = document.getElementById("note-content")   
+  const userId = document.getElementById("user-current-id")  
   const btnSave = document.getElementById("btn-save")
   const btnClose = document.getElementById("btn-close")
   const notesContainer = document.getElementById("notes-container")
@@ -99,7 +121,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function saveNote() {
     const title = noteTitle.value.trim()
-    const content = noteContent.value.trim()
+    const content = noteContent.value.trim() 
+    const user_id =  userId.value.trim();
 
     if (content === "") {
       alert("Please enter some content for your note.")
@@ -111,12 +134,13 @@ document.addEventListener("DOMContentLoaded", () => {
     formData.append("title", title)
     formData.append("content", content)
     formData.append("color", currentNoteColor)
-    formData.append("action", "create")
+    formData.append("action", "create") 
+    formData.append("user-current-id", user_id);
 
     // Send data to server
     fetch("notes_api.php", {
       method: "POST",
-      body: formData,
+      body: formData ,
     })
       .then((response) => response.json())
       .then((data) => {
@@ -127,14 +151,12 @@ document.addEventListener("DOMContentLoaded", () => {
           alert("Error saving note: " + data.message)
         }
       })
-      .catch((error) => {
-        console.error("Error:", error)
-        alert("An error occurred while saving the note.")
-      })
   }
 
-  function loadNotes() {
-    fetch("notes_api.php?action=read")
+  function loadNotes() {     
+
+
+   fetch(`notes_api.php?action=read`)
       .then((response) => response.json())
       .then((data) => {
         if (data.success) {
@@ -143,10 +165,11 @@ document.addEventListener("DOMContentLoaded", () => {
           console.error("Error loading notes:", data.message)
         }
       })
-      .catch((error) => {
-        console.error("Error:", error)
-      })
-  }
+  } 
+
+
+
+
 
   function renderNotes(notes) {
     notesContainer.innerHTML = ""
@@ -372,5 +395,5 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       })
     })
-  }
+  } 
 })

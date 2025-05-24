@@ -36,11 +36,12 @@
 
     <div class="container mt-5">
         <h1 class="text-center mb-4">Notes App</h1>
-
+  <input type="hidden" name="user-current-id" id="user-current-id">
         <!-- Note Input Section -->
         <div class="row justify-content-center mb-5">
             <div class="col-md-8">
                 <!-- Collapsed Note Entry -->
+              
                 <div id="note-collapsed" class="card shadow-sm" style="cursor: pointer;">
                     <div class="card-body d-flex align-items-center">
                         <span class="flex-grow-1">Take a note...</span>
@@ -52,6 +53,7 @@
                 <div id="note-expanded" class="card shadow-sm d-none">
                     <div class="card-body">
                         <input type="text" id="note-title" class="form-control border-0 fw-bold mb-2" placeholder="Title" maxlength="20">
+                      
                         <textarea id="note-content" class="form-control border-0" placeholder="Take a note..." maxlength="1000"></textarea>
 
                         <!-- Color Palette -->
@@ -91,6 +93,8 @@
     <script src="notes.js"></script>
     <script src="../../vendor/admin/home/home.js"></script>
     <script src="../../vendor/bootstrap/jquery.min.js"></script>
+
+
 
 </body>
 

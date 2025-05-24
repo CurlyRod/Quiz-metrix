@@ -57,7 +57,9 @@
     $shortcut = new ShortCutClass($conn); 
     if (isset($_POST['save_browser'])) {  
         $browserUrl = mysqli_real_escape_string($conn, $_POST['browserUrl']); 
-        $browserName = mysqli_real_escape_string($conn, $_POST['browserName']); 
+        $browserName = mysqli_real_escape_string($conn, $_POST['browserName']);
+        $user_id = mysqli_real_escape_string($conn, $_POST['user-id-log']); 
+ 
         if (empty($browserUrl)) {
             echo json_encode([
                 'status' => 422, 
@@ -65,8 +67,9 @@
             ]);
             return;
         } else {   
-            $user_id = 1;
+            
             $shortcut->CreateShortcut($browserName ,$browserUrl, $user_id);  
+
         }  
     } 
 
@@ -81,7 +84,7 @@
             ]);
             return;
         } else {   
-            $result = $shortcut->GetShortcutByUser($user);  
+            $result = $shortcut->GetShortcutByUser($user_id);  
             echo json_encode($result); 
         }  
     }
