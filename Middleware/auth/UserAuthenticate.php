@@ -9,7 +9,7 @@ class UserAuthenticate{
     }
     
     public function GetUserLogin($email) {
-        $stmt = $this->conn->prepare("SELECT * FROM  user_credential WHERE email = ?");
+        $stmt = $this->conn->prepare("SELECT * FROM user_credential WHERE email = ?");
         $stmt->bind_param("s", $email);
         $stmt->execute();
         $result = $stmt->get_result(); 

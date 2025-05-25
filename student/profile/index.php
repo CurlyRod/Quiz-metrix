@@ -26,6 +26,15 @@
 
         $userData = $_SESSION['user']; 
         $_SESSION['USER_NAME'] = $userData['displayName'];
+
+        
+
+        $userId = $_SESSION['user_id'];
+
+        $stmt = $conn->prepare("SELECT * FROM notes WHERE user_id = ?");
+        $stmt->bind_param("i", $userId);
+        $stmt->execute();
+        $result = $stmt->get_result();
         ?>
 <?php
 include '../../shared-student/sidebar.php';
@@ -59,7 +68,9 @@ include '../../shared-student/navbar.php';
                         <div class="profile-info">
                             <div class="info-label">Name</div>
                             <!-- <div class="info-value" id="user-name">Mj Despi</div> -->
-                            <?php echo $_SESSION['USER_NAME']; ?>
+                            <?php 
+                                echo str_replace(" (Student)", "", $_SESSION['USER_NAME']); 
+                            ?>
                         </div>
                         <div class="profile-info">
                             <div class="info-label">Email</div>

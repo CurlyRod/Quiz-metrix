@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Import Questions - Quiz Creator</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="../../assets/img/logo/apple-touch-icon.png">
+
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
     <link rel="stylesheet" href="css/styles.css">
 </head>
@@ -18,7 +20,7 @@
                     <h2 class="mb-0">Import Questions</h2>
                     <div>
                         <button class="btn btn-outline-secondary me-2" id="cancelBtn">Cancel</button>
-                        <button class="btn btn-primary" id="importBtn" style="background-color: #6366f1; color: white;">Import</button>
+                        <button class="btn " id="importBtn" style="background-color: #6366f1; color: white;">Import</button>
                     </div>
                 </div>
 
@@ -26,9 +28,9 @@
                 <div class="alert alert-success d-none" id="successAlert"></div>
 
                 <div class="mb-4">
-                    <h5>Import your data</h5>
-                    <p class="text-muted small">Copy and Paste your data here</p>
-                    <textarea class="form-control" id="importData" rows="12" placeholder="Term - Definition;&#10;Term - Definition;&#10;Term - Definition"></textarea>
+                    
+                    <p class="text-muted small">Copy and Paste your data below</p>
+                    <textarea class="form-control" id="importData" rows="12" placeholder="Term - Definition;&#10;Term - Definition;&#10;Term - Definition" style="resize: none; height: 600px;"></textarea>
                 </div>
 
                 <div class="row">
