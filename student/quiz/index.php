@@ -11,21 +11,22 @@
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-<?php
+    <!-- Sidebar and Navbar -->
+    <?php
         session_start();
         // Check if user is logged in
         if (!isset($_SESSION['user'])) {
-        header("Location: ../../landing-page/");
-        exit();
+            header("Location: ../../landing-page/");
+            exit();
         } 
-
+    
         $userData = $_SESSION['user']; 
         $_SESSION['USER_NAME'] = $userData['displayName'];
-        ?>
-<?php
-include '../../shared-student/sidebar.php';
-include '../../shared-student/navbar.php';
-?>
+        
+        include '../../shared-student/sidebar.php';
+        include '../../shared-student/navbar.php';
+    ?>
+    
     <ul class="nav nav-underline " style="padding: 20px;">
                     <li class="nav-item">
                         <a class="nav-link active" href="index.php" style="color: #6366f1">Create</a>
@@ -42,15 +43,10 @@ include '../../shared-student/navbar.php';
         <div class="quiz-creator">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h3 class="mb-0">Create Quiz</h3>
-                <input type="text" name="user-current-id" id="user-current-id">
-
                 <div>
-                    <button class="btn btn-outline-primary me-2" id="importQuestionsBtn">
-                    <i class="bi bi-upload"></i> Import Questions
-                </button>
-                    <button class="btn btn-outline-secondary me-2" id="clearFormBtn">Clear Form</button>
                     <button class="btn me-2" id="createQuizBtn" style="background-color: #6366f1; color: white;">Create Quiz</button>
                     <button class="btn btn-success" id="startQuizBtn">Start Quiz</button>
+                    
                 </div>
             </div>
             
@@ -76,8 +72,20 @@ include '../../shared-student/navbar.php';
 <hr>
 
         <div class="quiz-creator" id="quizCreator">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3 class="mb-0"></h3>
+                <div>
+                    <button class="btn btn-outline-secondary me-2" id="clearFormBtn">Clear Form</button>
+                    
+                    <button class="btn" id="importQuestionsBtn" style="background-color: #6366f1; color: white;">
+                    <i class="bi bi-upload"></i> Import Questions
+                </button>
+                </div>
+            </div>
+           
             <!-- New Quiz Form -->
             <div class="new-quiz-form mb-4">
+                
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <label for="quizTitle" class="form-label">Title</label>
@@ -95,11 +103,12 @@ include '../../shared-student/navbar.php';
             <div id="questionCards">
                 <!-- Question cards will be dynamically added here -->
             </div>
-
+            <button id="backToTopBtn" title="Go to top">↑</button>
             <!-- Add Card Button -->
             <button class="btn btn-light w-100 add-card-btn mt-3" id="addCardBtn">
                 Add question <i class="bi bi-plus"></i>
             </button>
+
                 </div>
         </div>
 
@@ -161,5 +170,26 @@ include '../../shared-student/navbar.php';
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/script.js"></script>
     <?php include '../../shared-student/script.php'; ?>
+     <script>
+        // Get the button
+        const backToTopBtn = document.getElementById("backToTopBtn");
+
+        // When the user scrolls down 1000px from the top, show the button
+        window.onscroll = function() {
+            if (document.body.scrollTop > 500 || document.documentElement.scrollTop > 500) {
+                backToTopBtn.style.display = "block";
+            } else {
+                backToTopBtn.style.display = "none";
+            }
+        };
+
+        // When the user clicks on the button, scroll smoothly to the top
+        backToTopBtn.addEventListener("click", function() {
+            window.scrollTo({
+                top: 0,
+                behavior: "smooth"
+            });
+        });
+    </script>
 </body>
 </html>

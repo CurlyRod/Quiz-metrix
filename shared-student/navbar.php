@@ -6,7 +6,9 @@
 		<form action="#">
 			
 		</form> 
-		<h6><?php echo $_SESSION['USER_EMAIL']; ?></h6>
+		<h6><?php 
+					echo str_replace(" (Student)", "", $_SESSION['USER_NAME']); 
+			?></h6>
 		<div class="profile">
 			<img src="../../assets/img/avatars/avatar_2.png" alt="">
 			<ul class="profile-link">

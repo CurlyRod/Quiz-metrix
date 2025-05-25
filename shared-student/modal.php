@@ -1,4 +1,4 @@
-<!-- Modal -->
+<!-- Modal FOR FUTURE UPDATES
 <div class="modal" id="addShortcut" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -9,9 +9,9 @@
             <div class="modal-body">
                 <form id="add-url-browser">
                     <div class="mb-3">
-                        <!-- <div class="alert alert-warning" role="alert">
+                        <div class="alert alert-warning" role="alert">
                             A simple warning alert—check it out!
-                        </div>  -->
+                        </div> 
                         <input type="hidden" name="user-email-log" id="user-email-log"> 
                         <input type="hidden" name="user-id-log" id="user-id-log">
                         <label for="exampleInputPassword1" class="form-label">URL</label>
@@ -28,7 +28,7 @@
 
         </div>
     </div>
-</div> 
+</div>  -->
 
 <!-- new user for adding password -->
 <div class="modal" id="new-user-modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
