@@ -3,7 +3,7 @@
 * {
   padding: 0;
   margin: 0;
-  font-family: "Montserrat", sans-serif;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   box-sizing: border-box;
 }
 
@@ -141,7 +141,7 @@ header .navbar {
   color: var(--dark-color);
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-bold);
-  background: linear-gradient(135deg, #4a6fa5, #89cff0);
+  background: linear-gradient(135deg, #4e91f9 0%, #6a7efc 40%, #8664e2 70%, #a36fd6 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -175,12 +175,12 @@ header .navbar {
   bottom: 0;
   left: 50%;
   transform: translateX(-50%);
-  background: #4a6fa5;
+  background: #6366f1;
   transition: width 0.3s ease;
 }
 
 .navbar .nav-menu .nav-link:hover {
-  color: #4a6fa5;
+  color: #6366f1;
 }
 
 .navbar .nav-menu .nav-link:hover::after {
@@ -199,7 +199,7 @@ header .navbar {
 }
 
 .navbar #btnAddUser {
-  background-color: #4a6fa5;
+  background-color: #6366f1;
   border: none;
   padding: 10px 26px;
   border-radius: 8px;
@@ -211,7 +211,7 @@ header .navbar {
 }
 
 .navbar #btnAddUser:hover {
-  background-color: #345888;
+  background-color: #6366f1;
   transform: translateY(-2px);
   box-shadow: 0 6px 10px rgba(74, 111, 165, 0.3);
 }
@@ -552,7 +552,7 @@ header .navbar {
 
 /* ================ FOOTER SECTION ================ */
 .footer-section {
-  background: #293241;
+  background: #6366f1;
   color: white;
   padding: 5rem 0 0;
   position: relative;
@@ -565,7 +565,6 @@ header .navbar {
   left: 0;
   width: 100%;
   height: 5px;
-  background: linear-gradient(to right, #4a6fa5, #98c1d9);
 }
 
 .footer-section .section-content {
@@ -583,7 +582,7 @@ header .navbar {
 }
 
 .footer-logo p {
-  color: #98c1d9;
+  color: #ffffff;
   font-size: var(--font-size-m);
 }
 

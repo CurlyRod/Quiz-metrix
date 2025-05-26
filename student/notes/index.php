@@ -38,7 +38,7 @@
 
     <div class="container mt-5">
         <h1 class="text-center mb-4">Notes App</h1>
-  <input type="hidden" name="user-current-id" id="user-current-id">
+        <input type="hidden" name="user-current-id" id="user-current-id">
         <!-- Note Input Section -->
         <div class="row justify-content-center mb-5">
             <div class="col-md-8">
@@ -56,7 +56,7 @@
                     <div class="card-body">
                         <input type="text" id="note-title" class="form-control border-0 fw-bold mb-2" placeholder="Title" maxlength="20">
                       
-                        <textarea id="note-content" class="form-control border-0" placeholder="Take a note..." maxlength="1000"></textarea>
+                        <textarea id="note-content" class="form-control border-0" placeholder="Take a note..." maxlength="3000"></textarea>
 
                         <!-- Color Palette -->
                         <div id="color-palette" class="color-palette mt-3">

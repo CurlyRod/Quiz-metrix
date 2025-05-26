@@ -24,7 +24,7 @@
   .left-column {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 0px;
   }
   
   .right-column {
@@ -585,7 +585,7 @@
     color: #9ca3af;
   }
   
-  /* Modals
+  /* Modals */
   .modal {
     display: none;
     position: fixed;
@@ -642,7 +642,7 @@
     border-top: 1px solid #f0f0f0;
     display: flex;
     justify-content: space-between;
-  } */
+  }
   
   /* Form Elements */
   .form-group {

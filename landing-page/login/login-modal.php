@@ -48,8 +48,8 @@
                 </form>
             </div>
 
-            <div class="modal-footer">
-                <button class="btn btn-secondary w-100" data-bs-target="#standardLogin" data-bs-toggle="modal">Manual Login</button>
+            <div class="modal-footer" style="height: 50px;">
+                <!-- <button class="btn btn-secondary w-100" data-bs-target="#standardLogin" data-bs-toggle="modal">Manual Login</button> -->
             </div>
         </div>
     </div>
