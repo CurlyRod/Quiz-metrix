@@ -14,9 +14,11 @@
   <!-- Bootstrap 5 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
 
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
-
-  <?php include '../../shared-student/header.php'; ?>
+  <link href='https://unpkg.com/boxicons@2.0.9/css/boxicons.min.css' rel='stylesheet'>
+	<link rel="stylesheet" href="../../vendor/student/home/home.css">
+	<link rel="stylesheet" href="../../vendor/admin/users/users.css">
+	
+  <link rel="icon" type="image/x-icon" href="../../assets/img/logo/apple-touch-icon.png">
 
   <!-- Custom CSS -->
   <link rel="stylesheet" href="css/styles.css">
@@ -27,19 +29,19 @@
 </head>
 
 <body>
-  <?php   
-  session_start(); 
+  <?php
+  session_start();
   // Check if user is logged in
   if (!isset($_SESSION['user'])) {
     header("Location: ../../landing-page/");
     exit();
-  }  
+  }
 
   require '../../middleware/Auth/UserAuthenticate.php';  
   require '../../student/home/db_connect.php'; 
   
   $userAthenticate = new UserAuthenticate($conn);
-  $userData = $_SESSION['user']; 
+  $userData = $_SESSION['user'];
   $email = $userData['mail']; 
 
   $getUser = $userAthenticate->GetUserLogin($email); 
@@ -75,7 +77,7 @@
               <i class="fas fa-chevron-right"></i>
             </button>
           </div>
-          <button class="btn primary-btn" id="addEventBtn">Add Event</button>
+          <button class="btn primary-btn" id="addEventBtn" >Add Event</button>
         </div>
         <div class="card-body p-0">
           <div id="calendar-container">
@@ -137,7 +139,7 @@
       </div>
 
       <!-- Goal Card -->
-        <div class="card goal-card">
+        <!-- <div class="card goal-card">
           <div class="card-header">
             <h3><i class="fas fa-bullseye"></i> Goal Tracker</h3>
           </div>
@@ -166,7 +168,7 @@
             <button id="setGoalBtn" class="btn outline-btn">Set New Goal</button>
             <button id="achievedBtn" class="btn primary-btn">Achieved</button>
           </div>
-        </div>
+        </div> -->
 
       <!-- Timer Card -->
       <div class="card timer-card">
@@ -296,6 +298,7 @@
       </div>
     </div>
   </div>
+ 
   <!-- jQuery -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
@@ -304,17 +307,13 @@
 
   <script src="js/calendar.js"></script>
   <script src="js/todo.js"></script>
-  <script src="js/goals.js"></script>
+  <!-- <script src="js/goals.js"></script> -->
   <script src="js/timer.js"></script>
-  <script src="js/main.js"></script>   
-  <script src="js/shortcut-browser.js"></script> 
-  <script src="js/validate-user.js"></script> 
-
+  <script src="js/main.js"></script>
+  <!-- <script src="js/validate-user.js"></script> -->
   <?php include '../../shared-student/script.php'; ?>
 
-  <script src ="../../shortcut-url/shorcut-url.js"></script> 
-
-
+  
 </body>
 
 </html>

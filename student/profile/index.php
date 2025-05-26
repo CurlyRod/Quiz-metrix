@@ -27,14 +27,6 @@
         $userData = $_SESSION['user']; 
         $_SESSION['USER_NAME'] = $userData['displayName'];
 
-        
-
-        $userId = $_SESSION['user_id'];
-
-        $stmt = $conn->prepare("SELECT * FROM notes WHERE user_id = ?");
-        $stmt->bind_param("i", $userId);
-        $stmt->execute();
-        $result = $stmt->get_result();
         ?>
 <?php
 include '../../shared-student/sidebar.php';

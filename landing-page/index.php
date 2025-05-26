@@ -32,8 +32,9 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <link rel="stylesheet" href="../vendor/bootstrap/bootstrap.min.css">
     <link rel="stylesheet" href="landing-page.css" />
+    <link rel="icon" type="image/x-icon" href="../../assets/img/logo/apple-touch-icon.png">
 
-    <link rel="icon" href="../assets copy/logo/apple-touch-icon-removebg-preview.png">
+
   </head>
   <body>
      <?php include 'login/login-modal.php';?>
@@ -90,8 +91,8 @@
             <h2 class="section-title">About Us</h2>
             <p class="text">Welcome to QuizMetrix, the ultimate platform designed to help students like you excel in your studies through interactive quizzes and assessments! Whether you are preparing for exams, reviewing lessons, or just testing your knowledge, QuizMetrix is here to make your learning journey easier and more effective.</p>
             <div class="social-link-list">
-              <a href="#" class="social-link"><i class="fa-brands fa-facebook"></i></a>
-              <a href="#" class="social-link"><i class="fa-brands fa-instagram"></i></a>
+              <!-- <a href="#" class="social-link"><i class="fa-brands fa-facebook"></i></a>
+              <a href="#" class="social-link"><i class="fa-brands fa-instagram"></i></a> -->
               <!-- <a href="#" class="social-link"><i class="fa-brands fa-x-twitter"></i></a> -->
             </div>
           </div>
