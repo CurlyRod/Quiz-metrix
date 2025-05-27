@@ -1,12 +1,15 @@
 <?php
 // Database connection
 require_once '../db_connect.php';
+session_start();
+
 
 // Set headers
 header('Content-Type: application/json');
 
 // Get action from request
 $action = isset($_GET['action']) ? $_GET['action'] : '';
+
 
 // Handle different actions
 switch ($action) {
@@ -35,76 +38,266 @@ switch ($action) {
 
 // Function to get all events for the current month
 function getMonthEvents($conn) {
-    $currentMonth = date('Y-m');
+    // Initialize response
+    $response = ['success' => false, 'message' => '', 'events' => []];
     
-    $stmt = $conn->prepare("SELECT * FROM events WHERE event_date LIKE ? ORDER BY event_date ASC");
-    $likePattern = $currentMonth . '%';
-    $stmt->bind_param("s", $likePattern);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    
-    $events = [];
-    while ($row = $result->fetch_assoc()) {
-        $events[] = $row;
+    try {
+        
+        // Get user ID from session
+        if (!isset($_SESSION['USER_EMAIL'])) {
+            throw new Exception('User not authenticated');
+        }
+        
+        $email = $_SESSION['USER_EMAIL'];
+        $user_id = null;
+
+        // Prepare and execute query to get user ID
+        $stmt = $conn->prepare("SELECT id FROM user_credential WHERE email = ?");
+        if (!$stmt) {
+            throw new Exception('Database prepare error: ' . $conn->error);
+        }
+
+        $stmt->bind_param("s", $email);
+        if (!$stmt->execute()) {
+            throw new Exception('Execution error: ' . $stmt->error);
+        }
+
+        $result = $stmt->get_result();
+        if ($result->num_rows > 0) {
+            $row = $result->fetch_assoc();
+            $user_id = $row['id'];
+        } else {
+            throw new Exception('User not found');
+        }
+        $stmt->close();
+
+        // Get current month and prepare query
+        $currentMonth = date('Y-m');
+        $stmt = $conn->prepare("SELECT * FROM events WHERE event_date LIKE ? AND user_id = ? ORDER BY event_date ASC");
+        if (!$stmt) {
+            throw new Exception('Prepare failed: ' . $conn->error);
+        }
+        
+        $likePattern = $currentMonth . '%';
+        $stmt->bind_param("si", $likePattern, $user_id);
+        if (!$stmt->execute()) {
+            throw new Exception('Execute failed: ' . $stmt->error);
+        }
+        
+        $result = $stmt->get_result();
+        $events = [];
+        while ($row = $result->fetch_assoc()) {
+            $events[] = $row;
+        }
+        $stmt->close();
+        
+        $response = [
+            'success' => true,
+            'events' => $events
+        ];
+
+    } catch (Exception $e) {
+        $response['message'] = $e->getMessage();
+        http_response_code(401); // Unauthorized for auth errors
     }
-    
-    echo json_encode($events);
+
+    header('Content-Type: application/json');
+    echo json_encode($response);
 }
 
 // Function to get events for a specific date
 function getEventsForDate($conn) {
-    $date = isset($_GET['date']) ? $_GET['date'] : date('Y-m-d');
-    
-    $stmt = $conn->prepare("SELECT * FROM events WHERE event_date = ? ORDER BY event_date ASC");
-    $stmt->bind_param("s", $date);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    
-    $events = [];
-    while ($row = $result->fetch_assoc()) {
-        $events[] = $row;
+    // Initialize response
+    $response = ['success' => false, 'message' => '', 'events' => []];
+
+    try {
+        
+        // Get user ID from session
+        if (!isset($_SESSION['USER_EMAIL'])) {
+            throw new Exception('User not authenticated');
+        }
+        
+        $email = $_SESSION['USER_EMAIL'];
+        $user_id = null;
+
+        // Prepare and execute query to get user ID
+        $stmt = $conn->prepare("SELECT id FROM user_credential WHERE email = ?");
+        if (!$stmt) {
+            throw new Exception('Database prepare error: ' . $conn->error);
+        }
+
+        $stmt->bind_param("s", $email);
+        if (!$stmt->execute()) {
+            throw new Exception('Execution error: ' . $stmt->error);
+        }
+
+        $result = $stmt->get_result();
+        if ($result->num_rows > 0) {
+            $row = $result->fetch_assoc();
+            $user_id = $row['id'];
+        } else {
+            throw new Exception('User not found');
+        }
+        $stmt->close();
+
+        // Get date from request
+        $date = isset($_GET['date']) ? $_GET['date'] : date('Y-m-d');
+        
+        // Validate date format
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+            throw new Exception('Invalid date format');
+        }
+
+        // Get events for the date
+        $stmt = $conn->prepare("SELECT * FROM events WHERE event_date = ? AND user_id = ? ORDER BY event_date ASC");
+        if (!$stmt) {
+            throw new Exception('Prepare failed: ' . $conn->error);
+        }
+        
+        $stmt->bind_param("si", $date, $user_id);
+        if (!$stmt->execute()) {
+            throw new Exception('Execute failed: ' . $stmt->error);
+        }
+        
+        $result = $stmt->get_result();
+        $events = [];
+        while ($row = $result->fetch_assoc()) {
+            $events[] = $row;
+        }
+        $stmt->close();
+        
+        $response = [
+            'success' => true,
+            'events' => $events
+        ];
+
+    } catch (Exception $e) {
+        $response['message'] = $e->getMessage();
+        http_response_code(401); // Unauthorized for auth errors
     }
-    
-    echo json_encode($events);
+
+    header('Content-Type: application/json');
+    echo json_encode($response);
 }
 
 // Function to get a single event
 function getEvent($conn) {
-    $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
-    
-    $stmt = $conn->prepare("SELECT * FROM events WHERE event_id = ?");
-    $stmt->bind_param("i", $id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    
-    if ($result->num_rows > 0) {
-        echo json_encode($result->fetch_assoc());
-    } else {
-        echo json_encode(['success' => false, 'message' => 'Event not found']);
+    // Initialize response
+    $response = ['success' => false, 'message' => '', 'event' => null];
+
+    try {
+        
+        // Get user ID from session
+        if (!isset($_SESSION['USER_EMAIL'])) {
+            throw new Exception('User not authenticated');
+        }
+        
+        $email = $_SESSION['USER_EMAIL'];
+        $user_id = null;
+
+        // Prepare and execute query to get user ID
+        $stmt = $conn->prepare("SELECT id FROM user_credential WHERE email = ?");
+        if (!$stmt) {
+            throw new Exception('Database prepare error: ' . $conn->error);
+        }
+
+        $stmt->bind_param("s", $email);
+        if (!$stmt->execute()) {
+            throw new Exception('Execution error: ' . $stmt->error);
+        }
+
+        $result = $stmt->get_result();
+        if ($result->num_rows > 0) {
+            $row = $result->fetch_assoc();
+            $user_id = $row['id'];
+        } else {
+            throw new Exception('User not found');
+        }
+        $stmt->close();
+
+        // Get event ID from request
+        $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+        if ($id <= 0) {
+            throw new Exception('Invalid event ID');
+        }
+
+        // Get the event
+        $stmt = $conn->prepare("SELECT * FROM events WHERE event_id = ? AND user_id = ?");
+        if (!$stmt) {
+            throw new Exception('Prepare failed: ' . $conn->error);
+        }
+        
+        $stmt->bind_param("ii", $id, $user_id);
+        if (!$stmt->execute()) {
+            throw new Exception('Execute failed: ' . $stmt->error);
+        }
+        
+        $result = $stmt->get_result();
+        if ($result->num_rows > 0) {
+            $response = [
+                'success' => true,
+                'event' => $result->fetch_assoc()
+            ];
+        } else {
+            throw new Exception('Event not found');
+        }
+        $stmt->close();
+
+    } catch (Exception $e) {
+        $response['message'] = $e->getMessage();
+        // Use 404 for not found, 401 for auth errors
+        http_response_code($e->getMessage() === 'Event not found' ? 404 : 401);
     }
+
+    header('Content-Type: application/json');
+    echo json_encode($response);
 }
 
-// Function to add a new event
 function addEvent($conn) {
     // Get JSON data
     $data = json_decode(file_get_contents('php://input'), true);
     
-    if (!isset($data['title']) || !isset($data['event_date'])) {
+    // Validate required fields
+    if (!isset($data['title']) || !isset($data['event_date']) || !isset($data['user_id'])) {
         echo json_encode(['success' => false, 'message' => 'Missing required fields']);
         return;
     }
-    
-    $title = $data['title'];
-    $description = isset($data['description']) ? $data['description'] : '';
+
+    // Sanitize and validate inputs
+    $user_id = intval($data['user_id']);
+    if ($user_id <= 0) {
+        echo json_encode(['success' => false, 'message' => 'Invalid user ID']);
+        return;
+    }
+
+    $title = trim($data['title']);
+    $description = isset($data['description']) ? trim($data['description']) : '';
     $eventDate = $data['event_date'];
-    
-    $stmt = $conn->prepare("INSERT INTO events (title, description, event_date) VALUES (?, ?, ?)");
-    $stmt->bind_param("sss", $title, $description, $eventDate);
-    
-    if ($stmt->execute()) {
-        echo json_encode(['success' => true, 'message' => 'Event added successfully', 'event_id' => $conn->insert_id]);
-    } else {
-        echo json_encode(['success' => false, 'message' => 'Error adding event: ' . $conn->error]);
+
+    // Validate date format (optional)
+    if (!DateTime::createFromFormat('Y-m-d', $eventDate)) {
+        echo json_encode(['success' => false, 'message' => 'Invalid date format']);
+        return;
+    }
+
+    try {
+        $stmt = $conn->prepare("INSERT INTO events (user_id, title, description, event_date) VALUES (?, ?, ?, ?)");
+        $stmt->bind_param("isss", $user_id, $title, $description, $eventDate);
+
+        if ($stmt->execute()) {
+            echo json_encode([
+                'success' => true, 
+                'message' => 'Event added successfully', 
+                'event_id' => $conn->insert_id
+            ]);
+        } else {
+            throw new Exception($conn->error);
+        }
+    } catch (Exception $e) {
+        echo json_encode([
+            'success' => false, 
+            'message' => 'Error adding event: ' . $e->getMessage()
+        ]);
     }
 }
 

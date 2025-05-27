@@ -1,4 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
+   
+    
     // Load tasks
     loadTasks();
     
@@ -19,26 +21,38 @@ document.addEventListener('DOMContentLoaded', function() {
         finishAllTasks();
     });
     
-    // Function to load tasks
     function loadTasks() {
-        fetch('api/todos.php?action=getTasks')
-            .then(response => response.json())
-            .then(data => {
-                const todoList = document.getElementById('todoList');
-                todoList.innerHTML = '';
-                
-                if (data.length === 0) {
-                    todoList.innerHTML = '<li class="todo-item text-muted">No tasks yet</li>';
-                    return;
-                }
-                
-                data.forEach(task => {
-                    const todoItem = createTodoItem(task);
-                    todoList.appendChild(todoItem);
-                });
-            })
-            .catch(error => console.error('Error loading tasks:', error));
-    }
+    fetch('api/todos.php?action=getTasks')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (!data.success) {
+                throw new Error(data.message || 'Failed to load tasks');
+            }
+            
+            const todoList = document.getElementById('todoList');
+            todoList.innerHTML = '';
+            
+            if (!data.data || data.data.length === 0) {
+                todoList.innerHTML = '<li class="todo-item text-muted">No tasks yet</li>';
+                return;
+            }
+            
+            data.data.forEach(task => {
+                const todoItem = createTodoItem(task);
+                todoList.appendChild(todoItem);
+            });
+        })
+        .catch(error => {
+            console.error('Error loading tasks:', error);
+            const todoList = document.getElementById('todoList');
+            todoList.innerHTML = '<li class="todo-item text-muted">Error loading tasks</li>';
+        });
+}
     
     // Function to create a todo item
     function createTodoItem(task) {
@@ -74,13 +88,15 @@ document.addEventListener('DOMContentLoaded', function() {
     function addTask() {
         const newTaskInput = document.getElementById('newTodoInput');
         const taskContent = newTaskInput.value.trim();
+        const user_id = document.getElementById("user-current-id").value // Assuming user_id is set in a hidden input
         
         if (!taskContent) {
             return;
         }
         
         const taskData = {
-            content: taskContent
+            content: taskContent,
+            user_id: user_id // Include user_id in the task data
         };
         
         fetch('api/todos.php?action=addTask', {
@@ -99,7 +115,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 alert('Error: ' + data.message);
             }
         })
-        .catch(error => console.error('Error adding task:', error));
+        // .catch(error => console.error('Error adding task:', error));
     }
     
     // Function to toggle task status
