@@ -1,6 +1,10 @@
 <?php
 require_once('../includes/db_config.php');
 
+// Start session and check authentication
+session_start();
+
+
 // Get the JSON data from the request
 $json_data = file_get_contents('php://input');
 $data = json_decode($json_data, true);
@@ -9,6 +13,9 @@ if (!$data) {
     echo json_encode(['success' => false, 'message' => 'Invalid data format']);
     exit;
 }
+
+$user_id = isset($data['user_current_id']) ? intval($data['user_current_id']) : 0;
+
 
 // Start transaction
 $conn->begin_transaction();
@@ -23,17 +30,31 @@ try {
     $quiz_id = isset($data['quiz_id']) ? intval($data['quiz_id']) : 0;
     
     if ($quiz_id > 0) {
+        // First verify the quiz belongs to this user
+        $check_stmt = $conn->prepare("SELECT quiz_id FROM quizzes WHERE quiz_id = ? AND user_id = ?");
+        $check_stmt->bind_param("ii", $quiz_id, $user_id);
+        $check_stmt->execute();
+        $check_stmt->store_result();
+        
+        // if ($check_stmt->num_rows === 0) {
+        //     throw new Exception("Quiz not found or you don't have permission to edit it");
+        // }
+        $check_stmt->close();
+        
         // Update existing quiz
-        $stmt = $conn->prepare("UPDATE quizzes SET title = ?, description = ?, settings = ? WHERE quiz_id = ?");
-        $stmt->bind_param("sssi", $title, $description, $settings, $quiz_id);
+        $stmt = $conn->prepare("UPDATE quizzes SET title = ?, description = ?, settings = ? WHERE quiz_id = ? AND user_id = ?");
+        $stmt->bind_param("sssii", $title, $description, $settings, $quiz_id, $user_id);
         $stmt->execute();
         
         // Delete existing questions to replace with new ones
-        $conn->query("DELETE FROM questions WHERE quiz_id = $quiz_id");
+        $delete_stmt = $conn->prepare("DELETE FROM questions WHERE quiz_id = ?");
+        $delete_stmt->bind_param("i", $quiz_id);
+        $delete_stmt->execute();
+        $delete_stmt->close();
     } else {
-        // Insert new quiz
-        $stmt = $conn->prepare("INSERT INTO quizzes (title, description, settings) VALUES (?, ?, ?)");
-        $stmt->bind_param("sss", $title, $description, $settings);
+        // Insert new quiz with user_id
+        $stmt = $conn->prepare("INSERT INTO quizzes (user_id, title, description, settings) VALUES (?, ?, ?, ?)");
+        $stmt->bind_param("isss", $user_id, $title, $description, $settings);
         $stmt->execute();
         $quiz_id = $conn->insert_id;
     }

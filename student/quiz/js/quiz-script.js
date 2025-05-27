@@ -87,10 +87,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Set up timer if quiz is timed
     if (currentQuiz.settings && currentQuiz.settings.timed) {
-      timerDisplay.classList.remove("d-none")
-      timeRemaining = currentQuiz.settings.time * 60 // Convert to seconds
-      updateTimerDisplay()
-      startTimer()
+      timerDisplay.classList.remove("d-none");
+      timeRemaining = currentQuiz.settings.time * 60;
+      updateTimerDisplay();
+      startTimer();
+    } else {
+      timerDisplay.classList.add("d-none");
+    }
+
+    
+    // Ensure answer types are properly set
+    if (!currentQuiz.settings.answerTypes || currentQuiz.settings.answerTypes.length === 0) {
+      currentQuiz.settings.answerTypes = ['typed']; // default fallback
     }
 
     speakQuestionBtn.addEventListener("click", speakCurrentQuestion);

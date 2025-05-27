@@ -17,6 +17,7 @@ session_start();
 </head>
 
 <body style="height: 100vh; background-color: #f8f9fa;">
+    <input type="hidden" name="user-current-id" id="user-current-id">
 
     <?php
     include '../../shared-student/sidebar.php';
@@ -43,11 +44,19 @@ session_start();
 
         <!-- Search Bar -->
         <div class="row mb-4">
-            <div class="col-md-6 col-lg-4" style="width: 50%;">
+            
+            <div class="col-md-6 col-lg-4" style="width: 75%;">
+                
                 <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    <button id="deleteSelectedBtn" class="btn btn-danger" disabled style="margin-right: 200px;">
+                        <i class="bi bi-trash"></i> Delete Selected
+                    </button>
+                    <span class="input-group-text bg-transparent border-end-0">
+                            <i class="bx bx-search"></i></span>
                     <input type="text" class="form-control" id="searchQuiz" placeholder="Search quizzes..." maxlength="30">
                     <button class="btn btn-outline-secondary" type="button" id="clearSearch">Clear</button>
+                    
+                </div>
                 </div>
             </div>
         </div>
@@ -55,9 +64,14 @@ session_start();
         <div class="alert alert-info d-none" id="statusMessage"></div>
         
         <div class="table">
-            <table class="table table-striped">
-                <thead>
+            <table class="table table-hover">
+                <thead class="thead-dark">
                     <tr>
+                        <th style="width: 40px;">
+                            <div class="d-flex justify-content-center">
+                                <input type="checkbox" id="selectAllCheckbox" class="m-0">
+                            </div>
+                        </th>
                         <th>Title</th>
                         <th>Description</th>
                         <th>Created</th>
@@ -68,7 +82,7 @@ session_start();
                 </thead>
                 <tbody id="quizTable">
                     <tr>
-                        <td colspan="6" class="text-center">
+                        <td colspan="7" class="text-center">
                             <div class="spinner-border" role="status">
                                 <span class="visually-hidden">Loading...</span>
                             </div>
