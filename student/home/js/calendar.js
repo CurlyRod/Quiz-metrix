@@ -376,58 +376,84 @@ document.addEventListener("DOMContentLoaded", () => {
       fetch("api/events.php?action=getMonthEvents")
         .then((response) => response.json())
         .then((data) => {
+          // Check if the request was successful and events exist
+          if (!data.success || !data.events) {
+            console.error("Error loading events:", data.message || "No events data received");
+            return;
+          }
+
           // Group events by date
-          const eventsByDate = {}
-  
-          data.forEach((event) => {
-            const eventDate = event.event_date
+          const eventsByDate = {};
+
+          data.events.forEach((event) => {
+            const eventDate = event.event_date;
             if (!eventsByDate[eventDate]) {
-              eventsByDate[eventDate] = []
+              eventsByDate[eventDate] = [];
             }
-            eventsByDate[eventDate].push(event)
-          })
-  
+            eventsByDate[eventDate].push(event);
+          });
+
           // Add event indicators and count badges to calendar days
           for (const [date, events] of Object.entries(eventsByDate)) {
-            const dayElement = document.querySelector(`.calendar-day[data-date="${date}"]`)
-  
+            const dayElement = document.querySelector(`.calendar-day[data-date="${date}"]`);
+
             if (dayElement) {
-              dayElement.classList.add("has-event")
-  
+              dayElement.classList.add("has-event");
+
               // Add event count badge
-              const eventCount = events.length
+              const eventCount = events.length;
               if (eventCount > 0) {
-                const badge = document.createElement("span")
-                badge.className = "event-count-badge"
-                badge.textContent = eventCount
-                dayElement.appendChild(badge)
+                let badge = dayElement.querySelector(".event-count-badge");
+                if (!badge) {
+                  badge = document.createElement("span");
+                  badge.className = "event-count-badge";
+                  dayElement.appendChild(badge);
+                }
+                badge.textContent = eventCount;
               }
             }
           }
         })
-        .catch((error) => console.error("Error loading events:", error))
+        .catch((error) => console.error("Error loading events:", error));
     }
   
     // Function to load events for a specific date
     function loadEventsForDate(dateStr) {
-      fetch(`api/events.php?action=getEventsForDate&date=${dateStr}`)
-        .then((response) => response.json())
-        .then((data) => {
-          const eventsContainer = document.getElementById("currentEvents")
-          eventsContainer.innerHTML = ""
-  
-          if (data.length === 0) {
-            eventsContainer.innerHTML = '<div class="empty-events">No events for this date</div>'
-            return
-          }
-  
-          data.forEach((event) => {
-            const eventItem = createEventItem(event)
-            eventsContainer.appendChild(eventItem)
-          })
-        })
-        .catch((error) => console.error("Error loading events for date:", error))
-    }
+    fetch(`api/events.php?action=getEventsForDate&date=${dateStr}`)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then((data) => {
+        const eventsContainer = document.getElementById("currentEvents");
+        eventsContainer.innerHTML = "";
+
+        // Check if the request was successful
+        if (!data.success) {
+          eventsContainer.innerHTML = `<div class="empty-events">Error: ${data.message || 'Failed to load events'}</div>`;
+          return;
+        }
+
+        // Check if there are events (data.events might be empty array)
+        if (!data.events || data.events.length === 0) {
+          eventsContainer.innerHTML = '<div class="empty-events">No events for this date</div>';
+          return;
+        }
+
+        // Process the events
+        data.events.forEach((event) => {
+          const eventItem = createEventItem(event);
+          eventsContainer.appendChild(eventItem);
+        });
+      })
+      .catch((error) => {
+        console.error("Error loading events for date:", error);
+        const eventsContainer = document.getElementById("currentEvents");
+        eventsContainer.innerHTML = `<div class="empty-events error">Error loading events: ${error.message}</div>`;
+      });
+  }
   
     // Function to create event item
     function createEventItem(event) {
@@ -540,20 +566,22 @@ document.addEventListener("DOMContentLoaded", () => {
       const eventId = document.getElementById("eventId").value
       const eventDate = document.getElementById("eventDate").value
       const eventTitle = document.getElementById("eventTitle").value
-  
+      const userId = document.getElementById("user-current-id").value // Get the user ID
+
       if (!eventTitle || !eventDate) {
         alert("Please fill in all required fields")
         return
       }
-  
+
       const eventData = {
         event_id: eventId,
         title: eventTitle,
         event_date: eventDate,
+        user_id: userId // Include the user ID in the data
       }
-  
+
       const action = eventId ? "updateEvent" : "addEvent"
-  
+
       fetch(`api/events.php?action=${action}`, {
         method: "POST",
         headers: {
@@ -567,12 +595,11 @@ document.addEventListener("DOMContentLoaded", () => {
             document.getElementById("eventModal").classList.remove("active")
             renderCalendar(currentDate)
             loadEventsForDate(eventDate)
-         
           } else {
             alert("Error: " + data.message)
           }
         })
-        .catch((error) => console.error("Error saving event:", error))
+        // .catch((error) => console.error("Error saving event:", error))
     }
   
     // Function to delete an event
@@ -600,7 +627,7 @@ document.addEventListener("DOMContentLoaded", () => {
             alert("Error: " + data.message)
           }
         })
-        .catch((error) => console.error("Error deleting event:", error))
+        // .catch((error) => console.error("Error deleting event:", error))
     }
   
   

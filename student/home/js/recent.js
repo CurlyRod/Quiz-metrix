@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
   function loadRecentQuizzes() {
-    fetch("api/get_quiz.php")
+    fetch("api/get_quizzes.php")
       .then((response) => response.json())
       .then((data) => {
         if (data.success) {
@@ -20,9 +20,9 @@ document.addEventListener("DOMContentLoaded", () => {
           console.error("Error fetching quizzes:", data.message)
         }
       })
-      .catch((error) => {
-        console.error("Error:", error)
-      })
+      // .catch((error) => {
+      //   console.error("Error:", error)
+      // })
   }
 
   function displayRecentQuizzes(quizzes) {
@@ -41,18 +41,20 @@ document.addEventListener("DOMContentLoaded", () => {
       const formattedDate = date.toLocaleDateString()
 
       const quizCard = document.createElement("div")
-      quizCard.className = "col-md-3 col-sm-6 mb-3 "
+      quizCard.className = "col-md-3 col-sm-6 mb-3"
       quizCard.innerHTML = `
-                <div class="recent-quiz-card" data-quiz-id="${quiz.quiz_id}" style="background-color: #f8f9fa;
+                <div class="recent-quiz-card" data-quiz-id="${quiz.quiz_id}"
+                style="background-color: #f8f9fa;
                     border-radius: 8px;
                     padding: 12px;
                     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
                     transition: all 0.2s ease;
                     cursor: pointer;
-                    height: 100%;">
-                    <div class="label-user">Quiz | ${formattedDate}</div>
-                    <div class="title">${quiz.title}</div>
-                    <div class="date">${quiz.description.substring(0, 30)}${quiz.description.length > 30 ? "..." : ""}</div>
+                    height: 100%;
+                    border:0.5px groove;">
+                    <div class="label-user" style="font-size: 11px;">Quiz | ${formattedDate}</div>
+                    <div class="title" style="font-size: 18px; font-weight: bold;">${quiz.title}</div>
+                    <div class="date"style="font-size: 11px;">${quiz.description.substring(0, 30)}${quiz.description.length > 30 ? "..." : ""}</div>
                 </div>
             `
 

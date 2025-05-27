@@ -1,4 +1,22 @@
 document.addEventListener('DOMContentLoaded', function() {
+
+    $.ajax({
+      url: "../../middleware/auth/ValidateUser.php",
+      type: "POST",
+      data: { action: "check-users" },
+      dataType: "json",
+      success: function (data) {
+        if (data.userinfo) {  
+           $("#user-current-id").val(data?.userinfo[1]) 
+           console.log(data?.userinfo[1]);          
+        } else {
+          console.error("Invalid user info:", data);
+        }
+      },
+      error: function (xhr, status, error) {
+        console.error("User check error:", error);
+      }
+    });
     // Set current date in the header
     const today = new Date();
     const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
@@ -7,6 +25,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Modal functionality
     const modals = document.querySelectorAll('.modal');
     const closeButtons = document.querySelectorAll('.close-btn');
+    const eventForm = document.getElementById('eventForm');
     
     // Open modals
     document.getElementById('addEventBtn').addEventListener('click', function() {
@@ -37,8 +56,11 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
         
-        // Also validate on form submission
-        document.getElementById('eventForm').addEventListener('submit', function(e) {
+    
+    });
+
+    // Also validate on form submission
+        eventForm.addEventListener('submit', function(e) {
             const selectedDate = new Date(eventDateInput.value);
             const today = new Date();
             today.setHours(0, 0, 0, 0);
@@ -50,7 +72,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 eventDateInput.focus();
             }
         });
-    });
     
     // Rest of your modal opening handlers...
     document.getElementById('setGoalBtn').addEventListener('click', function() {

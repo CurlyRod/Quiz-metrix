@@ -1,6 +1,7 @@
 <?php
 // Database connection
 require_once '../db_connect.php';
+session_start();
 
 // Set headers
 header('Content-Type: application/json');
@@ -30,39 +31,131 @@ switch ($action) {
         break;
 }
 
-// Function to get all tasks
 function getTasks($conn) {
-    $stmt = $conn->prepare("SELECT * FROM tasks ORDER BY created_at DESC");
-    $stmt->execute();
-    $result = $stmt->get_result();
-    
-    $tasks = [];
-    while ($row = $result->fetch_assoc()) {
-        $tasks[] = $row;
+    // Initialize response array
+    $response = [
+        'success' => false,
+        'message' => '',
+        'data' => []
+    ];
+
+    try {
+        // Set content type header
+        header('Content-Type: application/json');
+
+        // Get user ID from session
+        if (!isset($_SESSION['USER_EMAIL'])) {
+            throw new Exception('User not authenticated', 401);
+        }
+        
+        $email = $_SESSION['USER_EMAIL'];
+        $user_id = null;
+
+        // Get user ID
+        $stmt = $conn->prepare("SELECT id FROM user_credential WHERE email = ?");
+        if (!$stmt) {
+            throw new Exception('Database prepare error: ' . $conn->error, 500);
+        }
+
+        $stmt->bind_param("s", $email);
+        if (!$stmt->execute()) {
+            throw new Exception('Execution error: ' . $stmt->error, 500);
+        }
+
+        $result = $stmt->get_result();
+        if ($result->num_rows === 0) {
+            throw new Exception('User not found', 404);
+        }
+        
+        $row = $result->fetch_assoc();
+        $user_id = $row['id'];
+        $stmt->close();
+
+        // Get tasks for this user
+        $stmt = $conn->prepare("SELECT * FROM tasks WHERE user_id = ? ORDER BY created_at DESC");
+        if (!$stmt) {
+            throw new Exception('Database prepare error: ' . $conn->error, 500);
+        }
+
+        $stmt->bind_param("i", $user_id);
+        if (!$stmt->execute()) {
+            throw new Exception('Execute failed: ' . $stmt->error, 500);
+        }
+
+        $result = $stmt->get_result();
+        $tasks = [];
+        
+        while ($row = $result->fetch_assoc()) {
+            $tasks[] = $row;
+        }
+        
+        $stmt->close();
+
+        // Successful response
+        $response = [
+            'success' => true,
+            'data' => $tasks
+        ];
+        
+    } catch (Exception $e) {
+        // Error response
+        http_response_code($e->getCode() ?: 500);
+        $response['message'] = $e->getMessage();
     }
     
-    echo json_encode($tasks);
+    // Single JSON output
+    echo json_encode($response);
+    exit;
 }
 
 // Function to add a new task
 function addTask($conn) {
     // Get JSON data
     $data = json_decode(file_get_contents('php://input'), true);
+
+
     
+    // Validate required fields 
     if (!isset($data['content'])) {
         echo json_encode(['success' => false, 'message' => 'Missing required fields']);
         return;
     }
+
     
-    $content = $data['content'];
+
+    // Validate required fields 
+    if (!isset($data['user_id'])) {
+        echo json_encode(['success' => false, 'message' => 'Missing user_id']);
+        return;
+    }
+
+    // Sanitize and validate inputs
+    $user_id = intval($data['user_id']);
+    if ($user_id <= 0) {
+        echo json_encode(['success' => false, 'message' => 'Invalid user ID']);
+        return;
+    }
+
+    $content = trim($data['content']);
     
-    $stmt = $conn->prepare("INSERT INTO tasks (content) VALUES (?)");
-    $stmt->bind_param("s", $content);
-    
-    if ($stmt->execute()) {
-        echo json_encode(['success' => true, 'message' => 'Task added successfully', 'task_id' => $conn->insert_id]);
-    } else {
-        echo json_encode(['success' => false, 'message' => 'Error adding task: ' . $conn->error]);
+    try {
+        $stmt = $conn->prepare("INSERT INTO tasks (user_id, content) VALUES (?, ?)");
+        $stmt->bind_param("is", $user_id, $content);
+
+        if ($stmt->execute()) {
+            echo json_encode([
+                'success' => true, 
+                'message' => 'Task added successfully', 
+                'task_id' => $conn->insert_id
+            ]);
+        } else {
+            throw new Exception($conn->error);
+        }
+    } catch (Exception $e) {
+        echo json_encode([
+            'success' => false, 
+            'message' => 'Error adding task: ' . $e->getMessage()
+        ]);
     }
 }
 

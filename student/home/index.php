@@ -60,6 +60,7 @@
   include '../../shared-student/navbar.php';
   ?>
 
+  <input type="hidden" name="user-current-id" id="user-current-id">
 
   <div class="dashboard-grid">
     <!-- Left Column -->
