@@ -7,6 +7,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const paginationInfo = document.getElementById("paginationInfo")
   const prevPage = document.getElementById("prevPage")
   const nextPage = document.getElementById("nextPage")
+  const selectAllCheckbox = document.getElementById("selectAllCheckbox")
+  const deleteSelectedBtn = document.getElementById("deleteSelectedBtn")
 
   // Initialize Bootstrap modals
   const deleteModal = new bootstrap.Modal(document.getElementById("deleteModal"))
@@ -34,6 +36,8 @@ document.addEventListener("DOMContentLoaded", () => {
   clearSearch.addEventListener("click", clearSearchField)
   prevPage.parentElement.addEventListener("click", goToPrevPage)
   nextPage.parentElement.addEventListener("click", goToNextPage)
+  selectAllCheckbox.addEventListener("change", toggleSelectAll)
+  deleteSelectedBtn.addEventListener("click", deleteSelectedQuizzes)
 
   // Setup dropdown event delegation
   document.addEventListener("click", (e) => {
@@ -121,6 +125,81 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
   }
+
+  function toggleSelectAll() {
+    const checkboxes = document.querySelectorAll('#quizTable input[type="checkbox"]')
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = selectAllCheckbox.checked
+    })
+    updateDeleteSelectedBtnState()
+  }
+
+  function updateDeleteSelectedBtnState() {
+      const checkedBoxes = document.querySelectorAll('#quizTable input[type="checkbox"]:checked')
+      deleteSelectedBtn.disabled = checkedBoxes.length === 0
+  }
+
+  function deleteSelectedQuizzes() {
+    const checkedBoxes = document.querySelectorAll('#quizTable input[type="checkbox"]:checked')
+    const quizIds = Array.from(checkedBoxes).map(checkbox => checkbox.value)
+    
+    if (quizIds.length === 0) {
+        showStatusMessage("No quizzes selected for deletion.", "warning")
+        return
+    }
+    
+    if (confirm(`Are you sure you want to delete ${quizIds.length} selected quiz(es)? This action cannot be undone.`)) {
+        // Disable button during deletion
+        deleteSelectedBtn.disabled = true
+        deleteSelectedBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Deleting...'
+        
+        // We'll delete quizzes one by one to match your single-delete behavior
+        let deletePromises = quizIds.map(quizId => {
+            return fetch(`api/delete_quiz.php?id=${quizId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Remove quiz from arrays
+                        allQuizzes = allQuizzes.filter((quiz) => quiz.quiz_id != quizId)
+                        filteredQuizzes = filteredQuizzes.filter((quiz) => quiz.quiz_id != quizId)
+                        return { success: true, quizId }
+                    } else {
+                        return { success: false, quizId, message: data.message }
+                    }
+                })
+                .catch(error => {
+                    console.error("Error deleting quiz:", quizId, error)
+                    return { success: false, quizId, message: "Network error" }
+                })
+        })
+        
+        // Wait for all deletions to complete
+        Promise.all(deletePromises).then(results => {
+            const successfulDeletes = results.filter(r => r.success).length
+            const failedDeletes = results.filter(r => !r.success)
+            
+            if (failedDeletes.length === 0) {
+                showStatusMessage(`${successfulDeletes} quiz(es) deleted successfully.`, "success")
+            } else if (successfulDeletes === 0) {
+                showStatusMessage(`Failed to delete ${failedDeletes.length} quiz(es).`, "danger")
+            } else {
+                showStatusMessage(
+                    `${successfulDeletes} quiz(es) deleted successfully, ${failedDeletes.length} failed.`, 
+                    "warning"
+                )
+            }
+            
+            // Update UI
+            updatePagination()
+            displayQuizzes()
+            selectAllCheckbox.checked = false
+            
+            // Reset button state
+            deleteSelectedBtn.disabled = true
+            deleteSelectedBtn.innerHTML = '<i class="bi bi-trash"></i> Delete Selected'
+        })
+    }
+}
 
   function filterQuizzes() {
     const searchTerm = searchQuiz.value.toLowerCase().trim()
@@ -222,9 +301,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function displayQuizzes() {
     if (filteredQuizzes.length === 0) {
-      quizTable.innerHTML =
-        '<tr><td colspan="6" class="text-center">No quizzes found. <a href="index.html">Create a new quiz</a>.</td></tr>'
-      return
+        quizTable.innerHTML =
+            '<tr><td colspan="7" class="text-center">No quizzes found. <a href="index.html">Create a new quiz</a>.</td></tr>'
+        return
     }
 
     quizTable.innerHTML = ""
@@ -237,35 +316,43 @@ document.addEventListener("DOMContentLoaded", () => {
     const pageQuizzes = filteredQuizzes.slice(startIndex, endIndex)
 
     pageQuizzes.forEach((quiz) => {
-      // Format dates
-      const createdDate = new Date(quiz.created_at).toLocaleString()
-      const updatedDate = new Date(quiz.updated_at).toLocaleString()
+        // Format dates
+        const createdDate = new Date(quiz.created_at).toLocaleString()
+        const updatedDate = new Date(quiz.updated_at).toLocaleString()
 
-      const row = document.createElement("tr")
-      row.innerHTML = `
-        <td>${quiz.title}</td>
-        <td>${quiz.description.substring(0, 50)}${quiz.description.length > 50 ? "..." : ""}</td>
-        <td>${createdDate}</td>
-        <td>${updatedDate}</td>
-        <td>${quiz.questionCount || 0}</td>
-        <td>
-          <div class="dropdown">
-            <button class="btn btn-sm btn-light dropdown-toggle" type="button" aria-expanded="false">
-            </button>
-            <ul class="dropdown-menu dropdown-menu-end">
-              <li><a class="dropdown-item" href="quiz.php?id=${quiz.quiz_id}" data-action="take">Take Quiz</a></li>
-              <li><a class="dropdown-item" href="edit.php?id=${quiz.quiz_id}" data-action="edit">Edit Quiz</a></li>
-              <li><a class="dropdown-item dropdown-item-results" href="#" data-action="results" data-quiz-id="${quiz.quiz_id}" data-quiz-title="${quiz.title}">View Results</a></li>
-              <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item text-danger dropdown-item-delete" href="#" data-action="delete" data-quiz-id="${quiz.quiz_id}">Delete Quiz</a></li>
-            </ul>
-          </div>
-        </td>
-      `
+        const row = document.createElement("tr")
+        row.innerHTML = `
+            <td class="text-center">
+            <input type="checkbox" class="quiz-checkbox" value="${quiz.quiz_id}">
+            </td>
+            <td>${quiz.title}</td>
+            <td>${quiz.description.substring(0, 50)}${quiz.description.length > 50 ? "..." : ""}</td>
+            <td>${createdDate}</td>
+            <td>${updatedDate}</td>
+            <td>${quiz.questionCount || 0}</td>
+            <td>
+                <div class="dropdown">
+                    <button class="btn btn-sm btn-light dropdown-toggle" type="button" aria-expanded="false">
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="quiz.php?id=${quiz.quiz_id}" data-action="take">Take Quiz</a></li>
+                        <li><a class="dropdown-item" href="edit.php?id=${quiz.quiz_id}" data-action="edit">Edit Quiz</a></li>
+                        <li><a class="dropdown-item dropdown-item-results" href="#" data-action="results" data-quiz-id="${quiz.quiz_id}" data-quiz-title="${quiz.title}">View Results</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger dropdown-item-delete" href="#" data-action="delete" data-quiz-id="${quiz.quiz_id}">Delete Quiz</a></li>
+                    </ul>
+                </div>
+            </td>
+        `
 
-      quizTable.appendChild(row)
+        quizTable.appendChild(row)
     })
-  }
+
+    // Add event listeners to the checkboxes
+    document.querySelectorAll('.quiz-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', updateDeleteSelectedBtnState)
+    })
+}
 
   // Confirm delete button
   confirmDeleteBtn.addEventListener("click", () => {
@@ -295,7 +382,7 @@ document.addEventListener("DOMContentLoaded", () => {
       })
       .catch((error) => {
         console.error("Error:", error)
-        showStatusMessage("Error deleting quiz. Please try again.", "danger")
+        showStatusMessage("Error deleting quiz. Please try again.1", "danger")
       })
   }
 

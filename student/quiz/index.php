@@ -9,6 +9,7 @@
     <?php include '../../shared-student/header.php'; ?>
 
     <link rel="stylesheet" href="css/styles.css">
+    
 </head>
 <body>
     <!-- Sidebar and Navbar -->
@@ -26,7 +27,30 @@
         include '../../shared-student/sidebar.php';
         include '../../shared-student/navbar.php';
     ?>
+
+<style>
+    #backToTopBtn {
+  display: none;
+  position: fixed;
+  bottom: 30px;
+  right: 20px;
+  z-index: 99;
+  border: none;
+  outline: none;
+  background-color: #6366f1;
+  color: white;
+  cursor: pointer;
+  padding: 5px 10px;
+  font-size: 16px;
+  border-radius: 13%;
+  transition: opacity 0.3s, background-color 0.3s;
+}
+
+
+</style>
     
+    <input type="hidden" name="user-current-id" id="user-current-id">
+
     <ul class="nav nav-underline " style="padding: 20px;">
                     <li class="nav-item">
                         <a class="nav-link active" href="index.php" style="color: #6366f1">Create</a>

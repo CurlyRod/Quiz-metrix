@@ -1,4 +1,23 @@
 document.addEventListener("DOMContentLoaded", () => {
+ // for getting id for user 
+  // This will be used to save the quiz with the user ID
+    $.ajax({
+      url: "../../middleware/auth/ValidateUser.php",
+      type: "POST",
+      data: { action: "check-users" },
+      dataType: "json",
+      success: function (data) {
+        if (data.userinfo) {  
+           $("#user-current-id").val(data?.userinfo[1]) 
+           console.log(data?.userinfo[1]);          
+        } else {
+          console.error("Invalid user info:", data);
+        }
+      },
+      error: function (xhr, status, error) {
+        console.error("User check error:", error);
+      }
+    });
   // DOM Elements
   const createQuizBtn = document.getElementById("createQuizBtn")
   const clearFormBtn = document.getElementById("clearFormBtn")
@@ -17,6 +36,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const importQuestionsBtn = document.getElementById("importQuestionsBtn")
 
 
+
   // Quiz data
   let quizData = {
     title: "",
@@ -31,6 +51,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Drag and drop variables
   let draggedCard = null
+  quizData.user_current_id = document.getElementById("user-current-id").value;
+
 
   // Check if we're editing an existing quiz or coming from import
   const urlParams = new URLSearchParams(window.location.search)
@@ -68,14 +90,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Timed quiz switch
     timedQuizSwitch.addEventListener("change", function () {
+      quizData.settings.timed = this.checked;
       if (this.checked) {
-        timerSettings.classList.remove("d-none")
-        quizData.settings.timed = true
+        timerSettings.classList.remove("d-none");
+        // Set default time if not already set
+        quizData.settings.time = quizData.settings.time || 5;
+        document.getElementById("quizTime").value = quizData.settings.time;
       } else {
-        timerSettings.classList.add("d-none")
-        quizData.settings.timed = false
+        timerSettings.classList.add("d-none");
       }
-    })
+    });
 
     // Import questions button
     if (importQuestionsBtn) {
@@ -113,12 +137,12 @@ document.addEventListener("DOMContentLoaded", () => {
     // Answer type checkboxes
     answerTypeCheckboxes.forEach((checkbox) => {
       checkbox.addEventListener("change", () => {
-        // Hide warning if at least one checkbox is checked
+        updateAnswerTypes();
         if (getSelectedAnswerTypes().length > 0) {
-          answerTypeWarning.classList.add("d-none")
+          answerTypeWarning.classList.add("d-none");
         }
-      })
-    })
+      });
+    });
   }
 
   // Process imported cards from localStorage if available
@@ -310,73 +334,77 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function createQuiz(showSettingsModal = false) {
     // Get quiz title and description
-    quizData.title = document.getElementById("quizTitle").value || "Untitled Quiz"
-    quizData.description = document.getElementById("quizDescription").value || "No description provided"
+    quizData.title = document.getElementById("quizTitle").value || "Untitled Quiz";
+    quizData.description = document.getElementById("quizDescription").value || "No description provided";
+    
+    // Get the user ID from the hidden input field
+    quizData.user_current_id = document.getElementById("user-current-id").value;
 
     // Get questions
-    quizData.questions = []
+    quizData.questions = [];
     document.querySelectorAll(".question-card").forEach((card) => {
-      const term = card.querySelector(".term-input").value
-      const description = card.querySelector(".description-input").value
+        const term = card.querySelector(".term-input").value;
+        const description = card.querySelector(".description-input").value;
 
-      if (term || description) {
-        quizData.questions.push({
-          term: term || "No answer provided",
-          description: description || "No question provided",
-        })
-      }
-    })
+        if (term || description) {
+            quizData.questions.push({
+                term: term || "No answer provided",
+                description: description || "No question provided",
+            });
+        }
+    });
 
     // Check if we have at least one question
     if (quizData.questions.length <= 3) {
-      showError("Please add at least 4 question to your quiz.")
-      return
+        showError("Please add at least 4 questions to your quiz.");
+        return;
     }
 
     // If editing, include the quiz ID
     if (quizId) {
-      quizData.quiz_id = quizId
+        quizData.quiz_id = quizId;
     }
 
     // Save to database
     fetch("api/save_quiz.php", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(quizData),
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(quizData),
     })
-      .then((response) => response.json())
-      .then((data) => {
+    .then((response) => response.json())
+    .then((data) => {
         if (data.success) {
-          // Update quiz ID in case it's a new quiz
-          quizData.quiz_id = data.quiz_id
+            // Update quiz ID in case it's a new quiz
+            quizData.quiz_id = data.quiz_id;
 
-          if (showSettingsModal) {
-            // Show the quiz settings modal
-            showSuccess("Quiz saved successfully!")
-            // Reload recent quizzes
-            loadRecentQuizzes()
-            
-            // Clear the form after successful creation
-            clearForm()
-          } else {
-            
-          }
+            if (showSettingsModal) {
+                // Show the quiz settings modal
+                showSuccess("Quiz saved successfully!");
+                // Reload recent quizzes
+                loadRecentQuizzes();
+                
+                // Clear the form after successful creation
+                clearForm();
+            }
         } else {
-          showError("Error saving quiz: " + data.message)
+            showError("Error saving quiz: " + data.message);
         }
-      })
-      .catch((error) => {
-        console.error("Error:", error)
-        showError("Error saving quiz. Please try again.")
-      })
-  }
+    })
+    // .catch((error) => {
+    //     console.error("Error:", error);
+    //     showError("Error saving quiz. Please try again.");
+    // });
+}
 
   function saveQuiz(showSettingsModal = false) {
     // Get quiz title and description
     quizData.title = document.getElementById("quizTitle").value || "Untitled Quiz"
     quizData.description = document.getElementById("quizDescription").value || "No description provided"
+
+    // Get the user ID from the hidden input field
+    quizData.user_current_id = document.getElementById("user-current-id").value;
 
     // Get questions
     quizData.questions = []
@@ -430,10 +458,10 @@ document.addEventListener("DOMContentLoaded", () => {
           showError("Error saving quiz: " + data.message)
         }
       })
-      .catch((error) => {
-        console.error("Error:", error)
-        showError("Error saving quiz. Please try again.")
-      })
+      // .catch((error) => {
+      //   console.error("Error:", error)
+      //   showError("Error saving quiz. Please try again.")
+      // })
   }
 
   function startQuiz() {
@@ -487,10 +515,15 @@ document.addEventListener("DOMContentLoaded", () => {
           showError("Error loading quiz: " + data.message)
         }
       })
-      .catch((error) => {
-        console.error("Error:", error)
-        showError("Error loading quiz. Please try again.")
-      })
+      // .catch((error) => {
+      //   console.error("Error:", error)
+      //   showError("Error loading quiz. Please try again.")
+      // })
+  }
+
+  //function to update answer types whenever checkboxes change
+  function updateAnswerTypes() {
+    quizData.settings.answerTypes = getSelectedAnswerTypes();
   }
 
   function populateQuizForm(quiz) {
@@ -550,11 +583,14 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("quizTime").value = quiz.settings.time
       }
 
-      // Set answer types
+       // Set answer types
+    if (quiz.settings && quiz.settings.answerTypes) {
       answerTypeCheckboxes.forEach((checkbox) => {
-        checkbox.checked = quiz.settings.answerTypes.includes(checkbox.value)
-      })
+        checkbox.checked = quiz.settings.answerTypes.includes(checkbox.value);
+      });
+      updateAnswerTypes(); // Make sure quizData is updated
     }
+  }
 
     // Store the quiz data
     quizData = quiz
@@ -570,9 +606,9 @@ document.addEventListener("DOMContentLoaded", () => {
           console.error("Error fetching quizzes:", data.message)
         }
       })
-      .catch((error) => {
-        console.error("Error:", error)
-      })
+      // .catch((error) => {
+      //   console.error("Error:", error)
+      // })
   }
 
   function displayRecentQuizzes(quizzes) {
@@ -611,6 +647,11 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function clearForm() {
+    // Check if we have at least one question
+    if (quizData.questions.length === 0) {
+      showError("No Form to clear.")
+      return
+    }
     document.getElementById("quizTitle").value = ""
     document.getElementById("quizDescription").value = ""
 

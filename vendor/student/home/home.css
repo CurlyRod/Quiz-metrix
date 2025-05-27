@@ -307,7 +307,7 @@ nav .profile .profile-link {
 	padding: 20px;
 	box-shadow: 4px 4px 16px rgba(0, 0, 0, .1);
 	border-radius: 10px;
-	width: 250px;
+	width: 300px;
 	opacity: 0;
 	pointer-events: none;
 	transition: all .3s ease;
