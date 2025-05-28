@@ -3,7 +3,7 @@
 $host = 'localhost';
 $username = 'root'; // Default XAMPP username
 $password = ''; // Default XAMPP password is empty
-$database = 'file_manager'; // Database name
+$database = 'quizmetrix'; // Database name
 
 // Create connection
 $conn = new mysqli($host, $username, $password, $database);

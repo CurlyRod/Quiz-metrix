@@ -1,17 +1,52 @@
 <?php
 // includes/functions.php
 require_once 'db.php';
+session_start();
 
 // Flashcard Set Functions
 function getAllFlashcardSets() {
     $conn = getConnection();
+    
+    // Get user ID from session
+    if (!isset($_SESSION['USER_EMAIL'])) {
+        throw new Exception('User not authenticated');
+    }
+    
+    $email = $_SESSION['USER_EMAIL'];
+    $user_id = null;
+
+    // Prepare and execute query to get user ID
+    $stmt = $conn->prepare("SELECT id FROM user_credential WHERE email = ?");
+    if (!$stmt) {
+        throw new Exception('Database prepare error: ' . $conn->error);
+    }
+
+    $stmt->bind_param("s", $email);
+    if (!$stmt->execute()) {
+        throw new Exception('Execution error: ' . $stmt->error);
+    }
+
+    $result = $stmt->get_result();
+    if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        $user_id = $row['id'];
+    } else {
+        throw new Exception('User not found');
+    }
+    $stmt->close();
+    
     $sql = "SELECT fs.*, COUNT(f.id) as card_count 
             FROM flashcard_sets fs
             LEFT JOIN flashcards f ON fs.id = f.set_id
+            WHERE fs.user_id = ?
             GROUP BY fs.id
             ORDER BY fs.created_at DESC";
     
-    $result = $conn->query($sql);
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    
+    $result = $stmt->get_result();
     $sets = [];
     
     if ($result->num_rows > 0) {
@@ -20,16 +55,46 @@ function getAllFlashcardSets() {
         }
     }
     
+    $stmt->close();
     $conn->close();
     return $sets;
 }
 
 function getFlashcardSet($id) {
     $conn = getConnection();
-    $sql = "SELECT * FROM flashcard_sets WHERE id = ?";
+    
+    // Get user ID from session
+    if (!isset($_SESSION['USER_EMAIL'])) {
+        throw new Exception('User not authenticated');
+    }
+    
+    $email = $_SESSION['USER_EMAIL'];
+    $user_id = null;
+
+    // Prepare and execute query to get user ID
+    $stmt = $conn->prepare("SELECT id FROM user_credential WHERE email = ?");
+    if (!$stmt) {
+        throw new Exception('Database prepare error: ' . $conn->error);
+    }
+
+    $stmt->bind_param("s", $email);
+    if (!$stmt->execute()) {
+        throw new Exception('Execution error: ' . $stmt->error);
+    }
+
+    $result = $stmt->get_result();
+    if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        $user_id = $row['id'];
+    } else {
+        throw new Exception('User not found');
+    }
+    $stmt->close();
+    
+    $sql = "SELECT * FROM flashcard_sets WHERE id = ? AND user_id = ?";
     
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $id);
+    $stmt->bind_param("ii", $id, $user_id);
     $stmt->execute();
     
     $result = $stmt->get_result();
@@ -46,10 +111,39 @@ function getFlashcardSet($id) {
 
 function createFlashcardSet($title, $description) {
     $conn = getConnection();
-    $sql = "INSERT INTO flashcard_sets (title, description) VALUES (?, ?)";
+    
+    // Get user ID from session
+    if (!isset($_SESSION['USER_EMAIL'])) {
+        throw new Exception('User not authenticated');
+    }
+    
+    $email = $_SESSION['USER_EMAIL'];
+    $user_id = null;
+
+    // Prepare and execute query to get user ID
+    $stmt = $conn->prepare("SELECT id FROM user_credential WHERE email = ?");
+    if (!$stmt) {
+        throw new Exception('Database prepare error: ' . $conn->error);
+    }
+
+    $stmt->bind_param("s", $email);
+    if (!$stmt->execute()) {
+        throw new Exception('Execution error: ' . $stmt->error);
+    }
+
+    $result = $stmt->get_result();
+    if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        $user_id = $row['id'];
+    } else {
+        throw new Exception('User not found');
+    }
+    $stmt->close();
+    
+    $sql = "INSERT INTO flashcard_sets (title, description, user_id) VALUES (?, ?, ?)";
     
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ss", $title, $description);
+    $stmt->bind_param("ssi", $title, $description, $user_id);
     $success = $stmt->execute();
     
     $id = $success ? $conn->insert_id : 0;
@@ -61,10 +155,39 @@ function createFlashcardSet($title, $description) {
 
 function updateFlashcardSet($id, $title, $description) {
     $conn = getConnection();
-    $sql = "UPDATE flashcard_sets SET title = ?, description = ? WHERE id = ?";
+    
+    // Get user ID from session
+    if (!isset($_SESSION['USER_EMAIL'])) {
+        throw new Exception('User not authenticated');
+    }
+    
+    $email = $_SESSION['USER_EMAIL'];
+    $user_id = null;
+
+    // Prepare and execute query to get user ID
+    $stmt = $conn->prepare("SELECT id FROM user_credential WHERE email = ?");
+    if (!$stmt) {
+        throw new Exception('Database prepare error: ' . $conn->error);
+    }
+
+    $stmt->bind_param("s", $email);
+    if (!$stmt->execute()) {
+        throw new Exception('Execution error: ' . $stmt->error);
+    }
+
+    $result = $stmt->get_result();
+    if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        $user_id = $row['id'];
+    } else {
+        throw new Exception('User not found');
+    }
+    $stmt->close();
+    
+    $sql = "UPDATE flashcard_sets SET title = ?, description = ? WHERE id = ? AND user_id = ?";
     
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ssi", $title, $description, $id);
+    $stmt->bind_param("ssii", $title, $description, $id, $user_id);
     $success = $stmt->execute();
     
     $stmt->close();
@@ -74,10 +197,39 @@ function updateFlashcardSet($id, $title, $description) {
 
 function deleteFlashcardSet($id) {
     $conn = getConnection();
-    $sql = "DELETE FROM flashcard_sets WHERE id = ?";
+    
+    // Get user ID from session
+    if (!isset($_SESSION['USER_EMAIL'])) {
+        throw new Exception('User not authenticated');
+    }
+    
+    $email = $_SESSION['USER_EMAIL'];
+    $user_id = null;
+
+    // Prepare and execute query to get user ID
+    $stmt = $conn->prepare("SELECT id FROM user_credential WHERE email = ?");
+    if (!$stmt) {
+        throw new Exception('Database prepare error: ' . $conn->error);
+    }
+
+    $stmt->bind_param("s", $email);
+    if (!$stmt->execute()) {
+        throw new Exception('Execution error: ' . $stmt->error);
+    }
+
+    $result = $stmt->get_result();
+    if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        $user_id = $row['id'];
+    } else {
+        throw new Exception('User not found');
+    }
+    $stmt->close();
+    
+    $sql = "DELETE FROM flashcard_sets WHERE id = ? AND user_id = ?";
     
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $id);
+    $stmt->bind_param("ii", $id, $user_id);
     $success = $stmt->execute();
     
     $stmt->close();
@@ -88,10 +240,42 @@ function deleteFlashcardSet($id) {
 // Flashcard Functions
 function getFlashcards($setId) {
     $conn = getConnection();
-    $sql = "SELECT * FROM flashcards WHERE set_id = ? ORDER BY position ASC";
+    
+    // Get user ID from session
+    if (!isset($_SESSION['USER_EMAIL'])) {
+        throw new Exception('User not authenticated');
+    }
+    
+    $email = $_SESSION['USER_EMAIL'];
+    $user_id = null;
+
+    // Prepare and execute query to get user ID
+    $stmt = $conn->prepare("SELECT id FROM user_credential WHERE email = ?");
+    if (!$stmt) {
+        throw new Exception('Database prepare error: ' . $conn->error);
+    }
+
+    $stmt->bind_param("s", $email);
+    if (!$stmt->execute()) {
+        throw new Exception('Execution error: ' . $stmt->error);
+    }
+
+    $result = $stmt->get_result();
+    if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        $user_id = $row['id'];
+    } else {
+        throw new Exception('User not found');
+    }
+    $stmt->close();
+    
+    $sql = "SELECT f.* FROM flashcards f
+            JOIN flashcard_sets fs ON f.set_id = fs.id
+            WHERE f.set_id = ? AND fs.user_id = ?
+            ORDER BY f.position ASC";
     
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $setId);
+    $stmt->bind_param("ii", $setId, $user_id);
     $stmt->execute();
     
     $result = $stmt->get_result();
@@ -110,6 +294,48 @@ function getFlashcards($setId) {
 
 function createFlashcard($setId, $question, $answer, $position) {
     $conn = getConnection();
+    
+    // Get user ID from session
+    if (!isset($_SESSION['USER_EMAIL'])) {
+        throw new Exception('User not authenticated');
+    }
+    
+    $email = $_SESSION['USER_EMAIL'];
+    $user_id = null;
+
+    // Prepare and execute query to get user ID
+    $stmt = $conn->prepare("SELECT id FROM user_credential WHERE email = ?");
+    if (!$stmt) {
+        throw new Exception('Database prepare error: ' . $conn->error);
+    }
+
+    $stmt->bind_param("s", $email);
+    if (!$stmt->execute()) {
+        throw new Exception('Execution error: ' . $stmt->error);
+    }
+
+    $result = $stmt->get_result();
+    if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        $user_id = $row['id'];
+    } else {
+        throw new Exception('User not found');
+    }
+    $stmt->close();
+    
+    // Verify the set belongs to the user
+    $check_stmt = $conn->prepare("SELECT id FROM flashcard_sets WHERE id = ? AND user_id = ?");
+    $check_stmt->bind_param("ii", $setId, $user_id);
+    $check_stmt->execute();
+    $check_result = $check_stmt->get_result();
+    
+    if ($check_result->num_rows === 0) {
+        $check_stmt->close();
+        $conn->close();
+        throw new Exception('Flashcard set not found or not owned by user');
+    }
+    $check_stmt->close();
+    
     $sql = "INSERT INTO flashcards (set_id, question, answer, position) VALUES (?, ?, ?, ?)";
     
     $stmt = $conn->prepare($sql);
@@ -125,6 +351,50 @@ function createFlashcard($setId, $question, $answer, $position) {
 
 function updateFlashcard($id, $question, $answer, $position) {
     $conn = getConnection();
+    
+    // Get user ID from session
+    if (!isset($_SESSION['USER_EMAIL'])) {
+        throw new Exception('User not authenticated');
+    }
+    
+    $email = $_SESSION['USER_EMAIL'];
+    $user_id = null;
+
+    // Prepare and execute query to get user ID
+    $stmt = $conn->prepare("SELECT id FROM user_credential WHERE email = ?");
+    if (!$stmt) {
+        throw new Exception('Database prepare error: ' . $conn->error);
+    }
+
+    $stmt->bind_param("s", $email);
+    if (!$stmt->execute()) {
+        throw new Exception('Execution error: ' . $stmt->error);
+    }
+
+    $result = $stmt->get_result();
+    if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        $user_id = $row['id'];
+    } else {
+        throw new Exception('User not found');
+    }
+    $stmt->close();
+    
+    // Verify the flashcard belongs to the user
+    $check_stmt = $conn->prepare("SELECT f.id FROM flashcards f
+                                JOIN flashcard_sets fs ON f.set_id = fs.id
+                                WHERE f.id = ? AND fs.user_id = ?");
+    $check_stmt->bind_param("ii", $id, $user_id);
+    $check_stmt->execute();
+    $check_result = $check_stmt->get_result();
+    
+    if ($check_result->num_rows === 0) {
+        $check_stmt->close();
+        $conn->close();
+        throw new Exception('Flashcard not found or not owned by user');
+    }
+    $check_stmt->close();
+    
     $sql = "UPDATE flashcards SET question = ?, answer = ?, position = ? WHERE id = ?";
     
     $stmt = $conn->prepare($sql);
@@ -138,6 +408,50 @@ function updateFlashcard($id, $question, $answer, $position) {
 
 function deleteFlashcard($id) {
     $conn = getConnection();
+    
+    // Get user ID from session
+    if (!isset($_SESSION['USER_EMAIL'])) {
+        throw new Exception('User not authenticated');
+    }
+    
+    $email = $_SESSION['USER_EMAIL'];
+    $user_id = null;
+
+    // Prepare and execute query to get user ID
+    $stmt = $conn->prepare("SELECT id FROM user_credential WHERE email = ?");
+    if (!$stmt) {
+        throw new Exception('Database prepare error: ' . $conn->error);
+    }
+
+    $stmt->bind_param("s", $email);
+    if (!$stmt->execute()) {
+        throw new Exception('Execution error: ' . $stmt->error);
+    }
+
+    $result = $stmt->get_result();
+    if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        $user_id = $row['id'];
+    } else {
+        throw new Exception('User not found');
+    }
+    $stmt->close();
+    
+    // Verify the flashcard belongs to the user
+    $check_stmt = $conn->prepare("SELECT f.id FROM flashcards f
+                                JOIN flashcard_sets fs ON f.set_id = fs.id
+                                WHERE f.id = ? AND fs.user_id = ?");
+    $check_stmt->bind_param("ii", $id, $user_id);
+    $check_stmt->execute();
+    $check_result = $check_stmt->get_result();
+    
+    if ($check_result->num_rows === 0) {
+        $check_stmt->close();
+        $conn->close();
+        throw new Exception('Flashcard not found or not owned by user');
+    }
+    $check_stmt->close();
+    
     $sql = "DELETE FROM flashcards WHERE id = ?";
     
     $stmt = $conn->prepare($sql);

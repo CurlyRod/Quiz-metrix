@@ -8,7 +8,6 @@ document.addEventListener('DOMContentLoaded', function() {
       success: function (data) {
         if (data.userinfo) {  
            $("#user-current-id").val(data?.userinfo[1]) 
-           console.log(data?.userinfo[1]);          
         } else {
           console.error("Invalid user info:", data);
         }
@@ -60,23 +59,23 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Also validate on form submission
-        eventForm.addEventListener('submit', function(e) {
-            const selectedDate = new Date(eventDateInput.value);
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
+        // eventForm.addEventListener('submit', function(e) {
+        //     const selectedDate = new Date(eventDateInput.value);
+        //     const today = new Date();
+        //     today.setHours(0, 0, 0, 0);
             
-            if (selectedDate < today) {
-                e.preventDefault();
-                alert("Please select a current or future date for your event.");
-                eventDateInput.value = todayFormatted;
-                eventDateInput.focus();
-            }
-        });
+        //     if (selectedDate < today) {
+        //         e.preventDefault();
+        //         alert("Please select a current or future date for your event.");
+        //         eventDateInput.value = todayFormatted;
+        //         eventDateInput.focus();
+        //     }
+        // });
     
     // Rest of your modal opening handlers...
-    document.getElementById('setGoalBtn').addEventListener('click', function() {
-        openModal('goalModal');
-    });
+    // document.getElementById('setGoalBtn').addEventListener('click', function() {
+    //     openModal('goalModal');
+    // });
     
     document.getElementById('settingsBtn').addEventListener('click', function() {
         openModal('timerModal');

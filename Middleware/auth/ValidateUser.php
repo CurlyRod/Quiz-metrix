@@ -23,6 +23,7 @@ if (
     isset($_SESSION['USER_EMAIL'])
 ) {
     $email = $_SESSION['USER_EMAIL'];
+    $username = $_SESSION['USER_NAME']
     $checkUser = $userAuthenticate->GetUserLogin($email); 
     echo json_encode($checkUser); 
     exit;

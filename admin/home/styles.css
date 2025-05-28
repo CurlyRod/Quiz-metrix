@@ -1,0 +1,220 @@
+/* Custom styles for the admin dashboard */
+
+body {
+    background-color: #f5f7fb;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.card {
+    border-radius: 8px;
+    border: none;
+}
+
+#admin-content {
+	position: relative;
+	width: 100%;
+	transition: all .3s ease;
+	padding: 20px;
+	background: #f5f7fb;
+	height: 100vh;
+}
+
+
+ /* Calendar Customizations */
+  .calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    background-color: #f5f5f5;
+    border-bottom: 1px solid #e0e0e0;
+  }
+
+  .today-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    color: #333;
+    font-weight: 500;
+  }
+  
+  .month-navigation {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+  
+  .month-title {
+    font-size: 16px;
+    font-weight: 600;
+    min-width: 100px;
+    text-align: center;
+  }
+  
+  .nav-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    color: #555;
+  }
+  
+  
+  .calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+    padding: 10px;
+  }
+  
+  .calendar-day-header {
+    text-align: center;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 5px;
+    color: #777;
+  }
+  
+  .calendar-day {
+    text-align: center;
+    padding: 8px 0;
+    font-size: 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    position: relative;
+  }
+  
+  .calendar-day:hover {
+    background-color: #f0f0f0;
+  }
+  
+  .calendar-day.today {
+    background-color: #e0e7ff;
+    color: #4f46e5;
+    font-weight: 600;
+  }
+  
+  .calendar-day.selected {
+    background-color: #6366f1;
+    color: white;
+  }
+  
+  .calendar-day.has-event::after {
+    content: "";
+    position: absolute;
+    bottom: 2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background-color: #ef4444;
+  }
+  
+  .calendar-day.other-month {
+    color: #ccc;
+  }
+
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    background-color: #f5f5f5;
+    border-bottom: 1px solid #e0e0e0;
+  }
+  
+  .card-header h3 {
+    font-size: 16px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    margin: 0;
+    padding: 7px 9px;
+
+  }
+
+.search-container {
+    width: 300px;
+}
+
+.table th {
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    color: #495057;
+    border-top: none;
+}
+
+.table td {
+    vertical-align: middle;
+    color: #495057;
+    border-color: rgba(0, 0, 0, 0.05);
+}
+
+.table-calendar {
+    table-layout: fixed;
+}
+
+.table-calendar th, .table-calendar td {
+    text-align: center;
+    width: 14.28%;
+    height: 35px;
+    padding: 5px;
+}
+
+.table-calendar th {
+    font-weight: 500;
+    font-size: 0.85rem;
+}
+
+.calendar-day {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 30px;
+    width: 30px;
+    margin: 0 auto;
+    border-radius: 50%;
+    cursor: default;
+}
+
+.calendar-day.today {
+    background-color: #6366f1;
+    color: white;
+}
+
+.calendar-day.other-month {
+    color: #c0c0c0;
+}
+
+.totalUsers {
+    text-align: center;
+    font-size: 36px;
+    font-weight: 700;
+    margin: 20px 0;
+    font-variant-numeric: tabular-nums;
+  }
+
+.pagination-controls .btn {
+    padding: 0.25rem 0.5rem;
+}
+
+#totalUsersCount {
+    color: #212529;
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+    .search-container {
+        width: 100%;
+        margin-top: 1rem;
+    }
+    
+    .card-header {
+        flex-direction: column;
+        align-items: flex-start !important;
+    }
+}

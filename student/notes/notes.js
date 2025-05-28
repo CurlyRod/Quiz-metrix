@@ -18,7 +18,6 @@ document.addEventListener("DOMContentLoaded", () => {
       success: function (data) {
         if (data.userinfo) {  
            $("#user-current-id").val(data?.userinfo[1]) 
-           console.log(data?.userinfo[1]);          
         } else {
           console.error("Invalid user info:", data);
         }

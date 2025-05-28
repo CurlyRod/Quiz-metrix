@@ -9,7 +9,6 @@ document.addEventListener("DOMContentLoaded", () => {
       success: function (data) {
         if (data.userinfo) {  
            $("#user-current-id").val(data?.userinfo[1]) 
-           console.log(data?.userinfo[1]);          
         } else {
           console.error("Invalid user info:", data);
         }
@@ -380,13 +379,14 @@ document.addEventListener("DOMContentLoaded", () => {
             quizData.quiz_id = data.quiz_id;
 
             if (showSettingsModal) {
-                // Show the quiz settings modal
-                showSuccess("Quiz saved successfully!");
+              // Clear the form after successful creation
+                clearForm();
+                
                 // Reload recent quizzes
                 loadRecentQuizzes();
+                // Show the quiz settings modal
+                showSuccess("Quiz saved successfully!");
                 
-                // Clear the form after successful creation
-                clearForm();
             }
         } else {
             showError("Error saving quiz: " + data.message);

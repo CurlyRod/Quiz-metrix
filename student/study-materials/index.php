@@ -42,7 +42,6 @@ $recentFiles = getRecentFiles(5);
 
 <body style="padding: 20px background: #f5f7fb;">
     <?php
-    session_start();
     // Check if user is logged in
     if (!isset($_SESSION['user'])) {
         header("Location: ../../landing-page/");
@@ -56,6 +55,9 @@ $recentFiles = getRecentFiles(5);
     include '../../shared-student/sidebar.php';
     include '../../shared-student/navbar.php';
     ?>
+    <input type="hidden" name="user-current-id" id="user-current-id">
+
+
     <div class="container-fluid px-0">
         <!-- Main content -->
         <main class="container-fluid py-4" style="height: 100vh; background-color: #f5f7fb; padding: 20px 20px 20px 20px;">

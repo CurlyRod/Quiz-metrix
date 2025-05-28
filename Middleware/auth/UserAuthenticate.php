@@ -55,8 +55,9 @@ class UserAuthenticate{
 
         if ($result->num_rows === 0) 
         {           
-            $stmt = $this->conn->prepare("INSERT INTO user_credential (email) VALUES (?)");
-            $stmt->bind_param("s", $email);
+            $stmt = $this->conn->prepare("INSERT INTO user_credential (email, name) VALUES (?, ?)");
+            $stmt->bind_param("ss", $email, $username);
+            $username = $_SESSION['USER_NAME'];
             if ($stmt->execute()) {
                 return $this->GetUserLogin($email); 
             } else {
