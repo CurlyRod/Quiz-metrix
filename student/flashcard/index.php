@@ -16,7 +16,6 @@ $flashcardSets = getAllFlashcardSets();
 
 <body style="padding: 0;">
     <?php
-    session_start();
     // Check if user is logged in
     if (!isset($_SESSION['user'])) {
         header("Location: ../../landing-page/");
@@ -30,6 +29,7 @@ $flashcardSets = getAllFlashcardSets();
     include '../../shared-student/sidebar.php';
     include '../../shared-student/navbar.php';
     ?>
+    
     <div class="container" style="margin-top: 50px;">
         <header>
             <h4>My Flashcards</h4>

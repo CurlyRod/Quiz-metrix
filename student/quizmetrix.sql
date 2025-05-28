@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 07, 2025 at 02:16 PM
+-- Generation Time: May 28, 2025 at 08:58 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -32,16 +32,74 @@ CREATE TABLE `events` (
   `title` varchar(255) NOT NULL,
   `description` text DEFAULT NULL,
   `event_date` date NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `user_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+-- --------------------------------------------------------
+
 --
--- Dumping data for table `events`
+-- Table structure for table `files`
 --
 
-INSERT INTO `events` (`event_id`, `title`, `description`, `event_date`, `created_at`) VALUES
-(35, 'EXAM WEBSTECH & PROLANG', '', '2025-05-08', '2025-05-07 12:08:33'),
-(37, 'EXAM INFOSEC & MOBSTECH', '', '2025-05-09', '2025-05-07 12:09:19');
+CREATE TABLE `files` (
+  `id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `type` enum('pdf','docx','txt') NOT NULL,
+  `size` int(11) NOT NULL,
+  `folder_id` int(11) DEFAULT NULL,
+  `upload_date` timestamp NOT NULL DEFAULT current_timestamp(),
+  `file_path` varchar(255) NOT NULL,
+  `position` int(11) DEFAULT 0,
+  `is_deleted` tinyint(1) DEFAULT 0,
+  `deleted_at` timestamp NULL DEFAULT NULL,
+  `user_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `flashcards`
+--
+
+CREATE TABLE `flashcards` (
+  `id` int(11) NOT NULL,
+  `set_id` int(11) NOT NULL,
+  `question` text NOT NULL,
+  `answer` text NOT NULL,
+  `position` int(11) DEFAULT 0,
+  `user_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `flashcard_sets`
+--
+
+CREATE TABLE `flashcard_sets` (
+  `id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `user_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `folders`
+--
+
+CREATE TABLE `folders` (
+  `id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `parent_id` int(11) DEFAULT NULL,
+  `position` int(11) DEFAULT 0,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `user_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -57,13 +115,6 @@ CREATE TABLE `goals` (
   `is_achieved` tinyint(1) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `goals`
---
-
-INSERT INTO `goals` (`goal_id`, `title`, `target_date`, `created_at`, `is_achieved`) VALUES
-(5, 'MOCK DEFENSE', '2025-05-17', '2025-05-05 14:41:59', 0);
-
 -- --------------------------------------------------------
 
 --
@@ -76,7 +127,8 @@ CREATE TABLE `notes` (
   `content` text NOT NULL,
   `color` varchar(20) DEFAULT 'default',
   `created_at` datetime NOT NULL,
-  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `user_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -106,7 +158,8 @@ CREATE TABLE `quizzes` (
   `description` text DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `settings` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`settings`))
+  `settings` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`settings`)),
+  `user_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -133,15 +186,9 @@ CREATE TABLE `tasks` (
   `task_id` int(11) NOT NULL,
   `content` text NOT NULL,
   `is_completed` tinyint(1) DEFAULT 0,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `user_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `tasks`
---
-
-INSERT INTO `tasks` (`task_id`, `content`, `is_completed`, `created_at`) VALUES
-(62, 'GAWA REVIEWER FOR PROLANG AND WEBSTECH', 0, '2025-05-07 12:09:41');
 
 -- --------------------------------------------------------
 
@@ -189,6 +236,20 @@ CREATE TABLE `timer_settings` (
 INSERT INTO `timer_settings` (`setting_id`, `study_duration`, `break_duration`, `last_updated`) VALUES
 (1, 1500, 300, '2025-05-05 10:17:50');
 
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `user_credential`
+--
+
+CREATE TABLE `user_credential` (
+  `id` int(11) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `email` varchar(100) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `date_created` datetime NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 --
 -- Indexes for dumped tables
 --
@@ -198,6 +259,39 @@ INSERT INTO `timer_settings` (`setting_id`, `study_duration`, `break_duration`, 
 --
 ALTER TABLE `events`
   ADD PRIMARY KEY (`event_id`);
+
+--
+-- Indexes for table `files`
+--
+ALTER TABLE `files`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_files_folder_id` (`folder_id`),
+  ADD KEY `idx_files_upload_date` (`upload_date`),
+  ADD KEY `idx_files_is_deleted` (`is_deleted`),
+  ADD KEY `idx_files_position` (`position`),
+  ADD KEY `idx_files_name` (`name`);
+
+--
+-- Indexes for table `flashcards`
+--
+ALTER TABLE `flashcards`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `set_id` (`set_id`);
+
+--
+-- Indexes for table `flashcard_sets`
+--
+ALTER TABLE `flashcard_sets`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `folders`
+--
+ALTER TABLE `folders`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_folders_parent_id` (`parent_id`),
+  ADD KEY `idx_folders_position` (`position`),
+  ADD KEY `idx_folders_name` (`name`);
 
 --
 -- Indexes for table `goals`
@@ -222,7 +316,8 @@ ALTER TABLE `questions`
 -- Indexes for table `quizzes`
 --
 ALTER TABLE `quizzes`
-  ADD PRIMARY KEY (`quiz_id`);
+  ADD PRIMARY KEY (`quiz_id`),
+  ADD KEY `fk_user_id` (`user_id`);
 
 --
 -- Indexes for table `results`
@@ -250,6 +345,12 @@ ALTER TABLE `timer_settings`
   ADD PRIMARY KEY (`setting_id`);
 
 --
+-- Indexes for table `user_credential`
+--
+ALTER TABLE `user_credential`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- AUTO_INCREMENT for dumped tables
 --
 
@@ -257,7 +358,31 @@ ALTER TABLE `timer_settings`
 -- AUTO_INCREMENT for table `events`
 --
 ALTER TABLE `events`
-  MODIFY `event_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
+  MODIFY `event_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=68;
+
+--
+-- AUTO_INCREMENT for table `files`
+--
+ALTER TABLE `files`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=53;
+
+--
+-- AUTO_INCREMENT for table `flashcards`
+--
+ALTER TABLE `flashcards`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- AUTO_INCREMENT for table `flashcard_sets`
+--
+ALTER TABLE `flashcard_sets`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `folders`
+--
+ALTER TABLE `folders`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `goals`
@@ -269,31 +394,31 @@ ALTER TABLE `goals`
 -- AUTO_INCREMENT for table `notes`
 --
 ALTER TABLE `notes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `questions`
 --
 ALTER TABLE `questions`
-  MODIFY `question_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `question_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=415;
 
 --
 -- AUTO_INCREMENT for table `quizzes`
 --
 ALTER TABLE `quizzes`
-  MODIFY `quiz_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `quiz_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
 
 --
 -- AUTO_INCREMENT for table `results`
 --
 ALTER TABLE `results`
-  MODIFY `result_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `result_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `tasks`
 --
 ALTER TABLE `tasks`
-  MODIFY `task_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=63;
+  MODIFY `task_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=79;
 
 --
 -- AUTO_INCREMENT for table `timer_sessions`
@@ -308,14 +433,44 @@ ALTER TABLE `timer_settings`
   MODIFY `setting_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
+-- AUTO_INCREMENT for table `user_credential`
+--
+ALTER TABLE `user_credential`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
 -- Constraints for dumped tables
 --
+
+--
+-- Constraints for table `files`
+--
+ALTER TABLE `files`
+  ADD CONSTRAINT `files_ibfk_1` FOREIGN KEY (`folder_id`) REFERENCES `folders` (`id`) ON DELETE SET NULL;
+
+--
+-- Constraints for table `flashcards`
+--
+ALTER TABLE `flashcards`
+  ADD CONSTRAINT `flashcards_ibfk_1` FOREIGN KEY (`set_id`) REFERENCES `flashcard_sets` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `folders`
+--
+ALTER TABLE `folders`
+  ADD CONSTRAINT `folders_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `folders` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `questions`
 --
 ALTER TABLE `questions`
   ADD CONSTRAINT `questions_ibfk_1` FOREIGN KEY (`quiz_id`) REFERENCES `quizzes` (`quiz_id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `quizzes`
+--
+ALTER TABLE `quizzes`
+  ADD CONSTRAINT `fk_user_id` FOREIGN KEY (`user_id`) REFERENCES `user_credential` (`id`);
 
 --
 -- Constraints for table `results`

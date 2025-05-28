@@ -128,14 +128,14 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
   
-    // Make sure search form submits properly
-    if (searchForm) {
-      searchForm.addEventListener("submit", (e) => {
-        // Form will submit normally, no need to prevent default
-        // This is just to ensure the form is working
-        console.log("Search form submitted")
-      })
-    }
+    // // Make sure search form submits properly
+    // if (searchForm) {
+    //   searchForm.addEventListener("submit", (e) => {
+    //     // Form will submit normally, no need to prevent default
+    //     // This is just to ensure the form is working
+    //     console.log("Search form submitted")
+    //   })
+    // }
   
     // File upload
     if (uploadButton) {
@@ -182,7 +182,9 @@ document.addEventListener("DOMContentLoaded", () => {
               if (response.success) {
                 showToast("File uploaded successfully", "success")
                 // Reload the page to show the new file
-                window.location.reload()
+               setTimeout(() => {
+                    window.location.reload();
+                }, 2000);
               } else {
                 showToast(response.message || "Error uploading file", "danger")
               }
@@ -251,7 +253,9 @@ document.addEventListener("DOMContentLoaded", () => {
           .then((data) => {
             if (data.success) {
               showToast("Folder created successfully", "success")
-              window.location.reload()
+              setTimeout(() => {
+                    window.location.reload();
+                }, 2000);
             } else {
               showToast(data.message || "Error creating folder", "danger")
             }
@@ -321,7 +325,9 @@ document.addEventListener("DOMContentLoaded", () => {
           .then((data) => {
             if (data.success) {
               showToast("Folder renamed successfully", "success")
-              window.location.reload()
+              setTimeout(() => {
+                    window.location.reload();
+                }, 2000);
             } else {
               showToast(data.message || "Error renaming folder", "danger")
             }
@@ -397,9 +403,15 @@ document.addEventListener("DOMContentLoaded", () => {
         if (action === "delete-folder") {
           url = "api/delete-folder.php"
           successMessage = "Folder deleted successfully"
+          setTimeout(() => {
+                    window.location.reload();
+                }, 3000);
         } else if (action === "delete-file") {
           url = "api/delete-file.php"
           successMessage = "File deleted successfully"
+          setTimeout(() => {
+                    window.location.reload();
+                }, 3000);
         } else {
           if (confirmationModal) {
             confirmationModal.hide()

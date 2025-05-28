@@ -43,6 +43,7 @@
   $userAthenticate = new UserAuthenticate($conn);
   $userData = $_SESSION['user'];
   $email = $userData['mail']; 
+  $_SESSION['USER_NAME'] = $userData['displayName'];
 
   $getUser = $userAthenticate->GetUserLogin($email); 
 

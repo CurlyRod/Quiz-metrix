@@ -1,30 +1,24 @@
 <!-- NAVBAR -->
-<section id="content">
-		<!-- NAVBAR -->
-		<nav>
-			<i class='bx bx-menu toggle-sidebar' ></i>
-			<form action="#">
-				<div class="form-group">
-					<input type="text" placeholder="Search...">
-					<i class='bx bx-search icon' ></i>
-				</div>
-			</form>
-			<a href="#" class="nav-link">
-				<i class='bx bxs-bell icon' ></i>
-				<span class="badge">5</span>
-			</a>
-			<a href="#" class="nav-link">
-				<i class='bx bxs-message-square-dots icon' ></i>
-				<span class="badge">8</span>
-			</a>
-			<h6>Admin Ivan Gonzales</h6>
-			<div class="profile">
-				<img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?ixid=MnwxMjA3fDB8MHxzZWFyY2h8NHx8cGVvcGxlfGVufDB8fDB8fA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="">
-				<ul class="profile-link">
-					<li><a class="nav-link"href="#"><i class='bx bxs-user-circle icon ' ></i> Profile</a></li>
-					<li><a class="nav-link"href="#"><i class='bx bxs-cog' ></i> Settings</a></li>
-					<li><a class="nav-link"href="../../landing-page/landing-page.php"><i class='bx bxs-log-out-circle' ></i> Logout</a></li>
-				</ul>
-			</div>
-		</nav>
-		<!-- NAVBAR -->
+<section id="admin-content">
+	<!-- NAVBAR -->
+	<nav>
+	<a href="../home" class="brand text-decoration-none"><img class="icon" src="../../assets/img/logo/apple-touch-icon.png" alt="" style="height:40px"></a><h4 style="margin: 0px; font-weight: 700; color: #6366f1">Quizmetrix</h4>
+		<form action="#">
+		</form> 
+		<h6>ADMIN-1</h6>
+		<div class="profile">
+			<img src="../../assets/img/avatars/avatar_2.png" alt="">
+			<ul class="profile-link">
+				<li style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
+					<img src="../../assets/img/avatars/avatar_2.png" alt="" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+					<div>
+						<div class="nav-link" style="font-weight: bold;">ADMIN-1</div>
+						<div class="nav-link" style="font-size: 11px; color: #666;"></div>
+					</div>
+				</li>
+				<li><hr style="margin: 10px 0; border-color: black;"></li>
+				<li><a class="nav-link" href="../../shared-admin/logout.php"><i class='bx bx-log-out-circle icon'></i>Logout</a></li>
+			</ul>
+		</div>
+	</nav>
+	<!-- NAVBAR -->

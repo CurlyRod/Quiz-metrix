@@ -55,7 +55,6 @@ session_start();
                             <i class="bx bx-search"></i></span>
                     <input type="text" class="form-control" id="searchQuiz" placeholder="Search quizzes..." maxlength="30">
                     <button class="btn btn-outline-secondary" type="button" id="clearSearch">Clear</button>
-                    
                 </div>
                 </div>
             </div>
