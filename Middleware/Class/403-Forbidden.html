@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>403 Forbidden - Access Denied</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: #f8f9fa;
+            color: #6c757d;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        .error-title {
+            font-size: 18px;
+            font-weight: 500;
+            color: #6c757d;
+            margin-bottom: 30px;
+        }
+
+        .error-code {
+            font-size: 120px;
+            font-weight: bold;
+            color: #6366f1;
+            line-height: 1;
+            margin-bottom: 30px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .digit {
+            display: inline-block;
+        }
+
+        .prohibition-symbol {
+            width: 120px;
+            height: 120px;
+            border: 8px solid #6366f1;
+            border-radius: 50%;
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .prohibition-symbol::after {
+            content: '';
+            position: absolute;
+            width: 100px;
+            height: 8px;
+            background-color: #6366f1;
+            transform: rotate(45deg);
+        }
+
+        .error-message {
+            font-size: 16px;
+            color: #6c757d;
+            line-height: 1.5;
+            margin-bottom: 40px;
+            max-width: 350px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .go-back-btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .go-back-btn:hover {
+            background-color: #0056b3;
+        }
+
+        .go-back-btn:active {
+            transform: translateY(1px);
+        }
+
+        @media (max-width: 480px) {
+            .error-code {
+                font-size: 80px;
+            }
+            
+            .prohibition-symbol {
+                width: 80px;
+                height: 80px;
+                border-width: 6px;
+            }
+            
+            .prohibition-symbol::after {
+                width: 66px;
+                height: 6px;
+            }
+            
+            .error-title {
+                font-size: 16px;
+            }
+            
+            .error-message {
+                font-size: 14px;
+            }
+        }
+    </style>
+  <link rel="icon" type="image/x-icon" href="../../assets/img/logo/apple-touch-icon.png">
+
+</head>
+<body>
+    <div class="container">
+        <h1 class="error-title">Error: 403 Forbidden</h1>
+        
+        <div class="error-code">
+            <span class="digit">4</span>
+            <div class="prohibition-symbol"></div>
+            <span class="digit">3</span>
+        </div>
+        
+        <p class="error-message">
+            You don't have access to this page. Please contact support if this wasn't supposed to happen.
+        </p>
+        
+<button class="go-back-btn" onclick="window.location.href='../../landing-page/index.php'" style="background-color: #6366f1;">Go back</button>
+    </div>
+
+    
+</body>
+</html>
