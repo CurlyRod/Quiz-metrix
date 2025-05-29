@@ -4,6 +4,10 @@ require_once('../includes/db_config.php');
 // Start session and check authentication
 session_start();
 
+if (!isset($_SESSION['USER_EMAIL'])) {
+    echo json_encode(['success' => false, 'message' => 'User not authenticated']);
+    exit;
+}
 
 // Get the JSON data from the request
 $json_data = file_get_contents('php://input');
@@ -14,13 +18,34 @@ if (!$data) {
     exit;
 }
 
-$user_id = isset($data['user_current_id']) ? intval($data['user_current_id']) : 0;
-
-
-// Start transaction
-$conn->begin_transaction();
+// Get user ID from session email
+$email = $_SESSION['USER_EMAIL'];
+$user_id = null;
 
 try {
+    // Prepare and execute query to get user ID
+    $stmt = $conn->prepare("SELECT id FROM user_credential WHERE email = ?");
+    if (!$stmt) {
+        throw new Exception('Database prepare error: ' . $conn->error);
+    }
+
+    $stmt->bind_param("s", $email);
+    if (!$stmt->execute()) {
+        throw new Exception('Execution error: ' . $stmt->error);
+    }
+
+    $result = $stmt->get_result();
+    if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        $user_id = $row['id'];
+    } else {
+        throw new Exception('User not found');
+    }
+    $stmt->close();
+
+    // Start transaction
+    $conn->begin_transaction();
+
     // Prepare quiz data
     $title = $conn->real_escape_string($data['title']);
     $description = $conn->real_escape_string($data['description']);
@@ -36,9 +61,9 @@ try {
         $check_stmt->execute();
         $check_stmt->store_result();
         
-        // if ($check_stmt->num_rows === 0) {
-        //     throw new Exception("Quiz not found or you don't have permission to edit it");
-        // }
+        if ($check_stmt->num_rows === 0) {
+            throw new Exception("Quiz not found or you don't have permission to edit it");
+        }
         $check_stmt->close();
         
         // Update existing quiz
@@ -80,9 +105,13 @@ try {
     echo json_encode(['success' => true, 'quiz_id' => $quiz_id]);
 } catch (Exception $e) {
     // Rollback transaction on error
-    $conn->rollback();
+    if (isset($conn) && method_exists($conn, 'rollback')) {
+        $conn->rollback();
+    }
     echo json_encode(['success' => false, 'message' => $e->getMessage()]);
 }
 
-$conn->close();
+if (isset($conn)) {
+    $conn->close();
+}
 ?>
