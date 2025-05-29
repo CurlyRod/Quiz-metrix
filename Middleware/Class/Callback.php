@@ -69,7 +69,8 @@ if (isset($userData['error'])) {
 //Optional: Restrict access to a specific organization or school domain.
 $allowedDomain = 'alabang.sti.edu.ph';
 if (strpos($userData['userPrincipalName'], '@' . $allowedDomain) === false) {
-    die('Access denied: not an organization account.');
+    header('Location: 403-Forbidden.html');
+    exit; // Make sure to exit after the redirect
 }
 
 // Save user information in the session.

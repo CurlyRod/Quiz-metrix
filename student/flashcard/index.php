@@ -30,7 +30,7 @@ $flashcardSets = getAllFlashcardSets();
     include '../../shared-student/navbar.php';
     ?>
     
-    <div class="container" style="margin-top: 50px;">
+    <div class="container" style="margin-top: 50px; padding: 20px;">
         <header>
             <h4>My Flashcards</h4>
             <a href="create.php" class="btn " style="background-color: #6366f1; color: white;">+ Create New</a>
@@ -63,7 +63,7 @@ $flashcardSets = getAllFlashcardSets();
             <?php else: ?>
                 <div class="empty-state">
                     <p>You don't have any flashcard sets yet.</p>
-                    <a href="create.php" style="text-decoration: none;" class="btn-primary">Create your first set</a>
+                    <a href="create.php" style="background-color: #6366f1; color: white; text-decoration: none;" class="btn-primary">Create your first set</a>
                 </div>
             <?php endif; ?>
         </div>

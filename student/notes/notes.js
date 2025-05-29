@@ -9,24 +9,6 @@ function autoResizeTextarea(textarea) {
 
 document.addEventListener("DOMContentLoaded", () => { 
 
- // for getting id for user 
-    $.ajax({
-      url: "../../middleware/auth/ValidateUser.php",
-      type: "POST",
-      data: { action: "check-users" },
-      dataType: "json",
-      success: function (data) {
-        if (data.userinfo) {  
-           $("#user-current-id").val(data?.userinfo[1]) 
-        } else {
-          console.error("Invalid user info:", data);
-        }
-      },
-      error: function (xhr, status, error) {
-        console.error("User check error:", error);
-      }
-    });
-
 
   // DOM Elements
   const noteCollapsed = document.getElementById("note-collapsed")

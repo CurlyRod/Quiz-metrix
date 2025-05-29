@@ -254,33 +254,60 @@ function getEvent($conn) {
 }
 
 function addEvent($conn) {
-    // Get JSON data
-    $data = json_decode(file_get_contents('php://input'), true);
-    
-    // Validate required fields
-    if (!isset($data['title']) || !isset($data['event_date']) || !isset($data['user_id'])) {
-        echo json_encode(['success' => false, 'message' => 'Missing required fields']);
-        return;
-    }
-
-    // Sanitize and validate inputs
-    $user_id = intval($data['user_id']);
-    if ($user_id <= 0) {
-        echo json_encode(['success' => false, 'message' => 'Invalid user ID']);
-        return;
-    }
-
-    $title = trim($data['title']);
-    $description = isset($data['description']) ? trim($data['description']) : '';
-    $eventDate = $data['event_date'];
-
-    // Validate date format (optional)
-    if (!DateTime::createFromFormat('Y-m-d', $eventDate)) {
-        echo json_encode(['success' => false, 'message' => 'Invalid date format']);
-        return;
+    // Start session if not already started
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
     }
 
     try {
+        // Get user ID from session
+        if (!isset($_SESSION['USER_EMAIL'])) {
+            throw new Exception('User not authenticated');
+        }
+        
+        $email = $_SESSION['USER_EMAIL'];
+        $user_id = null;
+
+        // Prepare and execute query to get user ID
+        $stmt = $conn->prepare("SELECT id FROM user_credential WHERE email = ?");
+        if (!$stmt) {
+            throw new Exception('Database prepare error: ' . $conn->error);
+        }
+
+        $stmt->bind_param("s", $email);
+        if (!$stmt->execute()) {
+            throw new Exception('Execution error: ' . $stmt->error);
+        }
+
+        $result = $stmt->get_result();
+        if ($result->num_rows > 0) {
+            $row = $result->fetch_assoc();
+            $user_id = $row['id'];
+        } else {
+            throw new Exception('User not found');
+        }
+        $stmt->close();
+
+        // Get JSON data
+        $data = json_decode(file_get_contents('php://input'), true);
+        
+        // Validate required fields (no longer need to check for user_id)
+        if (!isset($data['title']) || !isset($data['event_date'])) {
+            echo json_encode(['success' => false, 'message' => 'Missing required fields']);
+            return;
+        }
+
+        // Sanitize inputs
+        $title = trim($data['title']);
+        $description = isset($data['description']) ? trim($data['description']) : '';
+        $eventDate = $data['event_date'];
+
+        // Validate date format (optional)
+        if (!DateTime::createFromFormat('Y-m-d', $eventDate)) {
+            echo json_encode(['success' => false, 'message' => 'Invalid date format']);
+            return;
+        }
+
         $stmt = $conn->prepare("INSERT INTO events (user_id, title, description, event_date) VALUES (?, ?, ?, ?)");
         $stmt->bind_param("isss", $user_id, $title, $description, $eventDate);
 

@@ -79,29 +79,75 @@ function getUserID($email) {
 function createNote() {
     global $conn;
     
-    // Get data from POST request
-    $title = isset($_POST['title']) ? $_POST['title'] : '';
-    $content = isset($_POST['content']) ? $_POST['content'] : '';
-    $color = isset($_POST['color']) ? $_POST['color'] : 'default'; // Add color parameter 
-    $user_id =  isset($_POST['user-current-id']) ? $_POST['user-current-id'] : '';
-    
-    // Validate content
-    if (empty($content)) {
-        echo json_encode(['success' => false, 'message' => 'Note content is required']);
-        return;
+    // Start session if not already started
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
     }
 
-    // Prepare and execute query
-    $stmt = $conn->prepare("INSERT INTO notes (user_id, title, content, color, created_at) VALUES (?, ?, ?, ?, NOW())");
-    $stmt->bind_param("isss", $user_id, $title, $content, $color);
-    
-    if ($stmt->execute()) {
-        echo json_encode(['success' => true, 'message' => 'Note created successfully']);
-    } else {
-        echo json_encode(['success' => false, 'message' => 'Error creating note: ' . $conn->error]);
+    try {
+        // Get user ID from session
+        if (!isset($_SESSION['USER_EMAIL'])) {
+            throw new Exception('User not authenticated');
+        }
+        
+        $email = $_SESSION['USER_EMAIL'];
+        $user_id = null;
+
+        // Prepare and execute query to get user ID
+        $stmt = $conn->prepare("SELECT id FROM user_credential WHERE email = ?");
+        if (!$stmt) {
+            throw new Exception('Database prepare error: ' . $conn->error);
+        }
+
+        $stmt->bind_param("s", $email);
+        if (!$stmt->execute()) {
+            throw new Exception('Execution error: ' . $stmt->error);
+        }
+
+        $result = $stmt->get_result();
+        if ($result->num_rows > 0) {
+            $row = $result->fetch_assoc();
+            $user_id = $row['id'];
+        } else {
+            throw new Exception('User not found');
+        }
+        $stmt->close();
+
+        // Get data from POST request (no longer need user-current-id)
+        $title = isset($_POST['title']) ? trim($_POST['title']) : '';
+        $content = isset($_POST['content']) ? trim($_POST['content']) : '';
+        $color = isset($_POST['color']) ? trim($_POST['color']) : 'default';
+        
+        // Validate content
+        if (empty($content)) {
+            echo json_encode(['success' => false, 'message' => 'Note content is required']);
+            return;
+        }
+
+        // Prepare and execute query
+        $stmt = $conn->prepare("INSERT INTO notes (user_id, title, content, color, created_at) VALUES (?, ?, ?, ?, NOW())");
+        $stmt->bind_param("isss", $user_id, $title, $content, $color);
+        
+        if ($stmt->execute()) {
+            echo json_encode([
+                'success' => true, 
+                'message' => 'Note created successfully',
+                'note_id' => $conn->insert_id  // Return the new note ID
+            ]);
+        } else {
+            throw new Exception('Database error: ' . $conn->error);
+        }
+        
+    } catch (Exception $e) {
+        echo json_encode([
+            'success' => false, 
+            'message' => 'Error creating note: ' . $e->getMessage()
+        ]);
+    } finally {
+        if (isset($stmt) && $stmt instanceof mysqli_stmt) {
+            $stmt->close();
+        }
     }
-    
-    $stmt->close();
 }
 
 // Read all notes

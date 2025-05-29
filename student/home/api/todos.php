@@ -110,35 +110,52 @@ function getTasks($conn) {
 
 // Function to add a new task
 function addTask($conn) {
-    // Get JSON data
-    $data = json_decode(file_get_contents('php://input'), true);
-
-
-    
-    // Validate required fields 
-    if (!isset($data['content'])) {
-        echo json_encode(['success' => false, 'message' => 'Missing required fields']);
-        return;
+    // Start session if not already started
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
     }
 
-    
-
-    // Validate required fields 
-    if (!isset($data['user_id'])) {
-        echo json_encode(['success' => false, 'message' => 'Missing user_id']);
-        return;
-    }
-
-    // Sanitize and validate inputs
-    $user_id = intval($data['user_id']);
-    if ($user_id <= 0) {
-        echo json_encode(['success' => false, 'message' => 'Invalid user ID']);
-        return;
-    }
-
-    $content = trim($data['content']);
-    
     try {
+        // Get user ID from session
+        if (!isset($_SESSION['USER_EMAIL'])) {
+            throw new Exception('User not authenticated');
+        }
+        
+        $email = $_SESSION['USER_EMAIL'];
+        $user_id = null;
+
+        // Prepare and execute query to get user ID
+        $stmt = $conn->prepare("SELECT id FROM user_credential WHERE email = ?");
+        if (!$stmt) {
+            throw new Exception('Database prepare error: ' . $conn->error);
+        }
+
+        $stmt->bind_param("s", $email);
+        if (!$stmt->execute()) {
+            throw new Exception('Execution error: ' . $stmt->error);
+        }
+
+        $result = $stmt->get_result();
+        if ($result->num_rows > 0) {
+            $row = $result->fetch_assoc();
+            $user_id = $row['id'];
+        } else {
+            throw new Exception('User not found');
+        }
+        $stmt->close();
+
+        // Get JSON data
+        $data = json_decode(file_get_contents('php://input'), true);
+        
+        // Validate required field (only content needed now)
+        if (!isset($data['content'])) {
+            echo json_encode(['success' => false, 'message' => 'Missing task content']);
+            return;
+        }
+
+        // Sanitize input
+        $content = trim($data['content']);
+
         $stmt = $conn->prepare("INSERT INTO tasks (user_id, content) VALUES (?, ?)");
         $stmt->bind_param("is", $user_id, $content);
 
