@@ -90,7 +90,7 @@ a {
 }
 
 .btn-secondary {
-    background-color: var(--secondary-color);
+    background-color:  #f8f9fa;
     color: var(--text-color);
     border: 1px solid var(--border-color);
 }
@@ -358,7 +358,7 @@ textarea {
 
 .card-flip-hint {
     position: absolute;
-    background-color: #3a56d4;
+    background-color: #6366f1;
     padding: 15px;
     border-bottom-right-radius: 8px;
     border-bottom-left-radius: 8px;
@@ -369,7 +369,7 @@ textarea {
 }
 
 .flashcard-back .card-flip-hint {
-    color: rgba(255, 255, 255, 0.7);
+    color: white;
 }
 
 .flashcard-navigation {

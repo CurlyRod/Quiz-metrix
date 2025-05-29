@@ -1,4 +1,3 @@
-<?php include 'modal.php'; ?>
 
 
 <!-- SIDEBAR -->

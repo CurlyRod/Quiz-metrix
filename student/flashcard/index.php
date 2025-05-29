@@ -33,7 +33,7 @@ $flashcardSets = getAllFlashcardSets();
     <div class="container" style="margin-top: 50px;">
         <header>
             <h4>My Flashcards</h4>
-            <a href="create.php" style="text-decoration: none;" class="btn-primary">+ Create New</a>
+            <a href="create.php" class="btn " style="background-color: #6366f1; color: white;">+ Create New</a>
         </header>
 
         <div class="flashcard-grid">
@@ -41,7 +41,7 @@ $flashcardSets = getAllFlashcardSets();
                 <?php foreach ($flashcardSets as $set): ?>
                     <div class="flashcard-set">
                         <div class="set-header">
-                            <h2><?php echo htmlspecialchars($set['title']); ?></h2>
+                            <h2 style="color: #6366f1"><?php echo htmlspecialchars($set['title']); ?></h2>
                             <div class="dropdown">
                                 <button class="dropdown-btn">⋮</button>
                                 <div class="dropdown-content">

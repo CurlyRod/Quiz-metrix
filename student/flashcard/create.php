@@ -6,13 +6,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Flashcard Set</title>
+    <title >Create Flashcard Set</title>
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body style="padding: 0;">
     <div class="container" style="margin-top: 50px;">
         <header>
-            <h1>Create Flashcard Set</h1>
+            <h1 style="color: #6366f1">Create Flashcard Set</h1>
             <a href="index.php" class="btn-secondary">Back to All Sets</a>
         </header>
         
@@ -56,7 +56,7 @@
             <button type="button" id="add-card" class="btn-secondary">+ Add Card</button>
             
             <div class="form-actions">
-                <button type="submit" class="btn-primary">Create Flashcard Set</button>
+                <button type="submit" class="btn-primary" style="background-color: #6366f1">Create Flashcard Set</button>
             </div>
         </form>
     </div>
