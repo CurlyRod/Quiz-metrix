@@ -1,21 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
 
-    $.ajax({
-      url: "../../middleware/auth/ValidateUser.php",
-      type: "POST",
-      data: { action: "check-users" },
-      dataType: "json",
-      success: function (data) {
-        if (data.userinfo) {  
-           $("#user-current-id").val(data?.userinfo[1]) 
-        } else {
-          console.error("Invalid user info:", data);
-        }
-      },
-      error: function (xhr, status, error) {
-        console.error("User check error:", error);
-      }
-    });
+    
     // Set current date in the header
     const today = new Date();
     const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
