@@ -54,9 +54,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Check if elements exist before adding event listeners
   if (noteCollapsed) {
     noteCollapsed.addEventListener("click", expandNoteInput)
-    console.log("Added click listener to collapsed note")
   } else {
-    console.error("Could not find note-collapsed element")
   }
 
   if (btnClose) {
@@ -72,7 +70,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Functions
   function expandNoteInput() {
-    console.log("Expanding note input")
     noteCollapsed.classList.add("d-none")
     noteExpanded.classList.remove("d-none")
     noteTitle.focus()

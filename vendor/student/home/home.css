@@ -124,12 +124,14 @@ li {
 	transform: rotateZ(90deg);
 }
 #sidebar .side-menu > li > a.active{
-	background: none;
+	background: var(--light-primary);
+	
+	
 }
 #sidebar .side-menu > li > a.active:hover {
-	background: #324053;
-	color: rgb(250, 241, 241);
-}
+	background: var(--light-primary);
+	color: var(--primary);}
+
 #sidebar .divider {
 	margin-top: 24px;
 	font-size: 12px;
@@ -195,6 +197,10 @@ li {
 }
 #sidebar .ads .wrapper p span {
 	font-weight: 700;
+}
+
+#side-menu .nav-link .active{
+	background-color: blue;
 }
 /* SIDEBAR */
 

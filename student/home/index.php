@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Quizmetrix Dashboard</title>
+  <title>Home</title>
 
 
 
@@ -56,7 +56,8 @@
   } else {
       $_SESSION['USER_EMAIL'] = $getUser['userinfo'][0];
   }
-  
+  $currentPage = 'home'; 
+
   include '../../shared-student/sidebar.php';
   include '../../shared-student/navbar.php';
   ?>

@@ -20,6 +20,8 @@ session_start();
     <input type="hidden" name="user-current-id" id="user-current-id">
 
     <?php
+            $currentPage = 'quiz'; 
+
     include '../../shared-student/sidebar.php';
     include '../../shared-student/navbar.php';
     ?>

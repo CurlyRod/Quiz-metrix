@@ -581,9 +581,9 @@ document.addEventListener("DOMContentLoaded", () => {
       .then((response) => response.json())
       .then((data) => {
         if (data.success) {
-          console.log("Result saved successfully with ID:", data.result_id)
+          // console.log("Result saved successfully with ID:", data.result_id)
         } else {
-          console.error("Error saving result:", data.message)
+          // console.error("Error saving result:", data.message)
         }
       })
       .catch((error) => {
