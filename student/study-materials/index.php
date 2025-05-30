@@ -52,6 +52,8 @@ $recentFiles = getRecentFiles(5);
     $_SESSION['USER_NAME'] = $userData['displayName'];
     ?>
     <?php
+    $currentPage = 'study-materials'; 
+
     include '../../shared-student/sidebar.php';
     include '../../shared-student/navbar.php';
     ?>

@@ -9,7 +9,7 @@ $flashcardSets = getAllFlashcardSets();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Flashcards</title>
+    <title>Flashcard</title>
     <link rel="stylesheet" href="assets/css/style.css">
     <?php include '../../shared-student/header.php'; ?>
 </head>
@@ -26,6 +26,8 @@ $flashcardSets = getAllFlashcardSets();
     $_SESSION['USER_NAME'] = $userData['displayName'];
     ?>
     <?php
+      $currentPage = 'flashcard'; 
+
     include '../../shared-student/sidebar.php';
     include '../../shared-student/navbar.php';
     ?>

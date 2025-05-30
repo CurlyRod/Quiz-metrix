@@ -23,6 +23,8 @@
         $_SESSION['USER_NAME'] = $userData['displayName'];
         ?>
 <?php
+$currentPage = 'quiz'; 
+
 include '../../shared-student/sidebar.php';
 include '../../shared-student/navbar.php';
 ?>
@@ -45,7 +47,7 @@ include '../../shared-student/navbar.php';
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h3 class="mb-0">Create Quiz</h3>
                 <div>
-                    <button class="btn btn-outline-secondary me-2" id="clearFormBtn">Clear Form</button>
+                    <button class="btn disabled" id="clearFormBtn" style="background-color: white; border-color: white;"></button>
                     <button class="btn me-2" id="createQuizBtn" style="background-color: #6366f1; color: white;">Edit Quiz</button>
                     <button class="btn btn-success" id="startQuizBtn">Start Quiz</button>
                 </div>
