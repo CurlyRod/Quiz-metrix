@@ -63,28 +63,10 @@ $recentFiles = getRecentFiles(5);
     <div class="container-fluid px-0">
         <!-- Main content -->
         <main class="container-fluid py-4" style="height: 100vh; background-color: #f5f7fb; padding: 20px 20px 20px 20px;">
-            <!-- Search bar -->
-            <div class="search-container mb-4">
-                <form action="index.php" method="GET" id="searchForm" class="search-form">
-                    <div class="input-group">
-                        <span class="input-group-text bg-transparent border-end-0">
-                            <i class="bx bx-search"></i>
-                        </span>
-                        <input type="text" class="form-control border-start-0" name="search" placeholder="Search in File Manager" value="<?php echo htmlspecialchars($searchQuery); ?>">
-                        <?php if (!empty($searchQuery)): ?>
-                            <a href="index.php<?php echo $currentFolderId ? '?folder=' . $currentFolderId : ''; ?>" class="input-group-text bg-transparent border-start-0 text-decoration-none">
-                                <i class="bx bx-x"></i>
-                            </a>
-                        <?php endif; ?>
-                        <?php if ($currentFolderId): ?>
-                            <input type="hidden" name="folder" value="<?php echo $currentFolderId; ?>">
-                        <?php endif; ?>
-                    </div>
-                </form>
-            </div>
-
-            <!-- Action buttons and filters -->
+           <!-- Action buttons + Search bar + Filters -->
             <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+                
+                <!-- Action buttons -->
                 <div class="action-buttons mb-3 mb-md-0">
                     <button type="button" class="btn primary-btn" data-bs-toggle="modal" data-bs-target="#uploadModal" style="background-color: #6366f1; color: white;">
                         <i class="bx bx-upload me-1"></i> Upload
@@ -93,9 +75,32 @@ $recentFiles = getRecentFiles(5);
                         <i class="bx bx-folder-plus me-1"></i> New Folder
                     </button>
                 </div>
+
+                <!-- Search bar -->
+                <div class="search-container mb-3 mb-md-0 flex-grow-1 mx-3">
+                    <form action="index.php" method="GET" id="searchForm" class="search-form">
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-end-0">
+                                <i class="bx bx-search"></i>
+                            </span>
+                            <input type="text" class="form-control border-start-0" name="search" placeholder="Search in File Manager" value="<?php echo htmlspecialchars($searchQuery); ?>">
+                            <?php if (!empty($searchQuery)): ?>
+                                <a href="index.php<?php echo $currentFolderId ? '?folder=' . $currentFolderId : ''; ?>" class="input-group-text bg-transparent border-start-0 text-decoration-none">
+                                    <i class="bx bx-x"></i>
+                                </a>
+                            <?php endif; ?>
+                            <?php if ($currentFolderId): ?>
+                                <input type="hidden" name="folder" value="<?php echo $currentFolderId; ?>">
+                            <?php endif; ?>
+                        </div>
+                    </form>
+                </div>
+
+
+                <!-- Filters -->
                 <div class="filters d-flex flex-wrap">
                     <div class="view-toggle btn-group">
-                        <button type="button" class="btn btn-outline-primary view-toggle active" data-view="grid" >
+                        <button type="button" class="btn btn-outline-primary view-toggle active" data-view="grid">
                             <i class="bx bxs-grid-alt"></i>
                         </button>
                         <button type="button" class="btn btn-outline-primary view-toggle" data-view="list">
@@ -128,56 +133,8 @@ $recentFiles = getRecentFiles(5);
                 </nav>
             <?php endif; ?>
 
-            <?php if (empty($searchQuery) && $currentFolderId === null): ?>
-                <!-- Recent files section -->
-                <div class="section mb-4">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h2 class="section-title">Recent files</h2>
-                    </div>
-                    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 row-cols-xl-5 g-3">
-                        <?php foreach ($recentFiles as $file): ?>
-                            <div class="col">
-                                <div class="card file-card h-100" data-id="<?php echo $file['id']; ?>" data-type="file">
-                                    <div class="card-preview">
-                                        <?php if ($file['type'] === 'pdf'): ?>
-                                            <div class="preview-placeholder pdf">
-                                                <i class="bx bxs-file-pdf"></i>
-                                            </div>
-                                        <?php elseif ($file['type'] === 'docx'): ?>
-                                            <div class="preview-placeholder docx">
-                                                <i class="bx bxs-file-doc"></i>
-                                            </div>
-                                        <?php elseif ($file['type'] === 'txt'): ?>
-                                            <div class="preview-placeholder txt">
-                                                <i class="bx bxs-file-txt"></i>
-                                            </div>
-                                        <?php endif; ?>
-                                    </div>
-                                    <div class="card-body">
-                                        <h5 class="card-title"><?php echo htmlspecialchars($file['name']); ?></h5>
-                                        <p class="card-text">
-                                            <small class="text-muted">
-                                                <?php echo strtoupper($file['type']); ?> - <?php echo formatDate($file['upload_date']); ?>
-                                            </small>
-                                        </p>
-                                    </div>
-                                    <div class="card-actions dropdown">
-                                        <button class="btn btn-sm dropdown-toggle no-arrow" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                            <i class="bx bx-dots-vertical-rounded"></i>
-                                        </button>
-                                        <ul class="dropdown-menu dropdown-menu-end">
-                                            <li><a class="dropdown-item preview-file" href="#" data-id="<?php echo $file['id']; ?>" data-type="<?php echo $file['type']; ?>" data-path="<?php echo htmlspecialchars($file['file_path']); ?>">Preview</a></li>
-                                            <li><a class="dropdown-item" href="api/download.php?id=<?php echo $file['id']; ?>">Download</a></li>
-                                            <li><a class="dropdown-item delete-file" href="#" data-id="<?php echo $file['id']; ?>">Delete</a></li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        <?php endforeach; ?>
-                    </div>
-                </div>
-            <?php endif; ?>
-
+            
+                
             <!-- Folders section -->
             <?php if (!empty($items['folders'])): ?>
                 <div class="section mb-4">
@@ -218,7 +175,47 @@ $recentFiles = getRecentFiles(5);
             <!-- Files section -->
             <div class="section">
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h2 class="section-title">Files</h2>
+                    <h2 class="section-title mb-0">Files</h2>
+
+                    <!-- Filters (Right aligned) -->
+                    <div class="d-flex gap-2">
+                        <!-- Sort by Date -->
+                        <div class="dropdown">
+                            <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="sortDateDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bx bx-calendar me-1"></i> Date
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="sortDateDropdown">
+                                <li><a class="dropdown-item sort-option" href="#" data-target="sortDateDropdown" data-filter="all">Date</a></li>
+                                <li><a class="dropdown-item sort-option" href="#" data-target="sortDateDropdown" data-filter="newest">Newest First</a></li>
+                                <li><a class="dropdown-item sort-option" href="#" data-target="sortDateDropdown" data-filter="oldest">Oldest First</a></li>
+                            </ul>
+                        </div>
+
+                        <!-- Sort by File Type -->
+                        <div class="dropdown">
+                            <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="sortTypeDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bx bx-file me-1"></i> File Type
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="sortTypeDropdown">
+                                <li><a class="dropdown-item sort-option" href="#" data-target="sortTypeDropdown" data-filter="all">File Type</a></li>
+                                <li><a class="dropdown-item sort-option" href="#" data-target="sortTypeDropdown" data-filter="pdf">PDF</a></li>
+                                <li><a class="dropdown-item sort-option" href="#" data-target="sortTypeDropdown" data-filter="docx">DOCX</a></li>
+                                <li><a class="dropdown-item sort-option" href="#" data-target="sortTypeDropdown" data-filter="txt">TXT</a></li>
+                            </ul>
+                        </div>
+
+                        <!-- Sort by Name -->
+                        <div class="dropdown">
+                            <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="sortNameDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bx bx-sort-a-z me-1"></i> Name
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="sortNameDropdown">
+                                <li><a class="dropdown-item sort-option" href="#" data-target="sortNameDropdown" data-filter="all">Name</a></li>
+                                <li><a class="dropdown-item sort-option" href="#" data-target="sortNameDropdown" data-filter="az">A → Z</a></li>
+                                <li><a class="dropdown-item sort-option" href="#" data-target="sortNameDropdown" data-filter="za">Z → A</a></li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Grid view -->
@@ -255,7 +252,7 @@ $recentFiles = getRecentFiles(5);
                                         <div class="card-body">
                                             <h5 class="card-title"><?php echo htmlspecialchars($file['name']); ?></h5>
                                             <p class="card-text">
-                                                <small class="text-muted">
+                                                <small class="text-muted" data-upload="<?php echo $file['upload_date']; ?>">
                                                     <?php echo strtoupper($file['type']); ?> - <?php echo formatDate($file['upload_date']); ?>
                                                 </small>
                                             </p>
@@ -302,7 +299,9 @@ $recentFiles = getRecentFiles(5);
                                 </thead>
                                 <tbody>
                                     <?php foreach ($items['files'] as $file): ?>
-                                        <tr data-id="<?php echo $file['id']; ?>" data-type="file">
+                                        <tr data-id="<?php echo $file['id']; ?>" data-type="<?php echo strtolower($file['type']); ?>">
+
+
                                             <td>
                                                 <div class="d-flex align-items-center">
                                                     <i class="<?php echo getFileIcon($file['type']); ?> me-2"></i>
@@ -311,7 +310,9 @@ $recentFiles = getRecentFiles(5);
                                             </td>
                                             <td><?php echo strtoupper($file['type']); ?></td>
                                             <td><?php echo formatFileSize($file['size']); ?></td>
-                                            <td><?php echo formatDate($file['upload_date']); ?></td>
+                                            <td data-upload="<?php echo $file['upload_date']; ?>">
+                                                <?php echo formatDate($file['upload_date']); ?>
+                                            </td>
                                             <td>
                                                 <div class="btn-group">
                                                     <button type="button" class="btn btn-sm btn-outline-secondary preview-file" data-id="<?php echo $file['id']; ?>" data-type="<?php echo $file['type']; ?>" data-path="<?php echo htmlspecialchars($file['file_path']); ?>">
@@ -337,30 +338,41 @@ $recentFiles = getRecentFiles(5);
     </div>
 
     <!-- Upload Modal -->
-    <div class="modal fade" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
+    <div class="modal fade" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false"> 
+        <div class="modal-dialog modal-dialog-centered static">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="uploadModalLabel">Upload File</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="uploadForm" enctype="multipart/form-data">
-                        <div class="mb-3">
-                            <label for="fileUpload" class="form-label">Select File</label>
-                            <input class="form-control" type="file" id="fileUpload" name="file" accept=".pdf,.docx,.txt">
-                            <div class="form-text">Only .pdf, .docx, and .txt files are allowed.</div>
-                        </div>
-                        <input type="hidden" name="folder_id" value="<?php echo $currentFolderId; ?>">
-                    </form>
-                    <div class="progress d-none" id="uploadProgress">
-                        <div class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+            <div class="modal-header">
+                <h5 class="modal-title" id="uploadModalLabel">Upload Files</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="uploadForm" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label for="fileUpload" class="form-label">Choose or Drop Files</label>
+                    
+                    <!-- Click + Drag-Drop Area -->
+                    <div id="fileInputWrapper" class="border rounded p-4 text-center bg-light" style="cursor:pointer; position: relative;">
+                    <input class="form-control" type="file" id="fileUpload" name="files[]"
+                            accept=".pdf,.docx,.txt" multiple
+                            style="opacity:0; position:absolute; top:0; left:0; width:100%; height:100%; cursor:pointer;">
+                    <p class="m-0">Click to browse or drag & drop files here</p>
+                    <small class="text-muted">Allowed: .pdf, .docx, .txt</small>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" id="uploadButton" style="background-color: #6366f1; color: white;">Upload</button>
+                <input type="hidden" name="folder_id" value="<?php echo $currentFolderId; ?>">
+                </form>
+
+                <ul id="fileList" class="list-group mb-2"></ul>
+
+                <div class="progress d-none" id="uploadProgress">
+                <div class="progress-bar" role="progressbar" style="width:0%;" aria-valuenow="0"
+                    aria-valuemin="0" aria-valuemax="100">0%</div>
                 </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="uploadButton" style="background-color:#6366f1; color:white;">Upload</button>
+            </div>
             </div>
         </div>
     </div>

@@ -49,6 +49,7 @@
     overflow: hidden;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     transition: box-shadow 0.3s;
+    border: solid .5px;
   }
   
   .dark-theme .search-form .input-group {

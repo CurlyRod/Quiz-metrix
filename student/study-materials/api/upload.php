@@ -8,20 +8,20 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 try {
-    // Check if file was uploaded
-    if (!isset($_FILES['file']) || $_FILES['file']['error'] !== UPLOAD_ERR_OK) {
-        throw new Exception('No file uploaded or upload error');
-    }
+    // // Check if files were uploaded
+    // if (!isset($_FILES['files']) || empty($_FILES['files']['name'])) {
+    //     throw new Exception('No files uploaded');
+    // }
 
     // Get user ID from session
     if (!isset($_SESSION['USER_EMAIL'])) {
         throw new Exception('User not authenticated');
     }
-    
+
     $email = $_SESSION['USER_EMAIL'];
     $user_id = null;
 
-    // Prepare and execute query to get user ID
+    // Get user ID
     $stmt = $conn->prepare("SELECT id FROM user_credential WHERE email = ?");
     if (!$stmt) {
         throw new Exception('Database prepare error: ' . $conn->error);
@@ -41,50 +41,65 @@ try {
     }
     $stmt->close();
 
-    // Get file information
-    $file = $_FILES['file'];
-    $fileName = sanitizeFilename($file['name']);
-    $fileSize = $file['size'];
-    $fileTmpPath = $file['tmp_name'];
-    $fileExtension = getFileExtension($fileName);
-
-    // Check if file type is allowed
-    if (!isAllowedFileType($fileExtension)) {
-        throw new Exception('File type not allowed. Only PDF, DOCX, and TXT files are allowed.');
-    }
-
-    // Create unique filename to prevent overwriting
-    $uniqueFileName = time() . '_' . $fileName;
-    $uploadPath = '../uploads/' . $uniqueFileName;
-
     // Get folder ID
     $folderId = isset($_POST['folder_id']) && !empty($_POST['folder_id']) ? intval($_POST['folder_id']) : null;
 
-    // Move uploaded file to destination
-    if (move_uploaded_file($fileTmpPath, $uploadPath)) {
-        // Insert file information into database (including user_id)
-        $sql = "INSERT INTO files (name, type, size, folder_id, file_path, user_id) VALUES (?, ?, ?, ?, ?, ?)";
-        $stmt = $conn->prepare($sql);
-        if (!$stmt) {
-            throw new Exception('Database prepare error: ' . $conn->error);
+    $uploaded = [];
+    $errors = [];
+
+    // Loop through uploaded files
+    foreach ($_FILES['files']['name'] as $key => $name) {
+        if ($_FILES['files']['error'][$key] !== UPLOAD_ERR_OK) {
+            $errors[] = "Error uploading file: " . $name;
+            continue;
         }
-        
-        $stmt->bind_param('ssissi', $fileName, $fileExtension, $fileSize, $folderId, $uniqueFileName, $user_id);
-        
-        if ($stmt->execute()) {
-            echo json_encode([
-                'success' => true,
-                'message' => 'File uploaded successfully',
-                'file_id' => $stmt->insert_id
-            ]);
+
+        $fileName = sanitizeFilename($name);
+        $fileSize = $_FILES['files']['size'][$key];
+        $fileTmpPath = $_FILES['files']['tmp_name'][$key];
+        $fileExtension = getFileExtension($fileName);
+
+        // Validate file type
+        if (!isAllowedFileType($fileExtension)) {
+            $errors[] = "File type not allowed: " . $fileName;
+            continue;
+        }
+
+        // Create unique filename
+        $uniqueFileName = time() . '_' . uniqid() . '_' . $fileName;
+        $uploadPath = '../uploads/' . $uniqueFileName;
+
+        if (move_uploaded_file($fileTmpPath, $uploadPath)) {
+            $sql = "INSERT INTO files (name, type, size, folder_id, file_path, user_id) VALUES (?, ?, ?, ?, ?, ?)";
+            $stmt = $conn->prepare($sql);
+            if (!$stmt) {
+                $errors[] = "Database prepare error for file: " . $fileName;
+                unlink($uploadPath);
+                continue;
+            }
+
+            $stmt->bind_param('ssissi', $fileName, $fileExtension, $fileSize, $folderId, $uniqueFileName, $user_id);
+            if ($stmt->execute()) {
+                $uploaded[] = [
+                    'file_id' => $stmt->insert_id,
+                    'name' => $fileName
+                ];
+            } else {
+                $errors[] = "Error saving file info: " . $fileName . " (" . $stmt->error . ")";
+                unlink($uploadPath);
+            }
+            $stmt->close();
         } else {
-            // Delete the uploaded file if database insert fails
-            unlink($uploadPath);
-            throw new Exception('Error saving file information to database: ' . $stmt->error);
+            $errors[] = "Error moving file: " . $fileName;
         }
-    } else {
-        throw new Exception('Error moving uploaded file');
     }
+
+    echo json_encode([
+        'success' => !empty($uploaded),
+        'message' => !empty($uploaded) ? 'Files uploaded successfully' : 'No valid files uploaded',
+        'uploaded' => $uploaded,
+        'errors' => $errors
+    ]);
 } catch (Exception $e) {
     echo json_encode([
         'success' => false,
