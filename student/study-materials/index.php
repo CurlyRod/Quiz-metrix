@@ -338,30 +338,41 @@ $recentFiles = getRecentFiles(5);
     </div>
 
     <!-- Upload Modal -->
-    <div class="modal fade" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
+    <div class="modal fade" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false"> 
+        <div class="modal-dialog modal-dialog-centered static">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="uploadModalLabel">Upload File</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="uploadForm" enctype="multipart/form-data">
-                        <div class="mb-3">
-                            <label for="fileUpload" class="form-label">Select File</label>
-                            <input class="form-control" type="file" id="fileUpload" name="file" accept=".pdf,.docx,.txt">
-                            <div class="form-text">Only .pdf, .docx, and .txt files are allowed.</div>
-                        </div>
-                        <input type="hidden" name="folder_id" value="<?php echo $currentFolderId; ?>">
-                    </form>
-                    <div class="progress d-none" id="uploadProgress">
-                        <div class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+            <div class="modal-header">
+                <h5 class="modal-title" id="uploadModalLabel">Upload Files</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="uploadForm" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label for="fileUpload" class="form-label">Choose or Drop Files</label>
+                    
+                    <!-- Click + Drag-Drop Area -->
+                    <div id="fileInputWrapper" class="border rounded p-4 text-center bg-light" style="cursor:pointer; position: relative;">
+                    <input class="form-control" type="file" id="fileUpload" name="files[]"
+                            accept=".pdf,.docx,.txt" multiple
+                            style="opacity:0; position:absolute; top:0; left:0; width:100%; height:100%; cursor:pointer;">
+                    <p class="m-0">Click to browse or drag & drop files here</p>
+                    <small class="text-muted">Allowed: .pdf, .docx, .txt</small>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" id="uploadButton" style="background-color: #6366f1; color: white;">Upload</button>
+                <input type="hidden" name="folder_id" value="<?php echo $currentFolderId; ?>">
+                </form>
+
+                <ul id="fileList" class="list-group mb-2"></ul>
+
+                <div class="progress d-none" id="uploadProgress">
+                <div class="progress-bar" role="progressbar" style="width:0%;" aria-valuenow="0"
+                    aria-valuemin="0" aria-valuemax="100">0%</div>
                 </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="uploadButton" style="background-color:#6366f1; color:white;">Upload</button>
+            </div>
             </div>
         </div>
     </div>

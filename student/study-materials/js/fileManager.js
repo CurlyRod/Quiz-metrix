@@ -13,6 +13,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const renameFolderButton = document.getElementById("renameFolderButton")
     const confirmActionButton = document.getElementById("confirmActionButton")
     const searchForm = document.getElementById("searchForm")
+    const fileListElement = document.getElementById("fileList");
+    const closeButtons = document.querySelectorAll(
+      "#uploadModal .btn-close, #uploadModal .btn-secondary"
+    );
+    
 
     // Initialize Bootstrap modals
     const uploadModal = document.getElementById("uploadModal")
@@ -30,6 +35,140 @@ document.addEventListener("DOMContentLoaded", () => {
     const confirmationModal = document.getElementById("confirmationModal")
       ? new bootstrap.Modal(document.getElementById("confirmationModal"))
       : null
+
+    const fileInputWrapper = document.getElementById("fileInputWrapper");
+    const fileInput = document.getElementById("fileUpload");
+    const fileList = document.getElementById("fileList");
+    let selectedFiles = [];
+
+    // Render file list
+    function renderFileList() {
+      if (!fileList) return;
+      fileList.innerHTML = "";
+      selectedFiles.forEach((file, index) => {
+        const li = document.createElement("li");
+        li.className = "list-group-item d-flex justify-content-between align-items-center";
+        li.textContent = file.name;
+
+        const removeBtn = document.createElement("button");
+        removeBtn.className = "bx bx-x transparent btn btn-sm";
+        removeBtn.onclick = () => {
+          selectedFiles.splice(index, 1);
+          renderFileList();
+        };
+
+        li.appendChild(removeBtn);
+        fileList.appendChild(li);
+      });
+    }
+    // Reset function
+    function resetFileList() {
+      selectedFiles = []; 
+      fileListElement.innerHTML = ""; 
+      uploadForm.reset(); 
+    }
+    
+    closeButtons.forEach((btn) => {
+      btn.addEventListener("click", resetFileList);
+    });
+
+    // File explorer select
+    if (fileInput) {
+      fileInput.addEventListener("change", (e) => {
+        Array.from(e.target.files).forEach((file) => {
+          const ext = file.name.split(".").pop().toLowerCase();
+          if (["pdf", "docx", "txt"].includes(ext)) {
+            selectedFiles.push(file);
+          } else {
+            showToast(`Invalid file type: ${file.name}`, "danger");
+          }
+        });
+        renderFileList();
+      });
+    }
+
+    // Drag highlight
+    if (fileInputWrapper) {
+      fileInputWrapper.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        fileInputWrapper.classList.add("bg-primary", "text-white");
+      });
+
+      fileInputWrapper.addEventListener("dragleave", () => {
+        fileInputWrapper.classList.remove("bg-primary", "text-white");
+      });
+
+      fileInputWrapper.addEventListener("drop", (e) => {
+        e.preventDefault();
+        fileInputWrapper.classList.remove("bg-primary", "text-white");
+
+        Array.from(e.dataTransfer.files).forEach((file) => {
+          const ext = file.name.split(".").pop().toLowerCase();
+          if (["pdf", "docx", "txt"].includes(ext)) {
+            selectedFiles.push(file);
+          } else {
+            showToast(`Invalid file type: ${file.name}`, "danger");
+          }
+        });
+        renderFileList();
+      });
+    }
+
+    // Upload all selected files
+    if (uploadButton) {
+      uploadButton.addEventListener("click", () => {
+        if (selectedFiles.length === 0) {
+          showToast("Please select at least one file", "warning");
+          return;
+        }
+
+        const formData = new FormData();
+        const folderInput = document.querySelector("input[name='folder_id']");
+        if (folderInput) {
+          formData.append("folder_id", folderInput.value);
+        }
+        // selectedFiles.forEach((file) => formData.append("files[]", file));
+
+        if (uploadProgress) uploadProgress.classList.remove("d-none");
+
+        const xhr = new XMLHttpRequest();
+        xhr.upload.addEventListener("progress", (e) => {
+          if (e.lengthComputable && progressBar) {
+            const percent = Math.round((e.loaded / e.total) * 100);
+            progressBar.style.width = percent + "%";
+            progressBar.textContent = percent + "%";
+            progressBar.setAttribute("aria-valuenow", percent);
+          }
+        });
+
+        xhr.addEventListener("load", () => {
+          if (xhr.status === 200) {
+            try {
+              const response = JSON.parse(xhr.responseText);
+              if (response.success) {
+                showToast("Files uploaded successfully", "success");
+                setTimeout(() => window.location.reload(), 1500);
+              } else {
+                showToast(response.message || "Error uploading files", "danger");
+              }
+            } catch {
+              // showToast("Error processing server response", "danger");
+            }
+          } else {
+            showToast("Error uploading files", "danger");
+          }
+          if (uploadProgress) uploadProgress.classList.add("d-none");
+          if (fileInput) fileInput.value = "";
+          selectedFiles = [];
+          renderFileList();
+          if (uploadModal) uploadModal.hide();
+        });
+
+        xhr.open("POST", "api/upload.php", true);
+        xhr.send(formData);
+      });
+    }
+
 
     // Initialize SortableJS for drag and drop
     const folderContainers = document.querySelectorAll(".folders-container")
