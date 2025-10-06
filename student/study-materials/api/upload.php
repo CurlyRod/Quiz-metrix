@@ -8,11 +8,6 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 try {
-    // // Check if files were uploaded
-    // if (!isset($_FILES['files']) || empty($_FILES['files']['name'])) {
-    //     throw new Exception('No files uploaded');
-    // }
-
     // Get user ID from session
     if (!isset($_SESSION['USER_EMAIL'])) {
         throw new Exception('User not authenticated');
@@ -47,6 +42,39 @@ try {
     $uploaded = [];
     $errors = [];
 
+    // Function to get unique filename for DB/user display
+    function getUniqueFileName($conn, $fileName, $folderId, $user_id) {
+        $baseName = pathinfo($fileName, PATHINFO_FILENAME);
+        $extension = pathinfo($fileName, PATHINFO_EXTENSION);
+
+        $newFileName = $fileName;
+        $counter = 1;
+
+        $sql = "SELECT COUNT(*) as count FROM files WHERE name = ? AND folder_id <=> ? AND user_id = ?";
+        $stmt = $conn->prepare($sql);
+        if (!$stmt) {
+            throw new Exception('Database prepare error: ' . $conn->error);
+        }
+
+        while (true) {
+            $stmt->bind_param("sii", $newFileName, $folderId, $user_id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $row = $result->fetch_assoc();
+            if ($row['count'] == 0) {
+                $stmt->close();
+                return $newFileName; // found unique name
+            }
+
+            // Append (n)
+            $newFileName = $baseName . " (" . $counter . ")";
+            if (!empty($extension)) {
+                $newFileName .= "." . $extension;
+            }
+            $counter++;
+        }
+    }
+
     // Loop through uploaded files
     foreach ($_FILES['files']['name'] as $key => $name) {
         if ($_FILES['files']['error'][$key] !== UPLOAD_ERR_OK) {
@@ -55,6 +83,7 @@ try {
         }
 
         $fileName = sanitizeFilename($name);
+        $fileName = getUniqueFileName($conn, $fileName, $folderId, $user_id); // <-- ensure uniqueness
         $fileSize = $_FILES['files']['size'][$key];
         $fileTmpPath = $_FILES['files']['tmp_name'][$key];
         $fileExtension = getFileExtension($fileName);
@@ -65,7 +94,7 @@ try {
             continue;
         }
 
-        // Create unique filename
+        // Always store physical file uniquely
         $uniqueFileName = time() . '_' . uniqid() . '_' . $fileName;
         $uploadPath = '../uploads/' . $uniqueFileName;
 
