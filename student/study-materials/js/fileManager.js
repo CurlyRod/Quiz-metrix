@@ -259,17 +259,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
-    // Sorting and Filtering Script
-    // Save original order of files (grid + list) for reset
-    const originalGrid = Array.from(document.querySelectorAll(".file-card")).map(el => el.closest(".col"));
-    const originalList = Array.from(document.querySelectorAll(".list-view tbody tr"));
-
-    // Store original button labels
-    const defaultLabels = {
-        sortDateDropdown: '<i class="bx bx-calendar me-1"></i> Date',
-        sortTypeDropdown: '<i class="bx bx-file me-1"></i> File Type',
-        sortNameDropdown: '<i class="bx bx-sort-a-z me-1"></i> Name'
-    };
 
     document.querySelectorAll(".dropdown-menu .dropdown-item").forEach(item => {
         item.addEventListener("click", function (e) {
@@ -279,29 +268,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const dropdownButton = document.getElementById(targetId);
             const filterValue = this.getAttribute("data-filter");
 
-            // ---- RESET HANDLING ----
-            if (filterValue === "all") {
-                // Reset button text to default
-                if (dropdownButton && defaultLabels[targetId]) {
-                    dropdownButton.innerHTML = defaultLabels[targetId];
-                }
-
-                // Reset files in Grid
-                const container = document.querySelector(".files-container");
-                originalGrid.forEach(el => {
-                    el.style.display = "block"; // show all
-                    container.appendChild(el); // restore order
-                });
-
-                // Reset files in List
-                const tbody = document.querySelector(".list-view tbody");
-                originalList.forEach(el => {
-                    el.style.display = ""; // show all
-                    tbody.appendChild(el); // restore order
-                });
-
-                return; // 
-            }
+            
 
             // ---- NORMAL FILTER / SORT ----
             if (dropdownButton) {
@@ -708,9 +675,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // For PDF files, open in a new tab instead of modal
         if (fileType === "pdf") {
-          window.open(`uploads/${filePath}`, "_blank")
-          return
-        }
+        // Trim filename for display only
+        const parts = filePath.split("_");
+        const originalName = parts.slice(2).join("_"); // keep everything after time + uniqid
+
+        // Example: show original name in console, modal, or title
+        console.log("Previewing:", originalName);
+
+        // Open the actual stored file
+        window.open(`uploads/${filePath}`, "_blank");
+        return;
+      }
 
         const previewContent = document.getElementById("previewContent")
         const previewDownloadBtn = document.getElementById("previewDownloadBtn")

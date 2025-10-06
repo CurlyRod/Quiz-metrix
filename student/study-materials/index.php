@@ -185,7 +185,6 @@ $recentFiles = getRecentFiles(5);
                                 <i class="bx bx-calendar me-1"></i> Date
                             </button>
                             <ul class="dropdown-menu" aria-labelledby="sortDateDropdown">
-                                <li><a class="dropdown-item sort-option" href="#" data-target="sortDateDropdown" data-filter="all">Date</a></li>
                                 <li><a class="dropdown-item sort-option" href="#" data-target="sortDateDropdown" data-filter="newest">Newest First</a></li>
                                 <li><a class="dropdown-item sort-option" href="#" data-target="sortDateDropdown" data-filter="oldest">Oldest First</a></li>
                             </ul>
@@ -197,7 +196,6 @@ $recentFiles = getRecentFiles(5);
                                 <i class="bx bx-file me-1"></i> File Type
                             </button>
                             <ul class="dropdown-menu" aria-labelledby="sortTypeDropdown">
-                                <li><a class="dropdown-item sort-option" href="#" data-target="sortTypeDropdown" data-filter="all">File Type</a></li>
                                 <li><a class="dropdown-item sort-option" href="#" data-target="sortTypeDropdown" data-filter="pdf">PDF</a></li>
                                 <li><a class="dropdown-item sort-option" href="#" data-target="sortTypeDropdown" data-filter="docx">DOCX</a></li>
                                 <li><a class="dropdown-item sort-option" href="#" data-target="sortTypeDropdown" data-filter="txt">TXT</a></li>
@@ -210,7 +208,6 @@ $recentFiles = getRecentFiles(5);
                                 <i class="bx bx-sort-a-z me-1"></i> Name
                             </button>
                             <ul class="dropdown-menu" aria-labelledby="sortNameDropdown">
-                                <li><a class="dropdown-item sort-option" href="#" data-target="sortNameDropdown" data-filter="all">Name</a></li>
                                 <li><a class="dropdown-item sort-option" href="#" data-target="sortNameDropdown" data-filter="az">A → Z</a></li>
                                 <li><a class="dropdown-item sort-option" href="#" data-target="sortNameDropdown" data-filter="za">Z → A</a></li>
                             </ul>
