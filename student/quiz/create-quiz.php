@@ -3,33 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quiz Creator</title>
+    <title>Quiz</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
     <?php include '../../shared-student/header.php'; ?>
 
     <link rel="stylesheet" href="css/styles.css">
+    
 </head>
 <body>
-<?php
+    <!-- Sidebar and Navbar -->
+    <?php
         session_start();
         // Check if user is logged in
         if (!isset($_SESSION['user'])) {
-        header("Location: ../../landing-page/");
-        exit();
+            header("Location: ../../landing-page/");
+            exit();
         } 
-
+    
         $userData = $_SESSION['user']; 
         $_SESSION['USER_NAME'] = $userData['displayName'];
-        ?>
-<?php
-$currentPage = 'quiz'; 
 
-include '../../shared-student/sidebar.php';
-include '../../shared-student/navbar.php';
-?>
+        $currentPage = 'quiz'; 
+
+        include '../../shared-student/sidebar.php';
+        include '../../shared-student/navbar.php';
+
+    ?>
+    
     <input type="hidden" name="user-current-id" id="user-current-id">
 
+    
     <ul class="nav nav-underline " style="padding: 20px;">
                     <li class="nav-item">
                         <a class="nav-link " href="index.php" style="color:rgba(99, 101, 241, 0.8)">Create</a>
@@ -40,23 +44,25 @@ include '../../shared-student/navbar.php';
                     </li>
                 </ul>
 
+
     <div class="main-content">
         <div class="quiz-creator">
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <h3 class="mb-0">Quiz</h3>
+                <h3 class="mb-0">Create Quiz</h3>
                 <div>
-                    <button class="btn me-2" id="createQuizBtn" style="background-color: #6366f1; color: white;">Edit Quiz</button>
-                    <button class="btn btn-success" id="startQuizBtn">Start Quiz</button>
+                    <button class="btn me-2" id="createQuizBtn" style="background-color: #6366f1; color: white;">Create Quiz</button>
+                    <button class="btn btn-success" id="startQuizBtn">Create and Start Quiz</button>
+
                 </div>
             </div>
             
-            <!-- Alert for messages -->
+              <!-- Alert for messages -->
             <div class="alert alert-success d-none" id="successAlert"></div>
             <div class="alert alert-danger d-none" id="errorAlert"></div>
             <hr class="solid">
-
             <!-- New Quiz Form -->
             <div class="new-quiz-form mb-4">
+                
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <label for="quizTitle" class="form-label">Title</label>
@@ -68,21 +74,22 @@ include '../../shared-student/navbar.php';
                     </div>
                 </div>
             </div>
-            
+            <button class="btn" id="importQuestionsBtn" style="background-color: #6366f1; color: white; margin-bottom: 30px;">
+                    <i class="bi bi-upload"></i> Import Questions
+                </button>
             <!-- Question Cards -->
-            <h5 class="mb-3">Questions</h5>
             <div id="questionCards">
                 <!-- Question cards will be dynamically added here -->
             </div>
-            
             <!-- Add Card Button -->
             <button class="btn btn-light w-100 add-card-btn mt-3" id="addCardBtn">
                 Add question <i class="bi bi-plus"></i>
             </button>
-                <div class="d-flex justify-content-end" style="margin-top: 20px;">
-                    <button class="btn me-2" id="createQuizBtn" style="background-color: #6366f1; color: white;">Edit Quiz</button>
-                    <button class="btn btn-success" id="startQuizBtn">Start Quiz</button>
+            <div class="d-flex justify-content-end" style="margin-top: 20px;">
+                    <button class="btn me-2" id="createQuizBtn" style="background-color: #6366f1; color: white;">Create Quiz</button>
+                    <button class="btn btn-success" id="startQuizBtn">Create and Start Quiz</button>
                 </div>
+
                 </div>
         </div>
 
@@ -127,7 +134,7 @@ include '../../shared-student/navbar.php';
                                 True or False
                             </label>
                         </div>
-                        <div id="answerTypeWarning" class="text-warning mt-2 d-none">
+                        <div id="answerTypeWarning" class="text-danger mt-2 d-none">
                             Please select at least one answer type.
                         </div>
                     </div>
@@ -144,5 +151,6 @@ include '../../shared-student/navbar.php';
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/script.js"></script>
     <?php include '../../shared-student/script.php'; ?>
+     
 </body>
 </html>

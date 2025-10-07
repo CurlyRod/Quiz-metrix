@@ -30,9 +30,6 @@ session_start();
                         <a class="nav-link " href="index.php" style="color:rgba(99, 101, 241, 0.8)">Create</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link " href="edit.php" style="color:rgba(99, 101, 241, 0.8)">Edit</a>
-                    </li>
-                    <li class="nav-item">
                         <a class="nav-link active" href="manage-quizzes.php" style="color: #6366f1">Manage Quizzes</a>
                     </li>
     </ul>
