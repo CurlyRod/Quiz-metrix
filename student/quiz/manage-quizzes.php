@@ -38,7 +38,7 @@ session_start();
     <div class="container mt-4" >
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h5>Manage Quizzes</h5>
-            <a href="index.php" class="btn" style="background-color: #6366f1; color: white;">Create New Quiz</a>
+            <a href="create-quiz.php" class="btn" style="background-color: #6366f1; color: white;">Create New Quiz</a>
         </div>
 
         <!-- Search Bar -->

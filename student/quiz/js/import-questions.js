@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Event listeners
   importBtn.addEventListener("click", processImport)
   cancelBtn.addEventListener("click", () => {
-    window.location.href = "index.php"
+    window.location.href = "create-quiz.php"
   })
 
   function processImport() {
@@ -33,12 +33,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const termSeparator = getSelectedRadioValue(termSeparatorRadios)
     const cardSeparator = getSelectedRadioValue(cardSeparatorRadios)
 
-    // Process the input based on selected separators
-    let cards
+    // NEW: Clean the input text by removing all \n and extra whitespace
+    const cleanedInput = cleanText(inputText)
 
-    if (cards = inputText.split(";")) {
-      
-    } 
+    // Process the input based on selected separators
+    let cards = cleanedInput.split(cardSeparator)
 
     // Filter out empty lines
     cards = cards.filter((card) => card.trim() !== "")
@@ -114,8 +113,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Redirect back to index.html after a short delay
     setTimeout(() => {
-      window.location.href = "index.php?import=true"
+      window.location.href = "create-quiz.php?import=true"
     }, 1500)
+  }
+
+  // NEW FUNCTION: Clean text by removing all \n and extra whitespace
+  function cleanText(text) {
+    // Replace all newline characters with spaces
+    let cleaned = text.replace(/\r\n/g, ' ').replace(/\n/g, ' ').replace(/\r/g, ' ');
+    
+    // Replace multiple spaces with single space
+    cleaned = cleaned.replace(/\s+/g, ' ');
+    
+    // Trim the result
+    return cleaned.trim();
   }
 
   function getSelectedRadioValue(radioButtons) {

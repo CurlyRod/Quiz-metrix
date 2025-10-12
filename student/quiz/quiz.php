@@ -35,7 +35,7 @@ session_start();
                 </div>
             </div>
 
-            <p id="quizDescription" class="mb-4">Quiz description will appear here.</p>
+            <p id="quizDescription" class="mb-4"></p>
 
             <!-- Question Container -->
             <div id="questionContainer">
