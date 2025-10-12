@@ -29,8 +29,8 @@
 
                 <div class="mb-4">
                     
-                    <p class="text-muted small">Copy and Paste your data below</p>
-                    <textarea class="form-control" id="importData" rows="12" placeholder="Term - Definition;&#10;Term - Definition;&#10;Term - Definition" style="resize: none; height: 600px;"></textarea>
+                    <p class="text-muted small">Paste your data below. Term - Definition;</p>
+                    <textarea class="form-control" id="importData" rows="12" placeholder="Term - Definition;&#10;Term - Definition;&#10;Term - Definition;" style="resize: none; height: 600px;"></textarea>
                 </div>
 
                 <div class="row">

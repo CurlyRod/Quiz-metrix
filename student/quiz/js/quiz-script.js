@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
   // DOM Elements
   const quizTitle = document.getElementById("quizTitle")
-  const quizDescription = document.getElementById("quizDescription")
+  // const quizDescription = document.getElementById("quizDescription")
   const questionContainer = document.getElementById("questionContainer")
   const questionProgress = document.getElementById("questionProgress")
   const prevBtn = document.getElementById("prevBtn")
@@ -28,9 +28,11 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentSpeech = null;
   let isQuizSubmitted = false;
   let exitDestination = "index.php";
+  let quizStateKey = null;
+  let preparedQuestions = [];
 
   // Store the correct answers for each question
-  const correctAnswers = []
+  let correctAnswers = []; // Changed from const to let
 
   // Check if we have a quiz ID in the URL
   const urlParams = new URLSearchParams(window.location.search)
@@ -47,8 +49,50 @@ document.addEventListener("DOMContentLoaded", () => {
   // Set up exit confirmation button
   document.getElementById("confirmExitBtn").addEventListener("click", function() {
     window.removeEventListener("beforeunload", beforeUnloadHandler);
+    clearQuizState();
     window.location.href = exitDestination;
   });
+
+  // Local Storage Functions
+  function saveQuizState() {
+    if (!currentQuizId || isQuizSubmitted) return;
+    
+    const quizState = {
+      currentQuestionIndex,
+      userAnswers,
+      timeRemaining,
+      preparedQuestions, // Save the randomized questions
+      correctAnswers,    // Save the correct answers
+      timestamp: Date.now()
+    };
+    
+    localStorage.setItem(quizStateKey, JSON.stringify(quizState));
+  }
+
+  function loadQuizState() {
+    if (!quizStateKey) return null;
+    
+    const savedState = localStorage.getItem(quizStateKey);
+    if (!savedState) return null;
+    
+    const state = JSON.parse(savedState);
+    
+    // Check if state is not too old (e.g., 24 hours)
+    const isExpired = Date.now() - state.timestamp > 24 * 60 * 60 * 1000;
+    if (isExpired) {
+      localStorage.removeItem(quizStateKey);
+      return null;
+    }
+    
+    return state;
+  }
+
+  
+  function clearQuizState() {
+    if (quizStateKey) {
+      localStorage.removeItem(quizStateKey);
+    }
+  }
 
   function loadQuizFromDatabase(quizId) {
     fetch(`api/get_quiz.php?id=${quizId}`)
@@ -73,29 +117,39 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function initQuiz() {
     // Set quiz title and description
-    quizTitle.textContent = currentQuiz.title
-    quizDescription.textContent = currentQuiz.description
+    quizTitle.textContent = currentQuiz.title;
 
-    // Initialize user answers array
-    userAnswers = Array(currentQuiz.questions.length).fill(null)
+    // Set up unique key for this quiz session
+    quizStateKey = `quiz_${currentQuizId}_state`;
+
+    // Try to load saved state
+    const savedState = loadQuizState();
+    if (savedState) {
+      currentQuestionIndex = savedState.currentQuestionIndex;
+      userAnswers = savedState.userAnswers;
+      timeRemaining = savedState.timeRemaining;
+      preparedQuestions = savedState.preparedQuestions;
+      correctAnswers = savedState.correctAnswers;
+      console.log("Loaded saved quiz state with preserved questions");
+    } else {
+      // Initialize fresh state - generate randomized questions once
+      userAnswers = Array(currentQuiz.questions.length).fill(null);
+      timeRemaining = currentQuiz.settings && currentQuiz.settings.timed ? currentQuiz.settings.time * 60 : 0;
+      preparedQuestions = prepareQuizQuestions(); // Generate randomized questions once
+    }
 
     // Set up navigation interception
     setupNavigationInterception();
 
-    // Prepare the questions based on their answer types
-    prepareQuizQuestions()
-
     // Set up timer if quiz is timed
     if (currentQuiz.settings && currentQuiz.settings.timed) {
       timerDisplay.classList.remove("d-none");
-      timeRemaining = currentQuiz.settings.time * 60;
       updateTimerDisplay();
       startTimer();
     } else {
       timerDisplay.classList.add("d-none");
     }
 
-    
     // Ensure answer types are properly set
     if (!currentQuiz.settings.answerTypes || currentQuiz.settings.answerTypes.length === 0) {
       currentQuiz.settings.answerTypes = ['typed']; // default fallback
@@ -103,71 +157,84 @@ document.addEventListener("DOMContentLoaded", () => {
 
     speakQuestionBtn.addEventListener("click", speakCurrentQuestion);
 
-    // Show first question
-    showQuestion(0)
+    // Show current question
+    showQuestion(currentQuestionIndex);
 
     // Set up event listeners
-    prevBtn.addEventListener("click", showPreviousQuestion)
-    nextBtn.addEventListener("click", showNextQuestion)
-    submitQuizBtn.addEventListener("click", submitQuiz)
+    prevBtn.addEventListener("click", showPreviousQuestion);
+    nextBtn.addEventListener("click", showNextQuestion);
+    submitQuizBtn.addEventListener("click", submitQuiz);
 
-
-
-    // Disable previous button on first question
-    prevBtn.disabled = true
+    // Update navigation buttons
+    updateNavigationButtons();
   }
 
   function prepareQuizQuestions() {
-    // Process each question based on its answer type
-    currentQuiz.questions.forEach((question, index) => {
-      // Only process the question if its answer type is one of the selected types
-      
-      if (!currentQuiz.settings.answerTypes.includes(question.answerType)) {
-        // If the question's type isn't in the selected types, force it to be one that is
-        const availableTypes = currentQuiz.settings.answerTypes.length > 0 
-          ? currentQuiz.settings.answerTypes 
-          : ['typed']; // fallback
-        const randomIndex = Math.floor(Math.random() * availableTypes.length);
-        question.answerType = availableTypes[randomIndex];
-      }
-      switch (question.answerType) {
-        case "multiple":
-          // For multiple choice, we need to generate options
-          question.options = generateMultipleChoiceOptions(question, index)
-          correctAnswers[index] = question.term
-          break
+  const questions = JSON.parse(JSON.stringify(currentQuiz.questions)); // Deep copy
+  
+  // Create a shuffled copy of questions
+  const shuffledQuestions = JSON.parse(JSON.stringify(currentQuiz.questions));
+  shuffleArray(shuffledQuestions);
+  
+  const preparedQuestions = [];
+  
+  // If we have fewer questions than needed, we'll need to reuse some
+  // But try to minimize duplicates in the same quiz
+  for (let i = 0; i < questions.length; i++) {
+    let questionForSlot;
+    
+    if (i < shuffledQuestions.length) {
+      // Use a unique question from the shuffled array
+      questionForSlot = { ...shuffledQuestions[i] };
+    } else {
+      // If we need more questions than available, reuse from the beginning
+      const reuseIndex = i % shuffledQuestions.length;
+      questionForSlot = { ...shuffledQuestions[reuseIndex] };
+    }
+    
+    // Assign random answer type if not specified
+    if (!currentQuiz.settings.answerTypes.includes(questionForSlot.answerType)) {
+      const availableTypes = currentQuiz.settings.answerTypes.length > 0 
+        ? currentQuiz.settings.answerTypes 
+        : ['typed'];
+      const randomIndex = Math.floor(Math.random() * availableTypes.length);
+      questionForSlot.answerType = availableTypes[randomIndex];
+    }
+    
+    // Set up the question based on its answer type
+    switch (questionForSlot.answerType) {
+      case "multiple":
+        questionForSlot.options = generateMultipleChoiceOptions(currentQuiz.questions, questionForSlot, i);
+        correctAnswers[i] = questionForSlot.term;
+        break;
 
-        case "typed":
-          // For typed answers, the correct answer is the term
-          correctAnswers[index] = question.term
-          break
+      case "typed":
+        correctAnswers[i] = questionForSlot.term;
+        break;
 
-        case "truefalse":
-          // For true/false, we need to decide if it's true or false
-          const isTrueStatement = Math.random() < 0.5 // 50% chance of being true
-
-          if (isTrueStatement) {
-            // True statement - use the correct term-description pair
-            question.statement = `${question.term} – ${question.description}`
-            correctAnswers[index] = "true"
+      case "truefalse":
+        const isTrueStatement = Math.random() < 0.5;
+        if (isTrueStatement) {
+          questionForSlot.statement = `${questionForSlot.term} – ${questionForSlot.description}`;
+          correctAnswers[i] = "true";
+        } else {
+          const otherQuestions = currentQuiz.questions.filter(q => q.term !== questionForSlot.term);
+          if (otherQuestions.length > 0) {
+            const randomQuestion = otherQuestions[Math.floor(Math.random() * otherQuestions.length)];
+            questionForSlot.statement = `${questionForSlot.term} – ${randomQuestion.description}`;
           } else {
-            // False statement - mismatch term with a different description
-            const otherQuestions = currentQuiz.questions.filter((q, i) => i !== index)
-
-            if (otherQuestions.length > 0) {
-              const randomQuestion = otherQuestions[Math.floor(Math.random() * otherQuestions.length)]
-              // Use current term with a different description
-              question.statement = `${question.term} – ${randomQuestion.description}`
-            } else {
-              // If there are no other questions, modify the description slightly
-              question.statement = `${question.term} – ${question.description} (modified)`
-            }
-            correctAnswers[index] = "false"
+            questionForSlot.statement = `${questionForSlot.term} – ${questionForSlot.description} (modified)`;
           }
-          break
-      }
-    })
+          correctAnswers[i] = "false";
+        }
+        break;
+    }
+    
+    preparedQuestions.push(questionForSlot);
   }
+  
+  return preparedQuestions;
+}
 
   function speakCurrentQuestion() {
     // Stop any ongoing speech
@@ -175,8 +242,8 @@ document.addEventListener("DOMContentLoaded", () => {
       speechSynthesis.cancel();
     }
     
-    // Get current question
-    const question = currentQuiz.questions[currentQuestionIndex];
+    // Get current question - FIXED: use preparedQuestions instead of currentQuiz.questions
+    const question = preparedQuestions[currentQuestionIndex];
     let textToSpeak = "";
     
     // Format text based on question type
@@ -265,31 +332,22 @@ document.addEventListener("DOMContentLoaded", () => {
     };
   }
 
-  function generateMultipleChoiceOptions(question, questionIndex) {
-    // Create an array with the correct answer
-    const options = [question.term]
+  function generateMultipleChoiceOptions(allQuestions, question, questionIndex) {
+    const options = [question.term];
+    const otherTerms = allQuestions.filter((q, i) => i !== questionIndex).map((q) => q.term);
+    shuffleArray(otherTerms);
 
-    // Get terms from other questions to use as distractors
-    const otherTerms = currentQuiz.questions.filter((q, i) => i !== questionIndex).map((q) => q.term)
-
-    // Shuffle the other terms
-    shuffleArray(otherTerms)
-
-    // Add 3 distractors (or fewer if not enough other terms)
-    const numberOfOptions = Math.min(4, otherTerms.length + 1)
+    const numberOfOptions = Math.min(4, otherTerms.length + 1);
     while (options.length < numberOfOptions && otherTerms.length > 0) {
-      options.push(otherTerms.pop())
+      options.push(otherTerms.pop());
     }
 
-    // If we still need more options (not enough other terms)
     while (options.length < 4) {
-      options.push(`Option ${options.length + 1}`)
+      options.push(`Option ${options.length + 1}`);
     }
 
-    // Shuffle the options
-    shuffleArray(options)
-
-    return options
+    shuffleArray(options);
+    return options;
   }
 
   function showQuestion(index) {
@@ -297,13 +355,13 @@ document.addEventListener("DOMContentLoaded", () => {
     currentQuestionIndex = index
 
     // Update question progress
-    questionProgress.textContent = `Question ${index + 1} of ${currentQuiz.questions.length}`
+    questionProgress.textContent = `Question ${index + 1} of ${preparedQuestions.length}`;
 
     // Clear question container
     questionContainer.innerHTML = ""
 
     // Get current question
-    const question = currentQuiz.questions[index]
+    const question = preparedQuestions[index];
 
     // Create question element
     const questionElement = document.createElement("div")
@@ -346,11 +404,30 @@ document.addEventListener("DOMContentLoaded", () => {
     questionContainer.appendChild(questionElement)
 
     // Add event listeners to save answers
-    if (question.answerType === "multiple") {
+    addAnswerEventListeners();
+
+    // Stop any ongoing speech when changing questions
+    if (speechSynthesis.speaking) {
+      speechSynthesis.cancel();
+    }
+
+    // Update navigation buttons
+    updateNavigationButtons()
+
+    // Save state after showing question
+    saveQuizState();
+  }
+
+  function addAnswerEventListeners() {
+    // FIXED: use preparedQuestions instead of currentQuiz.questions
+    const question = preparedQuestions[currentQuestionIndex];
+    
+    if (question.answerType === "multiple" || question.answerType === "truefalse") {
       const radioInputs = questionContainer.querySelectorAll('input[type="radio"]')
       radioInputs.forEach((input) => {
         input.addEventListener("change", function () {
           userAnswers[currentQuestionIndex] = this.value
+          saveQuizState(); // Save on change
         })
 
         // Check the radio button if it matches the saved answer
@@ -360,31 +437,14 @@ document.addEventListener("DOMContentLoaded", () => {
       })
     } else if (question.answerType === "typed") {
       const typedInput = questionContainer.querySelector("#typedAnswer")
-      typedInput.value = userAnswers[currentQuestionIndex] || ""
-      typedInput.addEventListener("input", function () {
-        userAnswers[currentQuestionIndex] = this.value
-      })
-    } else if (question.answerType === "truefalse") {
-      const radioInputs = questionContainer.querySelectorAll('input[type="radio"]')
-      radioInputs.forEach((input) => {
-        input.addEventListener("change", function () {
+      if (typedInput) {
+        typedInput.value = userAnswers[currentQuestionIndex] || ""
+        typedInput.addEventListener("input", function () {
           userAnswers[currentQuestionIndex] = this.value
+          saveQuizState(); // Save on input
         })
-
-        // Check the radio button if it matches the saved answer
-        if (input.value === userAnswers[currentQuestionIndex]) {
-          input.checked = true
-        }
-      })
+      }
     }
-
-    // Stop any ongoing speech when changing questions
-    if (speechSynthesis.speaking) {
-      speechSynthesis.cancel();
-    }
-
-    // Update navigation buttons
-    updateNavigationButtons()
   }
 
   function createMultipleChoiceInterface(index, question) {
@@ -451,13 +511,15 @@ document.addEventListener("DOMContentLoaded", () => {
   };
   
   function showPreviousQuestion() {
+    // FIXED: use preparedQuestions.length instead of currentQuiz.questions.length
     if (currentQuestionIndex > 0) {
       showQuestion(currentQuestionIndex - 1)
     }
   }
 
   function showNextQuestion() {
-    if (currentQuestionIndex < currentQuiz.questions.length - 1) {
+    // FIXED: use preparedQuestions.length instead of currentQuiz.questions.length
+    if (currentQuestionIndex < preparedQuestions.length - 1) {
       showQuestion(currentQuestionIndex + 1)
     }
   }
@@ -467,7 +529,8 @@ document.addEventListener("DOMContentLoaded", () => {
     prevBtn.disabled = currentQuestionIndex === 0;
 
     // Show/hide next and submit buttons on last question
-    if (currentQuestionIndex === currentQuiz.questions.length - 1) {
+    // FIXED: use preparedQuestions.length instead of currentQuiz.questions.length
+    if (currentQuestionIndex === preparedQuestions.length - 1) {
         nextBtn.classList.add("d-none");
         submitQuizBtn.classList.remove("d-none");
     } else {
@@ -480,6 +543,11 @@ document.addEventListener("DOMContentLoaded", () => {
     timerInterval = setInterval(() => {
       timeRemaining--
       updateTimerDisplay()
+
+      // Save state every 10 seconds to preserve timer progress
+      if (timeRemaining % 10 === 0) {
+        saveQuizState();
+      }
 
       if (timeRemaining <= 0) {
         clearInterval(timerInterval)
@@ -500,52 +568,43 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function submitQuiz() {
     isQuizSubmitted = true;
-    // Stop timer if it's running
     if (timerInterval) {
-      clearInterval(timerInterval)
+      clearInterval(timerInterval);
     }
+    clearQuizState();
 
-    // Calculate score
-    let score = 0
-    const results = []
+    let score = 0;
+    const results = [];
 
-    currentQuiz.questions.forEach((question, index) => {
-      let isCorrect = false
-      const userAnswer = userAnswers[index]
-      const correctAnswer = correctAnswers[index]
+    preparedQuestions.forEach((question, index) => { // Use preparedQuestions
+      let isCorrect = false;
+      const userAnswer = userAnswers[index];
+      const correctAnswer = correctAnswers[index];
 
       if (userAnswer) {
-        // Check if answer is correct based on question type
         switch (question.answerType) {
           case "multiple":
-            isCorrect = userAnswer === correctAnswer
-            break
-
+            isCorrect = userAnswer === correctAnswer;
+            break;
           case "typed":
-            // Case-insensitive comparison for typed answers
-            isCorrect = userAnswer.toLowerCase() === correctAnswer.toLowerCase()
-            break
-
+            isCorrect = userAnswer.toLowerCase() === correctAnswer.toLowerCase();
+            break;
           case "truefalse":
-            isCorrect = userAnswer === correctAnswer
-            break
+            isCorrect = userAnswer === correctAnswer;
+            break;
         }
-
-        if (isCorrect) {
-          score++
-        }
+        if (isCorrect) score++;
       }
 
-      // Format the question text based on question type
-      let questionText = ""
+      let questionText = "";
       switch (question.answerType) {
         case "multiple":
         case "typed":
-          questionText = question.description
-          break
+          questionText = question.description;
+          break;
         case "truefalse":
-          questionText = question.statement
-          break
+          questionText = question.statement;
+          break;
       }
 
       results.push({
@@ -554,16 +613,14 @@ document.addEventListener("DOMContentLoaded", () => {
         correctAnswer: correctAnswer,
         answerType: question.answerType,
         isCorrect: isCorrect,
-      })
-    })
+      });
+    });
 
-    // Save result to database if we have a quiz ID
     if (currentQuizId) {
-      saveResultToDatabase(currentQuizId, score, currentQuiz.questions.length)
+      saveResultToDatabase(currentQuizId, score, preparedQuestions.length);
     }
 
-    // Show results modal
-    showResults(score, currentQuiz.questions.length, results)
+    showResults(score, preparedQuestions.length, results);
   }
 
   function saveResultToDatabase(quizId, score, totalQuestions) {
@@ -674,24 +731,22 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function resetQuiz() {
-    // Reset user answers
-    userAnswers = Array(currentQuiz.questions.length).fill(null)
-
-    // Reset timer if quiz is timed
+    clearQuizState();
+    userAnswers = Array(currentQuiz.questions.length).fill(null);
+    
+    // Regenerate randomized questions for fresh start
+    preparedQuestions = prepareQuizQuestions();
+    
     if (currentQuiz.settings && currentQuiz.settings.timed) {
-      timeRemaining = currentQuiz.settings.time * 60
-      updateTimerDisplay()
+      timeRemaining = currentQuiz.settings.time * 60;
+      updateTimerDisplay();
       if (timerInterval) {
-        clearInterval(timerInterval)
+        clearInterval(timerInterval);
       }
-      startTimer()
+      startTimer();
     }
 
-    // Prepare questions again to regenerate options and true/false statements
-    prepareQuizQuestions()
-
-    // Show first question
-    showQuestion(0)
+    showQuestion(0);
   }
 
   // Utility function to shuffle array
