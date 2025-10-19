@@ -62,9 +62,9 @@ document.addEventListener('DOMContentLoaded', function() {
     //     openModal('goalModal');
     // });
     
-    document.getElementById('settingsBtn').addEventListener('click', function() {
-        openModal('timerModal');
-    });
+    // document.getElementById('settingsBtn').addEventListener('click', function() {
+    //     openModal('timerModal');
+    // });
     
     // Close modals
     closeButtons.forEach(button => {

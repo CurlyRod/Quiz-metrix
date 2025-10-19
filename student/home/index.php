@@ -141,38 +141,7 @@
         </div>
       </div>
 
-      <!-- Timer Card -->
-      <div class="card timer-card">
-        <div class="card-header">
-          <h3><i class="fas fa-clock"></i> Study Timer</h3>
-        </div>
-        <div class="card-body">
-          <div class="timer-tabs">
-            <button class="timer-tab active" data-tab="study">Study</button>
-            <button class="timer-tab" data-tab="break">Break</button>
-          </div>
-
-          <div class="timer-display">
-            <span id="timerDisplay">25:00</span>
-          </div>
-        </div>
-        <div class="timer-footer">
-          <button id="startPauseBtn" class="btn primary-btn">
-            <i class="fas fa-play"></i> Start
-          </button>
-          <div class="timer-controls">
-            <button id="resetBtn" class="timer-control-btn">
-              <i class="fas fa-redo"></i>
-            </button>
-            <button id="settingsBtn" class="timer-control-btn">
-              <i class="fas fa-cog"></i>
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
+     
   <!-- Modal for Adding/Editing Events -->
   <div class="modal" id="eventModal">
     <div class="modal-content">
@@ -198,91 +167,19 @@
     </div>
   </div>
 
-  <!-- Modal for Setting Goals -->
-  <div class="modal" id="goalModal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3>Set a New Goal</h3>
-        <button class="close-btn" data-bs-dismiss="modal">&times;</button>
-      </div>
-      <div class="modal-body">
-        <div class="form-group">
-          <label class="goal-sentence-label">Your Goal</label>
-          <div class="goal-sentence">
-            <span>Finish</span>
-            <select id="setsCount" class="inline-dropdown" style="width: 50px;">
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-              <option value="5" selected>5</option>
-              <option value="6">6</option>
-              <option value="7">7</option>
-              <option value="8">8</option>
-              <option value="9">9</option>
-              <option value="10">10</option>
-            </select>
-            <span id="setsLabel">set/s</span>
-            <span>of</span>
-            <select id="activityType" class="inline-dropdown" style="width:100px;">
-              <option value="Quiz" selected>Quiz</option>
-              <option value="Flashcard">Flashcard</option>
-            </select>
-          </div>
-        </div>
-        <div class="form-group">
-          <label for="goalDateInput">Target Date</label>
-          <input type="date" id="goalDateInput" class="form-control">
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button id="saveGoalBtn" class="btn primary-btn">Save Goal</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal for Timer Settings -->
-  <div class="modal" id="timerModal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3>Timer Settings</h3>
-        <button class="close-btn" data-bs-dismiss="modal">&times;</button>
-      </div>
-      <div class="modal-body">
-        <div class="form-group">
-          <label for="studyTimeInput">Study Time (minutes)</label>
-          <div class="slider-container">
-            <input type="range" id="studyTimeInput" min="10" max="120" step="5" value="25">
-            <span id="studyTimeValue">25</span>
-          </div>
-        </div>
-        <div class="form-group">
-          <label for="breakTimeInput">Break Time (minutes)</label>
-          <div class="slider-container">
-            <input type="range" id="breakTimeInput" min="5" max="30" step="1" value="5">
-            <span id="breakTimeValue">5</span>
-          </div>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button id="saveTimerBtn" class="btn primary-btn">Save Settings</button>
-      </div>
-    </div>
-  </div>
- 
+  
   <!-- jQuery -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
   <!-- Custom JS -->
   <script src="js/recent.js"></script>
-
   <script src="js/calendar.js"></script>
   <script src="js/todo.js"></script>
   <!-- <script src="js/goals.js"></script> -->
-  <script src="js/timer.js"></script>
   <script src="js/main.js"></script>
   <!-- <script src="js/validate-user.js"></script> -->
   <?php include '../../shared-student/script.php'; ?>
+
 
   
 </body>
