@@ -1,4 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&display=swap');
 
 * {
 	font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
@@ -204,8 +203,392 @@ li {
 }
 /* SIDEBAR */
 
+.primary-btn {
+    background-color: #6366f1;
+    color: white;
+}
 
+.save-btn {
+    padding: 6px 12px;
+    border-radius: 5px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.primary-btn:hover {
+    background-color: #6366f1;
+  }
 
+/* Navigation Timer Styles */
+.nav-timer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin: 0 auto;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.timer-btn {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.3s ease;
+}
+
+.timer-btn.primary-btn {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.timer-btn.stop-btn {
+    background-color: #f44336;
+    color: white;
+}
+
+.timer-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.nav-timer-display {
+    font-size: 18px;
+    font-weight: bold;
+    padding: 5px 10px;
+    background-color: #f5f5f5;
+    border-radius: 4px;
+    cursor: pointer;
+    min-width: 70px;
+    text-align: center;
+    transition: background-color 0.3s ease;
+}
+
+.nav-timer-display:hover {
+    background-color: #e0e0e0;
+}
+
+/* Modal Styles */
+.timer-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+
+.timer-modal.active {
+    display: flex;
+}
+
+.timer-modal-content {
+    background-color: white;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.timer-modal-header {
+    padding: 15px 20px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: between;
+    align-items: center;
+}
+
+.timer-modal-header h3 {
+    margin: 0;
+    flex: 1;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.timer-modal-body {
+    padding: 20px;
+}
+
+.timer-form-group {
+    margin-bottom: 20px;
+}
+
+.timer-form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+.slider-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.slider-container input[type="range"] {
+    flex: 1;
+}
+
+.slider-container span {
+    min-width: 30px;
+    text-align: center;
+}
+
+.timer-modal-footer {
+    padding: 15px 20px;
+    border-top: 1px solid #eee;
+    text-align: right;
+	display: flex;
+	justify-content: flex-end;
+}
+
+/* Navigation Styles */
+nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+/* Break Timer Styles */
+    .break-timer-display {
+        text-align: center;
+        margin: 20px 0;
+        font-size: 2rem;
+        font-weight: bold;
+        color: #4a5568;
+    }
+
+	/* Break Modal Styles */
+.break-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+.break-modal.active {
+    display: flex;
+}
+
+.break-modal .modal-content {
+    background-color: white;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    animation: breakModalSlideIn 0.3s ease-out;
+    overflow: hidden;
+}
+
+/* Modal Header */
+.break-modal .modal-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px;
+    text-align: center;
+    position: relative;
+}
+
+.break-modal .modal-header h3 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.break-modal .close-btn {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    background: none;
+    border: none;
+    color: white;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background-color 0.3s;
+}
+
+.break-modal .close-btn:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Modal Body */
+.break-modal .modal-body {
+    padding: 30px 20px;
+    text-align: center;
+}
+
+.break-modal .modal-body p {
+    margin: 0 0 20px 0;
+    font-size: 1.1rem;
+    color: #333;
+    line-height: 1.5;
+}
+
+.break-modal .break-timer-display {
+    font-size: 3rem;
+    font-weight: bold;
+    color: #667eea;
+    margin: 20px 0;
+    font-family: 'Courier New', monospace;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.break-modal .modal-body p:last-of-type {
+    font-size: 1rem;
+    color: #666;
+    margin-bottom: 0;
+}
+
+/* Modal Footer */
+.break-modal .modal-footer {
+    padding: 20px;
+    text-align: center;
+    border-top: 1px solid #eee;
+}
+
+.break-modal .btn {
+    padding: 12px 30px;
+    border: none;
+    border-radius: 25px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: none;
+}
+
+.break-modal .primary-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.break-modal .primary-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.break-modal .primary-btn:active {
+    transform: translateY(0);
+}
+
+/* Animation */
+@keyframes breakModalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50px) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .break-modal .modal-content {
+        width: 95%;
+        margin: 20px;
+    }
+    
+    .break-modal .break-timer-display {
+        font-size: 2.5rem;
+    }
+    
+    .break-modal .modal-body {
+        padding: 20px 15px;
+    }
+    
+    .break-modal .modal-header h3 {
+        font-size: 1.3rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .break-modal .break-timer-display {
+        font-size: 2rem;
+    }
+    
+    .break-modal .modal-body p {
+        font-size: 1rem;
+    }
+    
+    .break-modal .btn {
+        padding: 10px 25px;
+        font-size: 0.9rem;
+    }
+}
+
+/* Prevent background scrolling when modal is open */
+body.break-modal-open {
+    overflow: hidden;
+}
+
+/* Optional: Add some visual effects */
+.break-modal .modal-content::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+}
+
+/* Pulse animation for the timer */
+@keyframes breakPulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.break-modal .break-timer-display {
+    animation: breakPulse 2s infinite;
+}
 
 
 /* CONTENT */
