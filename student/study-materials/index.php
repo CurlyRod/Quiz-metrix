@@ -35,12 +35,12 @@ $recentFiles = getRecentFiles(5);
     <!-- Custom CSS -->
     <link href="css/styles.css" rel="stylesheet">
     <link rel="stylesheet" href="../../vendor/student/home/home.css">
-    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css'>
     <link rel="icon" type="image/x-icon" href="../../assets/img/logo/apple-touch-icon.png">
 
 </head>
 
-<body style="padding: 20px background: #f5f7fb;">
+<body>
     <?php
     // Check if user is logged in
     if (!isset($_SESSION['user'])) {
@@ -53,7 +53,7 @@ $recentFiles = getRecentFiles(5);
     ?>
     <?php
     $currentPage = 'study-materials'; 
-
+    
     include '../../shared-student/sidebar.php';
     include '../../shared-student/navbar.php';
     ?>
@@ -63,12 +63,12 @@ $recentFiles = getRecentFiles(5);
     <div class="container-fluid px-0">
         <!-- Main content -->
         <main class="container-fluid py-4" style="height: 100vh; background-color: #f5f7fb; padding: 20px 20px 20px 20px;">
-           <!-- Action buttons + Search bar + Filters -->
-            <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+          <!-- Action buttons + Search bar + Filters -->
+            <div class="d-flex justify-content-between align-items-center mb-4 flex-nowrap">
                 
                 <!-- Action buttons -->
-                <div class="action-buttons mb-3 mb-md-0">
-                    <button type="button" class="btn primary-btn" data-bs-toggle="modal" data-bs-target="#uploadModal" style="background-color: #6366f1; color: white;">
+                <div class="action-buttons d-flex align-items-center">
+                    <button type="button" class="btn primary-btn me-2" data-bs-toggle="modal" data-bs-target="#uploadModal" style="background-color: #6366f1; color: white;">
                         <i class="bx bx-upload me-1"></i> Upload
                     </button>
                     <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#newFolderModal">
@@ -77,7 +77,7 @@ $recentFiles = getRecentFiles(5);
                 </div>
 
                 <!-- Search bar -->
-                <div class="search-container mb-3 mb-md-0 flex-grow-1 mx-3">
+                <div class="search-container flex-grow-1 mx-3" style="min-width: 500px; max-width: 800px;">
                     <form action="index.php" method="GET" id="searchForm" class="search-form">
                         <div class="input-group">
                             <span class="input-group-text bg-transparent border-end-0">
@@ -96,9 +96,8 @@ $recentFiles = getRecentFiles(5);
                     </form>
                 </div>
 
-
                 <!-- Filters -->
-                <div class="filters d-flex flex-wrap">
+                <div class="filters d-flex align-items-center">
                     <div class="view-toggle btn-group">
                         <button type="button" class="btn btn-outline-primary view-toggle active" data-view="grid">
                             <i class="bx bxs-grid-alt"></i>
@@ -139,7 +138,7 @@ $recentFiles = getRecentFiles(5);
             <?php if (!empty($items['folders'])): ?>
                 <div class="section mb-4">
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h2 class="section-title">Folders</h2>
+                        <h1 class="section-title">Folders</h1>
                     </div>
                     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 row-cols-xl-5 g-3 folders-container sortable-container" data-type="folder">
                         <?php foreach ($items['folders'] as $folder): ?>
@@ -175,9 +174,23 @@ $recentFiles = getRecentFiles(5);
             <!-- Files section -->
             <div class="section">
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h2 class="section-title mb-0">Files</h2>
+                    <!-- Left side: Title + Action buttons -->
+                    <div class="d-flex align-items-center gap-2">
+                        <h1 class="section-title mb-0 me-3">Files</h1>
+                        <div class="d-flex gap-2">
+                            <button id="selectItemsBtn" class="btn primary-btn">
+                                <i class="bx bx-check-circle"></i> Select Files
+                            </button>
+                            <button class="btn btn-outline-info select-all-btn d-none" id="selectAllBtn">
+                                <i class="bx bx-select-multiple"></i> Select All
+                            </button>
+                            <button id="bulkDeleteBtn" class="upload-btn d-none" style="border-color:#ea4335; color:#ea4335;">
+                                <i class="bx bx-trash"></i> Delete Selected
+                            </button>
+                        </div>
+                    </div>
 
-                    <!-- Filters (Right aligned) -->
+                    <!-- Right side: Filter dropdowns -->
                     <div class="d-flex gap-2">
                         <!-- Sort by Date -->
                         <div class="dropdown">
@@ -216,7 +229,7 @@ $recentFiles = getRecentFiles(5);
                 </div>
 
                 <!-- Grid view -->
-                <div class="file-container grid-view">
+                <div class="row file-container grid-view">
                     <?php if (empty($items['files'])): ?>
                         <div class="empty-state">
                             <?php if (!empty($searchQuery)): ?>
@@ -231,6 +244,10 @@ $recentFiles = getRecentFiles(5);
                             <?php foreach ($items['files'] as $file): ?>
                                 <div class="col">
                                     <div class="card file-card h-100" data-id="<?php echo $file['id']; ?>">
+                                        <div class="file-checkbox">
+                                             <input type="checkbox" class="select-file" data-id="<?= $file['id'] ?>">
+                                        </div>
+
                                         <div class="card-preview">
                                             <?php if ($file['type'] === 'pdf'): ?>
                                                 <div class="preview-placeholder pdf">
@@ -260,7 +277,8 @@ $recentFiles = getRecentFiles(5);
                                             </button>
                                             <ul class="dropdown-menu dropdown-menu-end">
                                                 <li><a class="dropdown-item preview-file" href="#" data-id="<?php echo $file['id']; ?>" data-type="<?php echo $file['type']; ?>" data-path="<?php echo htmlspecialchars($file['file_path']); ?>">Preview</a></li>
-                                                <li><a class="dropdown-item" href="api/download.php?id=<?php echo $file['id']; ?>">Download</a></li>
+                                                <!-- Added download attribute to force file download -->
+                                               
                                                 <li><a class="dropdown-item delete-file" href="#" data-id="<?php echo $file['id']; ?>">Delete</a></li>
                                             </ul>
                                         </div>
@@ -287,7 +305,7 @@ $recentFiles = getRecentFiles(5);
                             <table class="table table-hover">
                                 <thead>
                                     <tr>
-                                        <th>Name</th>
+                                        <th>  Name</th>
                                         <th>Type</th>
                                         <th>Size</th>
                                         <th>Modified</th>
@@ -297,108 +315,138 @@ $recentFiles = getRecentFiles(5);
                                 <tbody>
                                     <?php foreach ($items['files'] as $file): ?>
                                         <tr data-id="<?php echo $file['id']; ?>" data-type="<?php echo strtolower($file['type']); ?>">
-
-
+                                        
                                             <td>
                                                 <div class="d-flex align-items-center">
+                                                      <div class="file-checkbox">
+                                                            <input type="checkbox" class="select-file" data-id="<?= $file['id'] ?>">
+                                                         </div>
                                                     <i class="<?php echo getFileIcon($file['type']); ?> me-2"></i>
                                                     <span><?php echo htmlspecialchars($file['name']); ?></span>
                                                 </div>
                                             </td>
+                                            
                                             <td><?php echo strtoupper($file['type']); ?></td>
                                             <td><?php echo formatFileSize($file['size']); ?></td>
                                             <td data-upload="<?php echo $file['upload_date']; ?>">
                                                 <?php echo formatDate($file['upload_date']); ?>
                                             </td>
                                             <td>
-                                                <div class="btn-group">
-                                                    <button type="button" class="btn btn-sm btn-outline-secondary preview-file" data-id="<?php echo $file['id']; ?>" data-type="<?php echo $file['type']; ?>" data-path="<?php echo htmlspecialchars($file['file_path']); ?>">
-                                                        <i class="bx bx-show"></i>
+                                                <div class="dropdown">
+                                                    <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                        Actions
                                                     </button>
-                                                    <a href="api/download.php?id=<?php echo $file['id']; ?>" class="btn btn-sm btn-outline-primary">
-                                                        <i class="bx bx-download"></i>
-                                                    </a>
-                                                    <button type="button" class="btn btn-sm btn-outline-danger delete-file" data-id="<?php echo $file['id']; ?>">
-                                                        <i class="bx bx-trash"></i>
-                                                    </button>
+                                                    <ul class="dropdown-menu">
+                                                        <li>
+                                                            <a class="dropdown-item preview-file" href="#" data-id="<?php echo $file['id']; ?>" data-type="<?php echo $file['type']; ?>" data-path="<?php echo htmlspecialchars($file['file_path']); ?>">
+                                                                <i class="bx bx-show me-2"></i> Preview
+                                                            </a>
+                                                        </li>
+                                                      
+                                                        <li>
+                                                            <a class="dropdown-item text-danger delete-file" href="#" data-id="<?php echo $file['id']; ?>">
+                                                                <i class="bx bx-trash me-2"></i> Delete
+                                                            </a>
+                                                        </li>
+                                                    </ul>
                                                 </div>
                                             </td>
+
                                         </tr>
                                     <?php endforeach; ?>
                                 </tbody>
                             </table>
                         </div>
+                                            <!--Pagination Controls -->
+                            <div id="paginationControls" class="d-flex justify-content-center align-items-center mt-3 mb-4">
+                            <button id="prevPage" class="btn btn-outline-primary me-2" disabled>Previous</button>
+                            <span id="pageInfo" class="fw-bold text-primary"></span>
+                            <button id="nextPage" class="btn btn-outline-primary ms-2">Next</button>
+                            </div>                    
                     <?php endif; ?>
                 </div>
             </div>
         </main>
     </div>
+    <div id="noResultsMessage" class="empty-state d-none">
+  <i class="bx bx-search"></i> No results found
+</div>
 
     <!-- Upload Modal -->
-    <div class="modal fade" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false"> 
-        <div class="modal-dialog modal-dialog-centered static">
-            <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="uploadModalLabel">Upload Files</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="uploadForm" enctype="multipart/form-data">
-                <div class="mb-3">
-                    <label for="fileUpload" class="form-label">Choose or Drop Files</label>
-                    
-                    <!-- Click + Drag-Drop Area -->
-                    <div id="fileInputWrapper" class="border rounded p-4 text-center bg-light" style="cursor:pointer; position: relative;">
-                    <input class="form-control" type="file" id="fileUpload" name="files[]"
-                            accept=".pdf,.docx,.txt" multiple
-                            style="opacity:0; position:absolute; top:0; left:0; width:100%; height:100%; cursor:pointer;">
-                    <p class="m-0">Click to browse or drag & drop files here</p>
-                    <small class="text-muted">Allowed: .pdf, .docx, .txt</small>
+    <div class="modal fade" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content upload-modal">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" id="uploadModalLabel">
+                        <i class="bx bx-cloud-upload me-2"></i> Upload Files
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <form id="uploadForm" enctype="multipart/form-data">
+                        <div class="mb-4">
+                            <label for="fileUpload" class="form-label fw-semibold fs-5">Choose or Drop Files</label>
+
+                            <div id="fileInputWrapper" class="upload-dropzone text-center">
+                                <input class="form-control" type="file" id="fileUpload" name="files[]" accept=".pdf,.docx,.txt" multiple>
+                                <i class="bx bx-cloud-upload fs-1 text-primary mb-2"></i>
+                                <p class="m-0 fw-semibold">Click to browse or drag & drop files here</p>
+                                <small class="text-muted d-block mt-1">Allowed: 5 MB below (each file).</small>
+                                <small class="text-muted d-block mt-1">Allowed: .pdf, .docx, .txt</small> 
+                            </div>
+                        </div>
+                        <input type="hidden" name="folder_id" value="<?php echo $currentFolderId; ?>">
+                    </form>
+
+                    <ul id="fileList" class="list-group mb-3"></ul>
+
+                    <!-- Enhanced circular progress with filename and size -->
+                    <div class="upload-progress-wrapper d-none" id="uploadProgressWrapper">
+                        <div class="upload-file-info" id="uploadFileInfo">
+                            <div class="file-name" id="uploadFileName">Uploading...</div>
+                            <div class="file-size" id="uploadFileSize">0 KB</div>
+                        </div>
+                            <div class="percentage" id="progressPercent">0%</div> 
                     </div>
                 </div>
-                <input type="hidden" name="folder_id" value="<?php echo $currentFolderId; ?>">
-                </form>
 
-                <ul id="fileList" class="list-group mb-2"></ul>
-
-                <div class="progress d-none" id="uploadProgress">
-                <div class="progress-bar" role="progressbar" style="width:0%;" aria-valuenow="0"
-                    aria-valuemin="0" aria-valuemax="100">0%</div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="uploadButton">Upload</button>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" id="uploadButton" style="background-color:#6366f1; color:white;">Upload</button>
-            </div>
             </div>
         </div>
     </div>
 
     <!-- New Folder Modal -->
     <div class="modal fade" id="newFolderModal" tabindex="-1" aria-labelledby="newFolderModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
+        <div class="modal-dialog modal-dialog-centered modal-md">
+            <div class="modal-content new-folder-modal">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="newFolderModalLabel">Create New Folder</h5>
+                    <h5 class="modal-title fw-bold" id="newFolderModalLabel">
+                        <i class="bx bx-folder-plus me-2"></i> Create New Folder
+                    </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
+
                 <div class="modal-body">
                     <form id="newFolderForm">
-                        <div class="mb-3">
-                            <label for="folderName" class="form-label">Folder Name</label>
-                            <input type="text" class="form-control" id="folderName" name="name" maxlength="15" required>
+                        <div class="mb-4">
+                            <label for="folderName" class="form-label fw-semibold fs-5">Folder Name</label>
+                            <input type="text" class="form-control form-control-lg" id="folderName" name="name" maxlength="15" placeholder="e.g. Documents" required>
                         </div>
                         <input type="hidden" name="parent_id" value="<?php echo $currentFolderId; ?>">
                     </form>
                 </div>
+
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="button" class="btn btn-success" id="createFolderButton">Create</button>
                 </div>
             </div>
         </div>
     </div>
-
     <!-- Rename Folder Modal -->
     <div class="modal fade" id="renameFolderModal" tabindex="-1" aria-labelledby="renameFolderModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -437,7 +485,8 @@ $recentFiles = getRecentFiles(5);
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <a href="#" class="btn btn-primary" id="previewDownloadBtn">Download</a>
+                    <!-- Added download attribute to preview modal download button -->
+                    <a href="#" class="btn btn-primary" id="previewDownloadBtn" download>Download</a>
                 </div>
             </div>
         </div>
@@ -462,13 +511,25 @@ $recentFiles = getRecentFiles(5);
         </div>
     </div>
 
+   <div class="view-toggle-group btn-group"> 
+  <button type="button" class="btn view-toggle" data-view="grid">
+    <i class="bx bx-grid"></i>
+  </button>
+  <button type="button" class="btn view-toggle" data-view="list">
+    <i class="bx bx-list-ul"></i>
+  </button>
+</div>
+
+
+
     <!-- Toast Container -->
-    <div class="toast-container position-fixed bottom-0 end-0 p-3">
-        <!-- Toasts will be added here dynamically -->
-    </div>
+    <div class="toast-container position-fixed bottom-0 end-0 p-3"></div>
+
+
 
 
     <!-- Custom JS -->
+     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
     <script src="js/fileManager.js"></script>
     <?php include '../../shared-student/script.php'; ?>
 
