@@ -135,4 +135,18 @@ try {
         'message' => $e->getMessage()
     ]);
 }
+
+$maxFileSize = 5 * 1024 * 1024; // 5 MB
+
+foreach ($_FILES['files']['name'] as $key => $name) {
+    if ($_FILES['files']['error'][$key] !== UPLOAD_ERR_OK) continue;
+
+    if ($_FILES['files']['size'][$key] > $maxFileSize) {
+        echo json_encode([
+            "success" => false,
+            "message" => "File '{$name}' exceeds 5 MB upload limit."
+        ]);
+        exit;
+    }
+}
 ?>
