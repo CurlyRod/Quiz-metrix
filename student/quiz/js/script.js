@@ -26,7 +26,6 @@ let draggedCard = null;
 document.addEventListener("DOMContentLoaded", () => {
     // DOM Elements
     const createQuizBtn = document.getElementById("createQuizBtn")
-    const clearFormBtn = document.getElementById("clearFormBtn")
     const addCardBtn = document.getElementById("addCardBtn")
     const questionCards = document.getElementById("questionCards")
     const startQuizBtn = document.getElementById("startQuizBtn")

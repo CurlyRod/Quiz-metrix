@@ -9,8 +9,8 @@ if ($quiz_id <= 0) {
     exit;
 }
 
-// Delete quiz (questions will be deleted via ON DELETE CASCADE)
-$stmt = $conn->prepare("DELETE FROM quizzes WHERE quiz_id = ?");
+// Soft delete quiz - set is_deleted flag instead of actually deleting (hides the quiz)
+$stmt = $conn->prepare("UPDATE quizzes SET is_deleted = 1 WHERE quiz_id = ?");
 $stmt->bind_param("i", $quiz_id);
 
 if ($stmt->execute()) {

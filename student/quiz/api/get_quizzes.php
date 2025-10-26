@@ -36,7 +36,7 @@ try {
     $stmt->close();
 
     // Get quizzes for this user
-    $stmt = $conn->prepare("SELECT quiz_id, title, description, created_at, updated_at FROM quizzes WHERE user_id = ? ORDER BY updated_at DESC");
+    $stmt = $conn->prepare("SELECT quiz_id, title, description, created_at, updated_at FROM quizzes WHERE user_id = ? AND is_deleted = 0 ORDER BY updated_at DESC");
     if (!$stmt) {
         throw new Exception('Prepare failed: ' . $conn->error);
     }

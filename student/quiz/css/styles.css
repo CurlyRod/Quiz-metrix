@@ -1,6 +1,7 @@
 /* General Styles */
 body {
-  background-color: #f8f9fa;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: #f8f9fa;
 }
 
 .container {
@@ -226,26 +227,7 @@ th:first-child, td:first-child {
   margin-right: 4%;
 }
 
-/* Results Styles */
-.correct-answer {
-  color: #28a745;
-  font-weight: bold;
-}
 
-.incorrect-answer {
-  color: #dc3545;
-  font-weight: bold;
-}
-
-.answer-review-item {
-  margin-bottom: 1.5rem;
-  padding-bottom: 1.5rem;
-  border-bottom: 1px solid #e9ecef;
-}
-
-.answer-review-item:last-child {
-  border-bottom: none;
-}
 
 /* Manage Quizzes Page */
 .table th {
