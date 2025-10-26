@@ -29,10 +29,9 @@ include '../../shared-student/sidebar.php';
 include '../../shared-student/navbar.php';
 ?>
     <input type="hidden" name="user-current-id" id="user-current-id">
-
     <ul class="nav nav-underline " style="padding: 20px;">
                     <li class="nav-item">
-                        <a class="nav-link " href="index.php" style="color:rgba(99, 101, 241, 0.8)">Create</a>
+                        <a class="nav-link " href="index.php" style="color:rgba(99, 101, 241, 0.8)">Quizzes</a>
                     </li>
                     
                     <li class="nav-item">
@@ -174,6 +173,7 @@ include '../../shared-student/navbar.php';
             </div>
         </div>
     </div>
+    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/script.js"></script>
     <?php include '../../shared-student/script.php'; ?>

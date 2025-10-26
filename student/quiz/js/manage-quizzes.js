@@ -10,13 +10,17 @@ document.addEventListener("DOMContentLoaded", () => {
   const selectAllCheckbox = document.getElementById("selectAllCheckbox")
   const deleteSelectedBtn = document.getElementById("deleteSelectedBtn")
 
-  // Initialize Bootstrap modals
-  const deleteModal = new bootstrap.Modal(document.getElementById("deleteModal"))
-  const resultsHistoryModal = new bootstrap.Modal(document.getElementById("resultsHistoryModal"))
-
+  // Modals
+  const deleteModal = document.getElementById("deleteModal")
+  const resultsHistoryModal = document.getElementById("resultsHistoryModal")
+  
   const confirmDeleteBtn = document.getElementById("confirmDeleteBtn")
   const resultsQuizTitle = document.getElementById("resultsQuizTitle")
   const resultsTable = document.getElementById("resultsTable")
+  
+  // Modal elements
+  const deleteModalTitle = document.getElementById("deleteModalTitle")
+  const deleteModalBody = document.getElementById("deleteModalBody")
 
   // Pagination variables
   const itemsPerPage = 10
@@ -27,17 +31,38 @@ document.addEventListener("DOMContentLoaded", () => {
   let allQuizzes = []
   let filteredQuizzes = []
   let quizToDelete = null
+  let quizzesToDelete = []
 
   // Load quizzes
   loadQuizzes()
 
   // Event listeners
-  searchQuiz.addEventListener("input", filterQuizzes)
+  searchQuiz.addEventListener("input", () => {
+    filterQuizzes()
+    clearSearch.classList.toggle("visible", searchQuiz.value !== "")
+  })
+  
   clearSearch.addEventListener("click", clearSearchField)
   prevPage.parentElement.addEventListener("click", goToPrevPage)
   nextPage.parentElement.addEventListener("click", goToNextPage)
   selectAllCheckbox.addEventListener("change", toggleSelectAll)
   deleteSelectedBtn.addEventListener("click", deleteSelectedQuizzes)
+
+  // Modal close buttons
+  document.querySelectorAll('[data-dismiss="modal"]').forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      const modal = e.target.closest(".modal")
+      if (modal) closeModal(modal)
+    })
+  })
+
+  // Close modal on overlay click
+  document.querySelectorAll(".modal-overlay").forEach(overlay => {
+    overlay.addEventListener("click", (e) => {
+      const modal = e.target.closest(".modal")
+      if (modal) closeModal(modal)
+    })
+  })
 
   // Setup dropdown event delegation
   document.addEventListener("click", (e) => {
@@ -65,7 +90,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (action === "delete") {
         quizToDelete = quizId
-        deleteModal.show()
+        showDeleteConfirmationModal(1)
       } else if (action === "results") {
         viewQuizResults(quizId, quizTitle)
       }
@@ -85,6 +110,16 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   })
 
+  function openModal(modal) {
+    modal.classList.add("show")
+    document.body.style.overflow = "hidden"
+  }
+
+  function closeModal(modal) {
+    modal.classList.remove("show")
+    document.body.style.overflow = ""
+  }
+
   function loadQuizzes() {
     fetch("api/get_quizzes.php")
       .then((response) => response.json())
@@ -93,7 +128,6 @@ document.addEventListener("DOMContentLoaded", () => {
           allQuizzes = data.quizzes
           filteredQuizzes = [...allQuizzes]
 
-          // Load question counts for all quizzes
           loadQuestionCounts(allQuizzes).then(() => {
             updatePagination()
             displayQuizzes()
@@ -108,7 +142,6 @@ document.addEventListener("DOMContentLoaded", () => {
       })
   }
 
-  // Load question counts for all quizzes
   async function loadQuestionCounts(quizzes) {
     for (const quiz of quizzes) {
       try {
@@ -129,77 +162,96 @@ document.addEventListener("DOMContentLoaded", () => {
   function toggleSelectAll() {
     const checkboxes = document.querySelectorAll('#quizTable input[type="checkbox"]')
     checkboxes.forEach(checkbox => {
-        checkbox.checked = selectAllCheckbox.checked
+      checkbox.checked = selectAllCheckbox.checked
     })
     updateDeleteSelectedBtnState()
   }
 
   function updateDeleteSelectedBtnState() {
-      const checkedBoxes = document.querySelectorAll('#quizTable input[type="checkbox"]:checked')
-      deleteSelectedBtn.disabled = checkedBoxes.length === 0
+    const checkedBoxes = document.querySelectorAll('#quizTable input[type="checkbox"]:checked')
+    deleteSelectedBtn.disabled = checkedBoxes.length === 0
   }
 
   function deleteSelectedQuizzes() {
     const checkedBoxes = document.querySelectorAll('#quizTable input[type="checkbox"]:checked')
-    const quizIds = Array.from(checkedBoxes).map(checkbox => checkbox.value)
+    quizzesToDelete = Array.from(checkedBoxes).map(checkbox => checkbox.value)
     
-    if (quizIds.length === 0) {
-        showStatusMessage("No quizzes selected for deletion.", "warning")
-        return
+    if (quizzesToDelete.length === 0) {
+      showStatusMessage("No quizzes selected for deletion.", "warning")
+      return
     }
     
-    if (confirm(`Are you sure you want to delete ${quizIds.length} selected quiz(es)? This action cannot be undone.`)) {
-        // Disable button during deletion
-        deleteSelectedBtn.disabled = true
-        deleteSelectedBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Deleting...'
-        
-        // We'll delete quizzes one by one to match your single-delete behavior
-        let deletePromises = quizIds.map(quizId => {
-            return fetch(`api/delete_quiz.php?id=${quizId}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Remove quiz from arrays
-                        allQuizzes = allQuizzes.filter((quiz) => quiz.quiz_id != quizId)
-                        filteredQuizzes = filteredQuizzes.filter((quiz) => quiz.quiz_id != quizId)
-                        return { success: true, quizId }
-                    } else {
-                        return { success: false, quizId, message: data.message }
-                    }
-                })
-                .catch(error => {
-                    console.error("Error deleting quiz:", quizId, error)
-                    return { success: false, quizId, message: "Network error" }
-                })
-        })
-        
-        // Wait for all deletions to complete
-        Promise.all(deletePromises).then(results => {
-            const successfulDeletes = results.filter(r => r.success).length
-            const failedDeletes = results.filter(r => !r.success)
-            
-            if (failedDeletes.length === 0) {
-                showStatusMessage(`${successfulDeletes} quiz(es) deleted successfully.`, "success")
-            } else if (successfulDeletes === 0) {
-                showStatusMessage(`Failed to delete ${failedDeletes.length} quiz(es).`, "danger")
-            } else {
-                showStatusMessage(
-                    `${successfulDeletes} quiz(es) deleted successfully, ${failedDeletes.length} failed.`, 
-                    "warning"
-                )
-            }
-            
-            // Update UI
-            updatePagination()
-            displayQuizzes()
-            selectAllCheckbox.checked = false
-            
-            // Reset button state
-            deleteSelectedBtn.disabled = true
-            deleteSelectedBtn.innerHTML = '<i class="bi bi-trash"></i> Delete Selected'
-        })
+    showDeleteConfirmationModal(quizzesToDelete.length)
+  }
+
+  function showDeleteConfirmationModal(quizCount) {
+    if (quizCount === 1) {
+      deleteModalTitle.textContent = "Delete Quiz"
+      deleteModalBody.textContent = "Are you sure you want to move this quiz to recycling bin? You can restore it later."
+    } else {
+      deleteModalTitle.textContent = "Delete Multiple Quizzes"
+      deleteModalBody.textContent = `Are you sure you want to move ${quizCount} selected quizzes to recycling bin? You can restore them later.`
     }
-}
+    
+    openModal(deleteModal)
+  }
+
+  confirmDeleteBtn.addEventListener("click", () => {
+    if (quizToDelete) {
+      deleteQuiz(quizToDelete)
+      quizToDelete = null
+    } else if (quizzesToDelete.length > 0) {
+      deleteMultipleQuizzes(quizzesToDelete)
+      quizzesToDelete = []
+    }
+    closeModal(deleteModal)
+  })
+
+  function deleteMultipleQuizzes(quizIds) {
+    deleteSelectedBtn.disabled = true
+    deleteSelectedBtn.innerHTML = '<div class="loading-spinner" style="width: 16px; height: 16px; margin: 0;"></div> Moving to Bin...'
+    
+    let deletePromises = quizIds.map(quizId => {
+      return fetch(`api/delete_quiz.php?id=${quizId}`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            allQuizzes = allQuizzes.filter((quiz) => quiz.quiz_id != quizId)
+            filteredQuizzes = filteredQuizzes.filter((quiz) => quiz.quiz_id != quizId)
+            return { success: true, quizId }
+          } else {
+            return { success: false, quizId, message: data.message }
+          }
+        })
+        .catch(error => {
+          console.error("Error moving quiz to bin:", quizId, error)
+          return { success: false, quizId, message: "Network error" }
+        })
+    })
+    
+    Promise.all(deletePromises).then(results => {
+      const successfulDeletes = results.filter(r => r.success).length
+      const failedDeletes = results.filter(r => !r.success)
+      
+      if (failedDeletes.length === 0) {
+        showStatusMessage(`${successfulDeletes} quiz(es) moved to recycling bin successfully.`, "success")
+      } else if (successfulDeletes === 0) {
+        showStatusMessage(`Failed to move ${failedDeletes.length} quiz(es) to recycling bin.`, "danger")
+      } else {
+        showStatusMessage(
+          `${successfulDeletes} quiz(es) moved to recycling bin successfully, ${failedDeletes.length} failed.`, 
+          "warning"
+        )
+      }
+      
+      updatePagination()
+      displayQuizzes()
+      selectAllCheckbox.checked = false
+      
+      deleteSelectedBtn.disabled = true
+      deleteSelectedBtn.innerHTML = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg> Delete Selected'
+    })
+  }
 
   function filterQuizzes() {
     const searchTerm = searchQuiz.value.toLowerCase().trim()
@@ -208,11 +260,10 @@ document.addEventListener("DOMContentLoaded", () => {
       filteredQuizzes = [...allQuizzes]
     } else {
       filteredQuizzes = allQuizzes.filter(
-        (quiz) => quiz.title.toLowerCase().includes(searchTerm) || quiz.description.toLowerCase().includes(searchTerm),
+        (quiz) => quiz.title.toLowerCase().includes(searchTerm) || quiz.description.toLowerCase().includes(searchTerm)
       )
     }
 
-    // Reset to first page when filtering
     currentPage = 1
     updatePagination()
     displayQuizzes()
@@ -220,32 +271,31 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function clearSearchField() {
     searchQuiz.value = ""
+    clearSearch.classList.remove("visible")
     filterQuizzes()
   }
 
   function updatePagination() {
     totalPages = Math.max(1, Math.ceil(filteredQuizzes.length / itemsPerPage))
 
-    // Ensure current page is valid
     if (currentPage > totalPages) {
       currentPage = totalPages
     }
 
-    // Update pagination controls
     paginationControls.innerHTML = ""
 
-    // Previous button
     const prevLi = document.createElement("li")
     prevLi.className = `page-item ${currentPage === 1 ? "disabled" : ""}`
     prevLi.innerHTML = `
-      <a class="page-link" href="#" aria-label="Previous">
-        <span aria-hidden="true">&laquo;</span>
+      <a class="page-link" href="#">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
       </a>
     `
     prevLi.addEventListener("click", goToPrevPage)
     paginationControls.appendChild(prevLi)
 
-    // Page numbers
     const startPage = Math.max(1, currentPage - 2)
     const endPage = Math.min(totalPages, startPage + 4)
 
@@ -264,18 +314,18 @@ document.addEventListener("DOMContentLoaded", () => {
       paginationControls.appendChild(pageLi)
     }
 
-    // Next button
     const nextLi = document.createElement("li")
     nextLi.className = `page-item ${currentPage === totalPages ? "disabled" : ""}`
     nextLi.innerHTML = `
-      <a class="page-link" href="#" aria-label="Next">
-        <span aria-hidden="true">&raquo;</span>
+      <a class="page-link" href="#">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="9 18 15 12 9 6"></polyline>
+        </svg>
       </a>
     `
     nextLi.addEventListener("click", goToNextPage)
     paginationControls.appendChild(nextLi)
 
-    // Update pagination info text
     const start = (currentPage - 1) * itemsPerPage + 1
     const end = Math.min(start + itemsPerPage - 1, filteredQuizzes.length)
     paginationInfo.textContent = `Showing ${filteredQuizzes.length > 0 ? start : 0}-${end} of ${filteredQuizzes.length} quizzes`
@@ -301,96 +351,81 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function displayQuizzes() {
     if (filteredQuizzes.length === 0) {
-        quizTable.innerHTML =
-            '<tr><td colspan="7" class="text-center">No quizzes found. <a href="index.html">Create a new quiz</a>.</td></tr>'
-        return
+      quizTable.innerHTML = '<tr><td colspan="7" class="text-center">No quizzes found. <a href="index.html">Create a new quiz</a>.</td></tr>'
+      return
     }
 
     quizTable.innerHTML = ""
 
-    // Calculate start and end indices for current page
     const startIndex = (currentPage - 1) * itemsPerPage
     const endIndex = Math.min(startIndex + itemsPerPage, filteredQuizzes.length)
-
-    // Get quizzes for current page
     const pageQuizzes = filteredQuizzes.slice(startIndex, endIndex)
 
     pageQuizzes.forEach((quiz) => {
-        // Format dates
-        const createdDate = new Date(quiz.created_at).toLocaleString()
-        const updatedDate = new Date(quiz.updated_at).toLocaleString()
+      const createdDate = new Date(quiz.created_at).toLocaleString()
+      const updatedDate = new Date(quiz.updated_at).toLocaleString()
 
-        const row = document.createElement("tr")
-        row.innerHTML = `
-            <td class="text-center">
-            <input type="checkbox" class="quiz-checkbox" value="${quiz.quiz_id}">
-            </td>
-            <td>${quiz.title}</td>
-            <td>${quiz.description.substring(0, 50)}${quiz.description.length > 50 ? "..." : ""}</td>
-            <td>${createdDate}</td>
-            <td>${updatedDate}</td>
-            <td>${quiz.questionCount || 0}</td>
-            <td>
-                <div class="dropdown">
-                    <button class="btn btn-sm btn-light dropdown-toggle" type="button" aria-expanded="false">
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="quiz.php?id=${quiz.quiz_id}" data-action="take">Take Quiz</a></li>
-                        <li><a class="dropdown-item" href="edit.php?id=${quiz.quiz_id}" data-action="edit">Edit Quiz</a></li>
-                        <li><a class="dropdown-item dropdown-item-results" href="#" data-action="results" data-quiz-id="${quiz.quiz_id}" data-quiz-title="${quiz.title}">View Results</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item text-danger dropdown-item-delete" href="#" data-action="delete" data-quiz-id="${quiz.quiz_id}">Delete Quiz</a></li>
-                    </ul>
-                </div>
-            </td>
-        `
+      const row = document.createElement("tr")
+      row.innerHTML = `
+        <td class="text-center">
+          <input type="checkbox" class="quiz-checkbox" value="${quiz.quiz_id}">
+        </td>
+        <td>${quiz.title}</td>
+        <td>${quiz.description.substring(0, 50)}${quiz.description.length > 50 ? "..." : ""}</td>
+        <td>${createdDate}</td>
+        <td>${updatedDate}</td>
+        <td class="text-center">${quiz.questionCount || 0}</td>
+        <td class="text-center">
+          <div class="dropdown">
+            <button class="dropdown-toggle" type="button">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="1"></circle>
+                <circle cx="12" cy="5" r="1"></circle>
+                <circle cx="12" cy="19" r="1"></circle>
+              </svg>
+            </button>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="quiz.php?id=${quiz.quiz_id}">Take Quiz</a></li>
+              <li><a class="dropdown-item" href="edit.php?id=${quiz.quiz_id}">Edit Quiz</a></li>
+              <li><a class="dropdown-item" href="#" data-action="results" data-quiz-id="${quiz.quiz_id}" data-quiz-title="${quiz.title}">View Results</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item text-danger" href="#" data-action="delete" data-quiz-id="${quiz.quiz_id}">Delete Quiz</a></li>
+            </ul>
+          </div>
+        </td>
+      `
 
-        quizTable.appendChild(row)
+      quizTable.appendChild(row)
     })
 
-    // Add event listeners to the checkboxes
     document.querySelectorAll('.quiz-checkbox').forEach(checkbox => {
-        checkbox.addEventListener('change', updateDeleteSelectedBtnState)
+      checkbox.addEventListener('change', updateDeleteSelectedBtnState)
     })
-}
-
-  // Confirm delete button
-  confirmDeleteBtn.addEventListener("click", () => {
-    if (quizToDelete) {
-      deleteQuiz(quizToDelete)
-      deleteModal.hide()
-    }
-  })
+  }
 
   function deleteQuiz(quizId) {
     fetch(`api/delete_quiz.php?id=${quizId}`)
       .then((response) => response.json())
       .then((data) => {
         if (data.success) {
-          showStatusMessage("Quiz deleted successfully.", "success")
-
-          // Remove quiz from arrays
+          showStatusMessage("Quiz moved to recycling bin.", "success")
           allQuizzes = allQuizzes.filter((quiz) => quiz.quiz_id != quizId)
           filteredQuizzes = filteredQuizzes.filter((quiz) => quiz.quiz_id != quizId)
-
-          // Update pagination and display
           updatePagination()
           displayQuizzes()
         } else {
-          showStatusMessage("Error deleting quiz: " + data.message, "danger")
+          showStatusMessage("Error moving quiz to recycling bin: " + data.message, "danger")
         }
       })
       .catch((error) => {
         console.error("Error:", error)
-        showStatusMessage("Error deleting quiz. Please try again.1", "danger")
+        showStatusMessage("Error moving quiz to recycling bin. Please try again.", "danger")
       })
   }
 
   function viewQuizResults(quizId, quizTitle) {
-    // Set quiz title in modal
     resultsQuizTitle.textContent = quizTitle
 
-    // Load results
     fetch(`api/get_quiz_results.php?id=${quizId}`)
       .then((response) => response.json())
       .then((data) => {
@@ -405,8 +440,7 @@ document.addEventListener("DOMContentLoaded", () => {
         resultsTable.innerHTML = '<tr><td colspan="3" class="text-center">Error loading results.</td></tr>'
       })
 
-    // Show modal
-    resultsHistoryModal.show()
+    openModal(resultsHistoryModal)
   }
 
   function displayQuizResults(results) {
@@ -420,12 +454,13 @@ document.addEventListener("DOMContentLoaded", () => {
     results.forEach((result) => {
       const date = new Date(result.completed_at).toLocaleString()
       const percentage = Math.round((result.score / result.total_questions) * 100)
+      const badgeClass = percentage >= 70 ? "success" : "warning"
 
       const row = document.createElement("tr")
       row.innerHTML = `
         <td>${date}</td>
         <td>${result.score}/${result.total_questions}</td>
-        <td>${percentage}%</td>
+        <td><span class="percentage-badge ${badgeClass}">${percentage}%</span></td>
       `
 
       resultsTable.appendChild(row)
@@ -437,7 +472,6 @@ document.addEventListener("DOMContentLoaded", () => {
     statusMessage.className = `alert alert-${type}`
     statusMessage.classList.remove("d-none")
 
-    // Hide message after 5 seconds
     setTimeout(() => {
       statusMessage.classList.add("d-none")
     }, 5000)

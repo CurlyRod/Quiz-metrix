@@ -42,8 +42,8 @@ try {
         throw new Exception('Invalid quiz ID');
     }
 
-    // Get quiz data
-    $stmt = $conn->prepare("SELECT * FROM quizzes WHERE quiz_id = ? AND user_id = ?");
+    // Get quiz data - ADDED is_deleted = 0 CHECK
+    $stmt = $conn->prepare("SELECT * FROM quizzes WHERE quiz_id = ? AND user_id = ? AND is_deleted = 0");
     if (!$stmt) {
         throw new Exception('Prepare failed: ' . $conn->error);
     }
@@ -55,7 +55,7 @@ try {
     
     $quiz_result = $stmt->get_result();
     if ($quiz_result->num_rows === 0) {
-        throw new Exception('Quiz not found or access denied');
+        throw new Exception('Quiz not found, access denied, or quiz has been deleted');
     }
     
     $quiz = $quiz_result->fetch_assoc();

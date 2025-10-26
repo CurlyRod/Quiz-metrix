@@ -29,7 +29,7 @@
 
     <ul class="nav nav-underline" style="padding: 20px;">
         <li class="nav-item">
-            <a class="nav-link active" href="index.php" style="color: #6366f1">Create</a>
+            <a class="nav-link active" href="index.php" style="color: #6366f1">Quizzes</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" href="manage-quizzes.php" style="color:rgba(99, 101, 241, 0.8)">Manage Quizzes</a>

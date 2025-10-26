@@ -1,15 +1,15 @@
 document.addEventListener("DOMContentLoaded", () => {
   // DOM Elements
   const quizTitle = document.getElementById("quizTitle")
-  // const quizDescription = document.getElementById("quizDescription")
   const questionContainer = document.getElementById("questionContainer")
-  const questionProgress = document.getElementById("questionProgress")
-  const prevBtn = document.getElementById("prevBtn")
-  const nextBtn = document.getElementById("nextBtn")
   const submitQuizBtn = document.getElementById("submitQuizBtn")
+  const submitContainer = document.getElementById("submitContainer")
   const timerDisplay = document.getElementById("timerDisplay")
   const timer = document.getElementById("timer")
   const speakQuestionBtn = document.getElementById("speakQuestionBtn");
+  const progressBar = document.getElementById("progressBar")
+  const progressText = document.getElementById("progressText")
+  const progressPercent = document.getElementById("progressPercent")
 
   // Initialize exit warning modal
   let exitWarningModal = new bootstrap.Modal(document.getElementById("exitWarningModal"), {
@@ -25,7 +25,6 @@ document.addEventListener("DOMContentLoaded", () => {
   let timerInterval
   let timeRemaining
   let speechSynthesis = window.speechSynthesis;
-  let currentSpeech = null;
   let isQuizSubmitted = false;
   let exitDestination = "index.php";
   let quizStateKey = null;
@@ -155,18 +154,16 @@ document.addEventListener("DOMContentLoaded", () => {
       currentQuiz.settings.answerTypes = ['typed']; // default fallback
     }
 
-    speakQuestionBtn.addEventListener("click", speakCurrentQuestion);
+    speakQuestionBtn.addEventListener("click", () => speakQuestion(0));
 
-    // Show current question
-    showQuestion(currentQuestionIndex);
+    // Show all questions at once
+    showAllQuestions();
 
-    // Set up event listeners
-    prevBtn.addEventListener("click", showPreviousQuestion);
-    nextBtn.addEventListener("click", showNextQuestion);
-    submitQuizBtn.addEventListener("click", submitQuiz);
-
-    // Update navigation buttons
-    updateNavigationButtons();
+    // Set up submit button
+    submitQuizBtn.addEventListener("click", validateAndSubmitQuiz);
+    
+    // Update progress display
+    updateProgress();
   }
 
   function prepareQuizQuestions() {
@@ -236,14 +233,13 @@ document.addEventListener("DOMContentLoaded", () => {
   return preparedQuestions;
 }
 
-  function speakCurrentQuestion() {
+  function speakQuestion(questionIndex) {
     // Stop any ongoing speech
     if (speechSynthesis.speaking) {
       speechSynthesis.cancel();
     }
     
-    // Get current question - FIXED: use preparedQuestions instead of currentQuiz.questions
-    const question = preparedQuestions[currentQuestionIndex];
+    const question = preparedQuestions[questionIndex];
     let textToSpeak = "";
     
     // Format text based on question type
@@ -257,25 +253,18 @@ document.addEventListener("DOMContentLoaded", () => {
         break;
     }
     
-    // Create speech utterance
     const speak = () => {
       const utterance = new SpeechSynthesisUtterance(textToSpeak);
+      utterance.rate = 1.0;
+      utterance.pitch = 1.0;
+      utterance.volume = 1.0;
       
-      // Configure speech settings for modern voice
-      utterance.rate = 1.0; // Normal speed
-      utterance.pitch = 1.0; // Normal pitch
-      utterance.volume = 1.0; // Full volume
-      
-      // Try to get a good voice
       const voices = speechSynthesis.getVoices();
-      
-      // Look for premium voices first (often more natural sounding)
       let selectedVoice = voices.find(voice => 
         (voice.name.includes("Premium") || voice.name.includes("Enhanced")) && 
         voice.lang.includes(navigator.language.split('-')[0])
       );
       
-      // If no premium voice, try to find a good native voice
       if (!selectedVoice) {
         selectedVoice = voices.find(voice => 
           voice.localService && 
@@ -283,53 +272,28 @@ document.addEventListener("DOMContentLoaded", () => {
         );
       }
       
-      // Fallback to any voice in the user's language
       if (!selectedVoice) {
         selectedVoice = voices.find(voice => 
           voice.lang.includes(navigator.language.split('-')[0])
         );
       }
       
-      // Last resort - just use the first available voice
       if (!selectedVoice && voices.length > 0) {
         selectedVoice = voices[0];
       }
       
-      // Set the selected voice if found
       if (selectedVoice) {
         utterance.voice = selectedVoice;
       }
       
-      // Add visual feedback when speaking
-      utterance.onstart = () => {
-        speakQuestionBtn.classList.add("btn-primary");
-        speakQuestionBtn.classList.remove("btn-outline-primary");
-      };
-      
-      utterance.onend = () => {
-        speakQuestionBtn.classList.remove("btn-primary");
-        speakQuestionBtn.classList.add("btn-outline-primary");
-      };
-      
-      // Speak the text
       speechSynthesis.speak(utterance);
-      currentSpeech = utterance;
     };
 
-    // Wait for voices to be loaded if needed
     if (speechSynthesis.getVoices().length === 0) {
       speechSynthesis.onvoiceschanged = speak;
     } else {
       speak();
     }
-  }
-
-  // Add this to ensure voices are loaded (some browsers need this)
-  if (speechSynthesis.onvoiceschanged !== undefined) {
-    speechSynthesis.onvoiceschanged = () => {
-      // Voices are now loaded
-      console.log("Voices loaded:", speechSynthesis.getVoices().length);
-    };
   }
 
   function generateMultipleChoiceOptions(allQuestions, question, questionIndex) {
@@ -350,101 +314,161 @@ document.addEventListener("DOMContentLoaded", () => {
     return options;
   }
 
-  function showQuestion(index) {
-    // Update current question index
-    currentQuestionIndex = index
-
-    // Update question progress
-    questionProgress.textContent = `Question ${index + 1} of ${preparedQuestions.length}`;
-
+  function showAllQuestions() {
     // Clear question container
-    questionContainer.innerHTML = ""
+    questionContainer.innerHTML = "";
 
-    // Get current question
-    const question = preparedQuestions[index];
+    // Create all question cards
+    preparedQuestions.forEach((question, index) => {
+      const questionCard = createQuestionCard(question, index);
+      questionContainer.appendChild(questionCard);
+    });
 
-    // Create question element
-    const questionElement = document.createElement("div")
-    questionElement.className = "card mb-4"
+    // Show submit button
+    submitContainer.style.display = "block";
 
-    // Create question header
+    // Add event listeners to all answers
+    addAllAnswerEventListeners();
+  }
+
+  function createQuestionCard(question, index) {
+    const questionCard = document.createElement("div");
+    questionCard.className = "question-card";
+    questionCard.id = `question-${index}`;
+    
     let questionContent = `
-            <div class="card-header">
-                <h5 class="mb-0">Question ${index + 1}</h5>
-            </div>
-            <div class="card-body">
-        `
+      <div class="d-flex justify-content-between align-items-start mb-3">
+        <span class="question-badge">
+          <i class='bx bx-question-mark'></i>
+          Question ${index + 1} of ${preparedQuestions.length}
+        </span>
+        <button class="speak-btn" onclick="speakQuestionAt(${index})" title="Speak this question">
+          <i class='bx bx-volume-full'></i>
+        </button>
+      </div>
+    `;
 
     // Create question content based on answer type
     switch (question.answerType) {
       case "multiple":
         questionContent += `
-                    <div class="question-description mb-4">${question.description}</div>
-                    ${createMultipleChoiceInterface(index, question)}
-                `
-        break
+          <div class="question-description">${question.description}</div>
+          ${createMultipleChoiceInterface(index, question)}
+        `;
+        break;
 
       case "typed":
         questionContent += `
-                    <div class="question-description mb-4">${question.description}</div>
-                    ${createTypedAnswerInterface(index, question)}
-                `
-        break
+          <div class="question-description">${question.description}</div>
+          <p class="text-muted mb-3">Define: <strong>${question.term}</strong></p>
+          ${createTypedAnswerInterface(index, question)}
+        `;
+        break;
 
       case "truefalse":
         questionContent += `
-                    <div class="question-description mb-4">${question.statement}</div>
-                    ${createTrueFalseInterface(index, question)}
-                `
-        break
+          <div class="question-description">${question.statement}</div>
+          ${createTrueFalseInterface(index, question)}
+        `;
+        break;
     }
 
-    questionContent += `</div>`
-    questionElement.innerHTML = questionContent
-    questionContainer.appendChild(questionElement)
-
-    // Add event listeners to save answers
-    addAnswerEventListeners();
-
-    // Stop any ongoing speech when changing questions
-    if (speechSynthesis.speaking) {
-      speechSynthesis.cancel();
-    }
-
-    // Update navigation buttons
-    updateNavigationButtons()
-
-    // Save state after showing question
-    saveQuizState();
+    questionCard.innerHTML = questionContent;
+    return questionCard;
   }
 
-  function addAnswerEventListeners() {
-    // FIXED: use preparedQuestions instead of currentQuiz.questions
-    const question = preparedQuestions[currentQuestionIndex];
-    
-    if (question.answerType === "multiple" || question.answerType === "truefalse") {
-      const radioInputs = questionContainer.querySelectorAll('input[type="radio"]')
-      radioInputs.forEach((input) => {
-        input.addEventListener("change", function () {
-          userAnswers[currentQuestionIndex] = this.value
-          saveQuizState(); // Save on change
-        })
+  // Global function for speak buttons
+  window.speakQuestionAt = function(index) {
+    speakQuestion(index);
+  }
 
-        // Check the radio button if it matches the saved answer
-        if (input.value === userAnswers[currentQuestionIndex]) {
-          input.checked = true
+  function addAllAnswerEventListeners() {
+    preparedQuestions.forEach((question, index) => {
+      if (question.answerType === "multiple" || question.answerType === "truefalse") {
+        const radioInputs = document.querySelectorAll(`input[name="q${index}"]`);
+        radioInputs.forEach((input) => {
+          input.addEventListener("change", function() {
+            userAnswers[index] = this.value;
+            markQuestionAsAnswered(index);
+            saveQuizState();
+            updateProgress();
+            autoScrollToNext(index);
+          });
+
+          // Check the radio button if it matches the saved answer
+          if (input.value === userAnswers[index]) {
+            input.checked = true;
+            markQuestionAsAnswered(index);
+          }
+        });
+      } else if (question.answerType === "typed") {
+        const typedInput = document.getElementById(`typedAnswer${index}`);
+        if (typedInput) {
+          typedInput.value = userAnswers[index] || "";
+          
+          // Auto-advance on blur or Enter key
+          typedInput.addEventListener("blur", function() {
+            if (this.value.trim()) {
+              userAnswers[index] = this.value;
+              markQuestionAsAnswered(index);
+              saveQuizState();
+              updateProgress();
+              autoScrollToNext(index);
+            }
+          });
+
+          typedInput.addEventListener("keypress", function(e) {
+            if (e.key === "Enter" && this.value.trim()) {
+              this.blur(); // Trigger blur event
+            }
+          });
+
+          if (userAnswers[index]) {
+            markQuestionAsAnswered(index);
+          }
         }
-      })
-    } else if (question.answerType === "typed") {
-      const typedInput = questionContainer.querySelector("#typedAnswer")
-      if (typedInput) {
-        typedInput.value = userAnswers[currentQuestionIndex] || ""
-        typedInput.addEventListener("input", function () {
-          userAnswers[currentQuestionIndex] = this.value
-          saveQuizState(); // Save on input
-        })
       }
+    });
+  }
+
+  function markQuestionAsAnswered(index) {
+    const questionCard = document.getElementById(`question-${index}`);
+    if (questionCard) {
+      questionCard.classList.add("answered");
     }
+  }
+
+  function autoScrollToNext(currentIndex) {
+    // Find next unanswered question
+    let nextIndex = currentIndex + 1;
+    
+    // Skip to next unanswered question
+    while (nextIndex < preparedQuestions.length && userAnswers[nextIndex] !== null) {
+      nextIndex++;
+    }
+
+    // Scroll to next question or submit button
+    setTimeout(() => {
+      if (nextIndex < preparedQuestions.length) {
+        const nextQuestion = document.getElementById(`question-${nextIndex}`);
+        if (nextQuestion) {
+          nextQuestion.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      } else {
+        // All questions answered, scroll to submit button
+        submitContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 300);
+  }
+
+  function updateProgress() {
+    const answeredCount = userAnswers.filter(a => a !== null).length;
+    const totalQuestions = preparedQuestions.length;
+    const percentage = Math.round((answeredCount / totalQuestions) * 100);
+
+    progressBar.style.width = percentage + "%";
+    progressText.textContent = `${answeredCount} of ${totalQuestions} answered`;
+    progressPercent.textContent = `${percentage}%`;
   }
 
   function createMultipleChoiceInterface(index, question) {
@@ -477,10 +501,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function createTypedAnswerInterface(index, question) {
     return `
-            <div class="typed-answer-container mt-3">
-                <input type="text" class="form-control" id="typedAnswer" placeholder="Type your answer" value="${userAnswers[index] || ""}">
-            </div>
-        `
+      <div class="typed-answer-container mt-3">
+        <input 
+          type="text" 
+          class="form-control" 
+          id="typedAnswer${index}" 
+          placeholder="Type your answer and press Enter..." 
+          value="${userAnswers[index] || ""}"
+          ${userAnswers[index] ? 'disabled' : ''}
+        >
+      </div>
+    `;
   }
 
   function createTrueFalseInterface(index, question) {
@@ -510,34 +541,6 @@ document.addEventListener("DOMContentLoaded", () => {
     div.classList.add('selected');
   };
   
-  function showPreviousQuestion() {
-    // FIXED: use preparedQuestions.length instead of currentQuiz.questions.length
-    if (currentQuestionIndex > 0) {
-      showQuestion(currentQuestionIndex - 1)
-    }
-  }
-
-  function showNextQuestion() {
-    // FIXED: use preparedQuestions.length instead of currentQuiz.questions.length
-    if (currentQuestionIndex < preparedQuestions.length - 1) {
-      showQuestion(currentQuestionIndex + 1)
-    }
-  }
-
-  function updateNavigationButtons() {
-    // Disable previous button on first question
-    prevBtn.disabled = currentQuestionIndex === 0;
-
-    // Show/hide next and submit buttons on last question
-    // FIXED: use preparedQuestions.length instead of currentQuiz.questions.length
-    if (currentQuestionIndex === preparedQuestions.length - 1) {
-        nextBtn.classList.add("d-none");
-        submitQuizBtn.classList.remove("d-none");
-    } else {
-        nextBtn.classList.remove("d-none");
-        submitQuizBtn.classList.add("d-none");
-    }
-  }
 
   function startTimer() {
     timerInterval = setInterval(() => {
@@ -559,12 +562,80 @@ document.addEventListener("DOMContentLoaded", () => {
   function updateTimerDisplay() {
     if (timeRemaining <= 0) {
       timer.textContent = "00:00";
+      timer.classList.add("warning");
       return;
     }
-    const minutes = Math.floor(timeRemaining / 60)
-    const seconds = timeRemaining % 60
-    timer.textContent = `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`
+    
+    const minutes = Math.floor(timeRemaining / 60);
+    const seconds = timeRemaining % 60;
+    timer.textContent = `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+    
+    // Add warning class when time is running low
+    if (timeRemaining < 60) {
+      timer.classList.add("warning");
+    } else {
+      timer.classList.remove("warning");
+    }
   }
+
+  // Validate if all the questions are answered
+  function validateAndSubmitQuiz() {
+  // Count unanswered questions
+  const unansweredQuestions = userAnswers.reduce((count, answer, index) => {
+    return answer === null || answer === "" ? count + 1 : count;
+  }, 0);
+
+  // If there are unanswered questions, show warning and scroll to top
+  if (unansweredQuestions > 0) {
+    // Scroll to top of the page - more reliable methods
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    // Alternative scroll methods if the above doesn't work
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+    
+    // Create or update warning div
+    let warningDiv = document.getElementById('unansweredWarning');
+    if (!warningDiv) {
+      warningDiv = document.createElement('div');
+      warningDiv.id = 'unansweredWarning';
+      warningDiv.className = 'alert alert-warning alert-dismissible fade show';
+      warningDiv.style.margin = '20px 0';
+      warningDiv.style.position = 'sticky';
+      warningDiv.style.top = '0';
+      warningDiv.style.zIndex = '1000';
+      
+      // Insert the warning at the very top of the content
+      const mainContainer = document.querySelector('.container, main, body');
+      mainContainer.insertBefore(warningDiv, mainContainer.firstChild);
+    }
+    
+    // Update warning message
+    const questionText = unansweredQuestions === 1 ? 'question' : 'questions';
+    warningDiv.innerHTML = `
+      <strong>Warning!</strong> You have ${unansweredQuestions} unanswered ${questionText}. 
+      Please answer all questions before submitting.
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    // Force a reflow and scroll again to ensure it works
+    setTimeout(() => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 100);
+    
+    // Auto-dismiss after 5 seconds
+    setTimeout(() => {
+      if (warningDiv && warningDiv.parentNode) {
+        warningDiv.remove();
+      }
+    }, 5000);
+    
+    return; // Stop the submission process
+  }
+  
+  // If all questions are answered, proceed with submission
+  submitQuiz();
+}
 
   function submitQuiz() {
     isQuizSubmitted = true;
@@ -746,7 +817,8 @@ document.addEventListener("DOMContentLoaded", () => {
       startTimer();
     }
 
-    showQuestion(0);
+    showAllQuestions();
+    updateProgress();
   }
 
   // Utility function to shuffle array
