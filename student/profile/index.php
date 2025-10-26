@@ -4,14 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Profile</title>
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Boxicons CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/boxicons@latest/css/boxicons.min.css" rel="stylesheet">
-
     <?php include '../../shared-student/header.php'; ?>
 
-
+     <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <!-- Custom CSS -->
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -32,144 +28,154 @@
 include '../../shared-student/sidebar.php';
 include '../../shared-student/navbar.php';
 ?>
-    <div class="container profile-container">
-        <div class="row">
-            <!-- Profile Information -->
-            <div class="col-md-8 mb-4">
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1 class="header-title">Student Profile</h1>
+            <p class="header-subtitle">Track your learning progress</p>
+        </header>
+
+        <!-- Profile Section -->
+        <div class="grid-layout">
+            <div class="profile-section">
                 <div class="profile-card">
-                    <div class="d-flex align-items-start">
-                        <div class="avatar-container">
-                            <img id="profile-avatar" src="avatar_2_boy.png" alt="Profile Avatar" class="avatar-img">
-                            <div class="avatar-toggle" id="avatar-toggle">
-                                <i class="bx bx-edit-alt"></i>
-                            </div>
-                            <div class="avatar-dropdown" id="avatar-dropdown">
-                                <div class="avatar-option" data-avatar="avatar_2_boy.png">
-                                    <img src="avatar_2_boy.png" alt="Boy Avatar">
-                                    <span>Boy</span>
-                                </div>
-                                <div class="avatar-option" data-avatar="avatar_2_girl.png">
-                                    <img src="avatar_2_girl.png" alt="Girl Avatar">
-                                    <span>Girl</span>
-                                </div>
-                            </div>
+                    <div class="profile-content">
+                        <div class="avatar-wrapper">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Student" alt="Student Avatar" class="avatar">
                         </div>
-                    </div>
-                    
-                    <div class="mt-4">
                         <div class="profile-info">
-                            <div class="info-label">Name</div>
-                            <!-- <div class="info-value" id="user-name">Mj Despi</div> -->
-                            <?php 
+                            <div class="info-item">
+                                <div class="info-label">
+                                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                        <circle cx="12" cy="7" r="4"></circle>
+                                    </svg>
+                                    <span>Name</span>
+                                </div>
+                                <?php 
                                 echo str_replace(" (Student)", "", $_SESSION['USER_NAME']); 
                             ?>
-                        </div>
-                        <div class="profile-info">
-                            <div class="info-label">Email</div>
-                            <?php echo $_SESSION['USER_EMAIL']; ?>
-
-                        </div>
-                        <div class="profile-info">
-                            <div class="info-label">Password</div>
-                            <div class="info-value">
-                                <span>********</span>
-                                <button class="btn-change ms-2" id="toggle-password-form">Change</button>
                             </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Current Password Verification Form (Hidden by default) -->
-                    <div class="password-form" id="current-password-form">
-                        <div class="stats-header">Verify Current Password</div>
-                        <div class="password-form-content">
-                            <div class="mb-3">
-                                <label for="current-password" class="form-label">Current Password</label>
-                                <div class="password-input-wrapper">
-                                    <input type="password" class="form-control" id="current-password">
-                                    <button type="button" class="password-toggle-btn" data-target="current-password">
-                                        <i class="bx bx-eye-closed" style="color: #000000;"></i>
-                                    </button>
+                            <div class="info-item">
+                                <div class="info-label">
+                                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                                        <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
+                                    </svg>
+                                    <span>Email</span>
                                 </div>
-                            </div>
-                            <div class="d-flex justify-content-end">
-                                <button class="btn btn-light me-2" id="cancel-current-password">Cancel</button>
-                                <button class="btn btn-dark" id="verify-current-password">Done</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Password Change Form (Hidden by default) -->
-                    <div class="password-form" id="password-form">
-                        <div class="stats-header">Change Password</div>
-                        <div class="password-form-content">
-                            <div class="mb-3">
-                                <label for="new-password" class="form-label">New Password</label>
-                                <div class="password-input-wrapper">
-                                    <input type="password" class="form-control" id="new-password">
-                                    <button type="button" class="password-toggle-btn" data-target="new-password">
-                                        <i class="bx bx-eye-closed"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="mb-3">
-                                <label for="confirm-password" class="form-label">Confirm Password</label>
-                                <div class="password-input-wrapper">
-                                    <input type="password" class="form-control" id="confirm-password">
-                                    <button type="button" class="password-toggle-btn" data-target="confirm-password">
-                                        <i class="bx bx-eye-closed"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="d-flex justify-content-end">
-                                <button class="btn btn-light me-2" id="cancel-password-change">Cancel</button>
-                                <button class="btn btn-dark" id="submit-password-change">Change Password</button>
+                                <?php echo $_SESSION['USER_EMAIL']; ?>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            
-            <!-- Stats Cards -->
-            <div class="col-md-4">
-                <!-- Quiz Stats -->
-                <div class="profile-card p-0 overflow-hidden">
-                    <div class="stats-header">Quiz</div>
-                    <div class="stats-body">
-                        <div class="stats-row">
-                            <div class="stats-cell">
-                                <div class="text-muted small">Created</div>
-                                <div class="fw-medium">10</div>
-                            </div>
-                            <div class="stats-cell">
-                                <div class="text-muted small">Taken</div>
-                                <div class="fw-medium">5</div>
-                            </div>
+
+            <!-- Quick Stats Column -->
+            <div class="quick-stats">
+                <div class="stat-card stat-primary quiz-card">
+                    <div class="quiz-card-header">
+                        <p class="quiz-card-title">Quiz</p>
+                        <div class="stat-icon stat-icon-primary">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                            </svg>
                         </div>
                     </div>
-                </div>
-                
-                <!-- Flashcard Stats -->
-                <div class="profile-card p-0 overflow-hidden">
-                    <div class="stats-header">Flashcard</div>
-                    <div class="stats-body">
-                        <div class="stats-row">
-                            <div class="stats-cell">
-                                <div class="text-muted small">Created</div>
-                                <div class="fw-medium">10</div>
-                            </div>
-                            <div class="stats-cell">
-                                <div class="text-muted small">Taken</div>
-                                <div class="fw-medium">5</div>
-                            </div>
+                    <div class="quiz-separator"></div>
+                    <div class="quiz-split">
+                        <div class="quiz-split-item">
+                            <p class="quiz-split-label">Created</p>
+                            <p class="quiz-split-value" id="quizzes-created">5</p>
+                        </div>
+                        <div class="quiz-split-divider"></div>
+                        <div class="quiz-split-item">
+                            <p class="quiz-split-label">Taken</p>
+                            <p class="quiz-split-value" id="quizzes-taken">12</p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- Statistics Grid -->
+        <div class="stats-grid">
+            <div class="stat-card stat-accent">
+                <div class="stat-content">
+                    <div class="stat-text">
+                        <p class="stat-label">Files Uploaded</p>
+                        <p class="stat-value" id="files-uploaded">24</p>
+                    </div>
+                    <div class="stat-icon stat-icon-accent">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                            <polyline points="10 9 9 9 8 9"></polyline>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+            <div class="stat-card stat-info">
+                <div class="stat-content">
+                    <div class="stat-text">
+                        <p class="stat-label">Notes Created</p>
+                        <p class="stat-value" id="notes-created">18</p>
+                    </div>
+                    <div class="stat-icon stat-icon-info">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+            <div class="stat-card stat-success">
+                <div class="stat-content">
+                    <div class="stat-text">
+                        <p class="stat-label">Quiz Accuracy</p>
+                        <p class="stat-value" id="quiz-accuracy">85%</p>
+                    </div>
+                    <div class="stat-icon stat-icon-success">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <circle cx="12" cy="12" r="6"></circle>
+                            <circle cx="12" cy="12" r="2"></circle>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Accuracy Chart -->
+        <div class="chart-card">
+            <div class="chart-header">
+                <div>
+                    <h3 class="chart-title">Quiz Accuracy Trend</h3>
+                    <p class="chart-subtitle" id="current-month">January 2024</p>
+                </div>
+                <div class="chart-controls">
+                    <button class="nav-button" id="prev-month" aria-label="Previous month">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="15 18 9 12 15 6"></polyline>
+                        </svg>
+                    </button>
+                    <button class="nav-button" id="next-month" aria-label="Next month">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="chart-container">
+                <canvas id="accuracyChart"></canvas>
+            </div>
+        </div>
     </div>
 
     <!-- Bootstrap 5 JS Bundle with Popper -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="script.js"></script>
     <?php include '../../shared-student/script.php'; ?>
 
