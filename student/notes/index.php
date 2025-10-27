@@ -7,6 +7,8 @@
     <title>Notes</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Lemon&display=swap" rel="stylesheet">
+
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Custom CSS -->
@@ -18,6 +20,7 @@
 
 
 </head>
+
 
 <body>
     <?php
@@ -37,30 +40,48 @@
     include '../../shared-student/sidebar.php';
     include '../../shared-student/navbar.php';
     ?>
+    
 
-    <div class="container mt-5">
-        <h1 class="text-center mb-4">Notes App</h1>
-        <input type="hidden" name="user-current-id" id="user-current-id">
-        <!-- Note Input Section -->
-        <div class="row justify-content-center mb-5">
-            <div class="col-md-8">
-                <!-- Collapsed Note Entry -->
-              
-                <div id="note-collapsed" class="card shadow-sm" style="cursor: pointer;">
-                    <div class="card-body d-flex align-items-center">
-                        <span class="flex-grow-1">Take a note...</span>
+   <div class="app-container">
+    <h1 class="app-title">My Notes</h1>
 
-                    </div>
-                </div>
+    <!-- Search -->
+    <div class="search-container">
+      <input type="text" id="searchNotes" placeholder="🔍 Search Notes">
+    </div>
 
-                <!-- Expanded Note Entry (hidden initially) -->
-                <div id="note-expanded" class="card shadow-sm d-none">
-                    <div class="card-body">
-                        <input type="text" id="note-title" class="form-control border-0 fw-bold mb-2" placeholder="Title" maxlength="20">
-                      
-                        <textarea id="note-content" class="form-control border-0" placeholder="Take a note..." maxlength="3000"></textarea>
+    <!-- Create & Bulk Delete -->
+<div class="actions">
+  <button id="createNoteBtn">
+       <i class="fas fa-plus"></i> Create Note
+  </button>
+  <button id="selectItemsBtn">
+  <i class="fas fa-check-square"></i> <span>Select Notes</span>
+</button>
 
-                        <!-- Color Palette -->
+  <button id="bulkDeleteBtn" style="display:none;">
+    <i class="fas fa-trash"></i> Delete Selected
+  </button>
+</div>
+
+
+
+    <!-- Notes -->
+    <div id="notes-container" class="notes-container"></div>
+  </div>
+
+  <!-- Hidden -->
+  <input type="hidden" id="user-current-id" value="1">
+
+  <!-- Create Note Modal -->
+  <div id="createNoteModal" class="modal">
+    <div class="modal-content note-color-default" id="note-expanded">
+      <input type="text" id="note-title" placeholder="Title" class="form-control mb-2" maxlength="50">
+      <textarea id="note-content" placeholder="Take a note..." class="form-control mb-2"maxlength="3000"></textarea>
+      <small id="charCount" class="text-muted d-block mb-2">0 / 3000</small>
+
+
+     <!-- Color Palette -->
                         <div id="color-palette" class="color-palette mt-3">
                             <div class="color-option selected" data-color="default" style="background-color: #ffffff;"></div>
                             <div class="color-option" data-color="red" style="background-color: #f8d7da;"></div>
@@ -73,24 +94,53 @@
                             <div class="color-option" data-color="pink" style="background-color: #f8d7f7;"></div>
                             <div class="color-option" data-color="gray" style="background-color: #e9ecef;"></div>
                         </div>
+       
+    
 
-                        <div class="d-flex justify-content align-items-center mt-3">
-
-                            <button id="btn-close" class="btn btn-sm btn-light me-2">Close</button>
-                            <button id="btn-save" class="btn btn-sm btn-primary">Save</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+      <!-- Buttons -->
+      <div class="mt-3 d-flex justify-content-end gap-2">
+         
+        <button id="btn-close" class="btn btn-light">Close</button>
+        <button id="btn-save" class="btn btn-primary">Save</button>
+      </div>
     </div>
+  </div>
 
-    <!-- Notes Display Section -->
-    <div class="row" id="notes-container">
-        <!-- Notes will be displayed here -->
+  <!-- View Note Modal -->
+  <div id="viewNoteModal" class="modal">
+    <div class="modal-content view-modal">
+      <button id="viewBackBtn" class="back-btn"><i class="fas fa-arrow-left"></i></button>
+      
+      <h3 id="viewTitle">Title</h3>
+      <hr>
+      <p id="viewContent">Sample text</p>
+      <hr>
+      <div class="view-actions">
+        <small id="viewDate">Date & Time Created</small>
+        <button id="viewEditBtn" class="btn-action"><i class="fas fa-edit"></i> Edit</button>
+        <button id="viewDeleteBtn" class="btn-action delete"><i class="fas fa-trash"></i> Delete</button>
+      </div>
     </div>
-    </div>
+  </div>
 
+  <!-- Delete Confirmation Modal -->
+<div id="deleteConfirmModal" class="modal delete-modal">
+  <div class="modal-content small">
+    <h5 id="deleteModalTitle">Delete?</h5>
+    <p id="deleteModalMessage">This action cannot be undone.</p>
+    <div class="mt-3 d-flex justify-content-end gap-2">
+      <button id="deleteCancelBtn" class="btn btn-light">Cancel</button>
+      <button id="deleteConfirmBtn" class="btn btn-danger">Delete</button>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+    <!-- Toast container -->
+  <div id="toast-container"></div>
     <!-- Bootstrap JS Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Custom JavaScript -->

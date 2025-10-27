@@ -22,78 +22,28 @@ switch ($action) {
     case 'delete':
         deleteNote();
         break;
+    case 'bulk_delete':
+        bulkDeleteNotes();
+        break;
     default:
         echo json_encode(['success' => false, 'message' => 'Invalid action']);
         break;
-}
-    
-
-function getUserID($email) {
-    global $conn;
-    
-    // Validate email first
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        return [
-            'isAuthenticate' => false,
-            'message' => 'Invalid email format'
-        ];
-    }
-
-    $stmt = $conn->prepare("SELECT id, email FROM user_credential WHERE email = ?");
-    if (!$stmt) {
-        return [
-            'isAuthenticate' => false,
-            'message' => 'Database prepare error: ' . $conn->error
-        ];
-    }
-
-    $stmt->bind_param("s", $email);
-    if (!$stmt->execute()) {
-        return [
-            'isAuthenticate' => false,
-            'message' => 'Execution error: ' . $stmt->error
-        ];
-    }
-
-    $result = $stmt->get_result();
-    $stmt->close();
-
-    if ($result->num_rows > 0) {
-        $row = $result->fetch_assoc();
-        return [
-            'isAuthenticate' => true,
-            'userinfo' => [
-                'email' => $row['email'],
-                'id' => $row['id']
-            ]
-        ];
-    } else {
-        return [
-            'isAuthenticate' => false,
-            'message' => 'User not found'
-        ];
-    }
 }
 
 // Create a new note
 function createNote() {
     global $conn;
     
-    // Start session if not already started
-    if (session_status() === PHP_SESSION_NONE) {
-        session_start();
-    }
-
     try {
-        // Get user ID from session
+        // Check if user is logged in - same method as get_deleted.php
         if (!isset($_SESSION['USER_EMAIL'])) {
             throw new Exception('User not authenticated');
         }
         
+        // Get user ID from session - same method as get_deleted.php
         $email = $_SESSION['USER_EMAIL'];
         $user_id = null;
 
-        // Prepare and execute query to get user ID
         $stmt = $conn->prepare("SELECT id FROM user_credential WHERE email = ?");
         if (!$stmt) {
             throw new Exception('Database prepare error: ' . $conn->error);
@@ -113,26 +63,23 @@ function createNote() {
         }
         $stmt->close();
 
-        // Get data from POST request (no longer need user-current-id)
         $title = isset($_POST['title']) ? trim($_POST['title']) : '';
         $content = isset($_POST['content']) ? trim($_POST['content']) : '';
         $color = isset($_POST['color']) ? trim($_POST['color']) : 'default';
         
-        // Validate content
         if (empty($content)) {
             echo json_encode(['success' => false, 'message' => 'Note content is required']);
             return;
         }
 
-        // Prepare and execute query
-        $stmt = $conn->prepare("INSERT INTO notes (user_id, title, content, color, created_at) VALUES (?, ?, ?, ?, NOW())");
+        $stmt = $conn->prepare("INSERT INTO notes (user_id, title, content, color, created_at, is_deleted) VALUES (?, ?, ?, ?, NOW(), 0)");
         $stmt->bind_param("isss", $user_id, $title, $content, $color);
         
         if ($stmt->execute()) {
             echo json_encode([
                 'success' => true, 
                 'message' => 'Note created successfully',
-                'note_id' => $conn->insert_id  // Return the new note ID
+                'note_id' => $conn->insert_id
             ]);
         } else {
             throw new Exception('Database error: ' . $conn->error);
@@ -154,92 +101,271 @@ function createNote() {
 function readNotes() {
     global $conn;
 
-    $emailUser = $_SESSION['USER_EMAIL'] ?? null;
-    $stmt =  getUserID($emailUser);
+    try {
+        // Check if user is logged in - same method as get_deleted.php
+        if (!isset($_SESSION['USER_EMAIL'])) {
+            throw new Exception('User not authenticated');
+        }
 
-    $user_id =   $stmt['userinfo']['id'] ?? null;
-    if (!$user_id) {
-        die("Error: Could not retrieve user ID");
-    }
+        // Get user ID from session - same method as get_deleted.php
+        $email = $_SESSION['USER_EMAIL'];
+        $user_id = null;
 
+        $stmt = $conn->prepare("SELECT id FROM user_credential WHERE email = ?");
+        if (!$stmt) {
+            throw new Exception('Database prepare error: ' . $conn->error);
+        }
 
-    // Prepare the query correctly
-    $stmt = $conn->prepare("SELECT * FROM notes WHERE user_id = ? ORDER BY created_at DESC");
-    if (!$stmt) {
-        echo json_encode(['success' => false, 'message' => 'Prepare failed: ' . $conn->error]);
-        return;
+        $stmt->bind_param("s", $email);
+        if (!$stmt->execute()) {
+            throw new Exception('Execution error: ' . $stmt->error);
+        }
+
+        $result = $stmt->get_result();
+        if ($result->num_rows > 0) {
+            $row = $result->fetch_assoc();
+            $user_id = $row['id'];
+        } else {
+            throw new Exception('User not found');
+        }
+        $stmt->close();
+
+        // If an ID is provided, fetch a single note
+        if (isset($_GET['id']) && !empty($_GET['id'])) {
+            $note_id = intval($_GET['id']);
+
+            $stmt = $conn->prepare("SELECT * FROM notes WHERE id = ? AND user_id = ? AND is_deleted = 0");
+            if (!$stmt) {
+                throw new Exception('Prepare failed: ' . $conn->error);
+            }
+
+            $stmt->bind_param("ii", $note_id, $user_id);
+            if (!$stmt->execute()) {
+                throw new Exception('Execute failed: ' . $stmt->error);
+            }
+
+            $result = $stmt->get_result();
+            if ($row = $result->fetch_assoc()) {
+                echo json_encode(['success' => true, 'note' => $row]);
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Note not found']);
+            }
+            $stmt->close();
+            return;
+        }
+
+        // Otherwise, fetch all notes
+        $stmt = $conn->prepare("SELECT * FROM notes WHERE user_id = ? AND is_deleted = 0 ORDER BY created_at DESC");
+        if (!$stmt) {
+            throw new Exception('Prepare failed: ' . $conn->error);
+        }
+
+        $stmt->bind_param("i", $user_id);
+        if (!$stmt->execute()) {
+            throw new Exception('Execute failed: ' . $stmt->error);
+        }
+
+        $result = $stmt->get_result();
+        $notes = [];
+        while ($row = $result->fetch_assoc()) {
+            $notes[] = $row;
+        }
+
+        echo json_encode(['success' => true, 'notes' => $notes]);
+        $stmt->close();
+
+    } catch (Exception $e) {
+        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
     }
-    
-    // Bind and execute
-    $stmt->bind_param("i", $user_id);
-    if (!$stmt->execute()) {
-        echo json_encode(['success' => false, 'message' => 'Execute failed: ' . $stmt->error]);
-        return;
-    }
-    
-    // Get result
-    $result = $stmt->get_result();
-    $notes = [];
-    while ($row = $result->fetch_assoc()) {
-        $notes[] = $row;
-    }
-    
-    echo json_encode(['success' => true, 'notes' => $notes]);
-    $stmt->close();
 }
 
 // Update a note
 function updateNote() {
     global $conn;
     
-    // Get data from POST request
-    $id = isset($_POST['id']) ? $_POST['id'] : '';
-    $title = isset($_POST['title']) ? $_POST['title'] : '';
-    $content = isset($_POST['content']) ? $_POST['content'] : '';
-    $color = isset($_POST['color']) ? $_POST['color'] : 'default'; // Add color parameter
-    
-    // Validate data
-    if (empty($id) || empty($content)) {
-        echo json_encode(['success' => false, 'message' => 'Note ID and content are required']);
-        return;
+    try {
+        // Check if user is logged in - same method as get_deleted.php
+        if (!isset($_SESSION['USER_EMAIL'])) {
+            throw new Exception('User not authenticated');
+        }
+
+        // Get user ID from session - same method as get_deleted.php
+        $email = $_SESSION['USER_EMAIL'];
+        $user_id = null;
+
+        $stmt = $conn->prepare("SELECT id FROM user_credential WHERE email = ?");
+        if (!$stmt) {
+            throw new Exception('Database prepare error: ' . $conn->error);
+        }
+
+        $stmt->bind_param("s", $email);
+        if (!$stmt->execute()) {
+            throw new Exception('Execution error: ' . $stmt->error);
+        }
+
+        $result = $stmt->get_result();
+        if ($result->num_rows > 0) {
+            $row = $result->fetch_assoc();
+            $user_id = $row['id'];
+        } else {
+            throw new Exception('User not found');
+        }
+        $stmt->close();
+
+        $id = isset($_POST['id']) ? $_POST['id'] : '';
+        $title = isset($_POST['title']) ? $_POST['title'] : '';
+        $content = isset($_POST['content']) ? $_POST['content'] : '';
+        $color = isset($_POST['color']) ? $_POST['color'] : 'default';
+        
+        if (empty($id) || empty($content)) {
+            echo json_encode(['success' => false, 'message' => 'Note ID and content are required']);
+            return;
+        }
+        
+        $stmt = $conn->prepare("UPDATE notes SET title = ?, content = ?, color = ?, updated_at = NOW() WHERE id = ? AND user_id = ?");
+        $stmt->bind_param("sssii", $title, $content, $color, $id, $user_id);
+        
+        if ($stmt->execute()) {
+            if ($stmt->affected_rows > 0) {
+                echo json_encode(['success' => true, 'message' => 'Note updated successfully']);
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Note not found or access denied']);
+            }
+        } else {
+            throw new Exception('Error updating note: ' . $conn->error);
+        }
+        
+        $stmt->close();
+
+    } catch (Exception $e) {
+        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
     }
-    
-    // Prepare and execute query
-    $stmt = $conn->prepare("UPDATE notes SET title = ?, content = ?, color = ?, updated_at = NOW() WHERE id = ?");
-    $stmt->bind_param("sssi", $title, $content, $color, $id);
-    
-    if ($stmt->execute()) {
-        echo json_encode(['success' => true, 'message' => 'Note updated successfully']);
-    } else {
-        echo json_encode(['success' => false, 'message' => 'Error updating note: ' . $conn->error]);
-    }
-    
-    $stmt->close();
 }
 
 // Delete a note
 function deleteNote() {
     global $conn;
     
-    // Get data from POST request
-    $id = isset($_POST['id']) ? $_POST['id'] : '';
-    
-    // Validate data
-    if (empty($id)) {
-        echo json_encode(['success' => false, 'message' => 'Note ID is required']);
-        return;
+    try {
+        // Check if user is logged in - same method as get_deleted.php
+        if (!isset($_SESSION['USER_EMAIL'])) {
+            throw new Exception('User not authenticated');
+        }
+
+        // Get user ID from session - same method as get_deleted.php
+        $email = $_SESSION['USER_EMAIL'];
+        $user_id = null;
+
+        $stmt = $conn->prepare("SELECT id FROM user_credential WHERE email = ?");
+        if (!$stmt) {
+            throw new Exception('Database prepare error: ' . $conn->error);
+        }
+
+        $stmt->bind_param("s", $email);
+        if (!$stmt->execute()) {
+            throw new Exception('Execution error: ' . $stmt->error);
+        }
+
+        $result = $stmt->get_result();
+        if ($result->num_rows > 0) {
+            $row = $result->fetch_assoc();
+            $user_id = $row['id'];
+        } else {
+            throw new Exception('User not found');
+        }
+        $stmt->close();
+
+        $id = isset($_POST['id']) ? $_POST['id'] : '';
+        
+        if (empty($id)) {
+            echo json_encode(['success' => false, 'message' => 'Note ID is required']);
+            return;
+        }
+        
+        $stmt = $conn->prepare("UPDATE notes SET is_deleted = 1 WHERE id = ? AND user_id = ?");
+        $stmt->bind_param("ii", $id, $user_id);
+        
+        if ($stmt->execute()) {
+            if ($stmt->affected_rows > 0) {
+                echo json_encode(['success' => true, 'message' => 'Note moved to trash successfully']);
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Note not found or access denied']);
+            }
+        } else {
+            throw new Exception('Error deleting note: ' . $conn->error);
+        }
+        
+        $stmt->close();
+
+    } catch (Exception $e) {
+        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
     }
-    
-    // Prepare and execute query
-    $stmt = $conn->prepare("DELETE FROM notes WHERE id = ?");
-    $stmt->bind_param("i", $id);
-    
-    if ($stmt->execute()) {
-        echo json_encode(['success' => true, 'message' => 'Note deleted successfully']);
-    } else {
-        echo json_encode(['success' => false, 'message' => 'Error deleting note: ' . $conn->error]);
+}
+
+// Bulk Delete Notes
+function bulkDeleteNotes() {
+    global $conn;
+
+    try {
+        // Check if user is logged in - same method as get_deleted.php
+        if (!isset($_SESSION['USER_EMAIL'])) {
+            throw new Exception('User not authenticated');
+        }
+
+        // Get user ID from session - same method as get_deleted.php
+        $email = $_SESSION['USER_EMAIL'];
+        $user_id = null;
+
+        $stmt = $conn->prepare("SELECT id FROM user_credential WHERE email = ?");
+        if (!$stmt) {
+            throw new Exception('Database prepare error: ' . $conn->error);
+        }
+
+        $stmt->bind_param("s", $email);
+        if (!$stmt->execute()) {
+            throw new Exception('Execution error: ' . $stmt->error);
+        }
+
+        $result = $stmt->get_result();
+        if ($result->num_rows > 0) {
+            $row = $result->fetch_assoc();
+            $user_id = $row['id'];
+        } else {
+            throw new Exception('User not found');
+        }
+        $stmt->close();
+
+        $ids = isset($_POST['ids']) ? json_decode($_POST['ids'], true) : [];
+
+        if (empty($ids) || !is_array($ids)) {
+            echo json_encode(['success' => false, 'message' => 'No IDs provided']);
+            return;
+        }
+
+        $placeholders = implode(",", array_fill(0, count($ids), "?"));
+        $stmt = $conn->prepare("UPDATE notes SET is_deleted = 1 WHERE id IN ($placeholders) AND user_id = ?");
+        if (!$stmt) {
+            throw new Exception('Prepare failed: ' . $conn->error);
+        }
+
+        $types = str_repeat("i", count($ids)) . "i"; 
+        $params = array_merge($ids, [$user_id]);
+        $stmt->bind_param($types, ...$params);
+
+        if ($stmt->execute()) {
+            if ($stmt->affected_rows > 0) {
+                echo json_encode(['success' => true, 'message' => 'Notes moved to trash successfully']);
+            } else {
+                echo json_encode(['success' => false, 'message' => 'No notes found or access denied']);
+            }
+        } else {
+            throw new Exception('Error deleting notes: ' . $stmt->error);
+        }
+
+        $stmt->close();
+
+    } catch (Exception $e) {
+        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
     }
-    
-    $stmt->close();
 }
 ?>

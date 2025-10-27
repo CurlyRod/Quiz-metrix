@@ -35,6 +35,7 @@
                         <div class="nav-link" style="font-size: 11px; color: #666;"><?php echo $_SESSION['USER_EMAIL'];?></div>
                     </div>
                 </li>
+                <li><a class="nav-link" href="../../student/profile/index.php"><i class='bx bx-user icon'></i>Profile</a></li>
                 <li><hr style="margin: 10px 0; border-color: black;"></li>
                 <li><a class="nav-link" href="../../shared-student/logout.php"><i class='bx bx-log-out-circle icon'></i>Logout</a></li>
             </ul>
@@ -52,7 +53,7 @@
                 <div class="timer-form-group">
                     <label for="studyTimeInput">Study Time (minutes)</label>
                     <div class="slider-container">
-                        <input type="range" id="studyTimeInput" min="1" max="120" step="5" value="25">
+                        <input type="range" id="studyTimeInput" min="10" max="120" step="5" value="25">
                         <span id="studyTimeValue">25</span>
                     </div>
                 </div>
