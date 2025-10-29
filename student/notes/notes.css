@@ -102,11 +102,10 @@ body {
   background: #fff;
   border: 1px solid #6366f1;
   cursor: pointer;
-  font-size: 20px;
+  font-size: 16px;
   color:#6366f1;
   font-weight: bold;
   transition: 0.3s;
-  width: 280px;
   box-shadow: 2px 3px 6px rgba(0,0,0,0.2);
 }
 
@@ -226,7 +225,6 @@ body {
   overflow-y: auto;
   box-shadow: 0 5px 20px rgba(0,0,0,0.3);
   animation: fadeIn 0.3s ease-in-out;
-  margin-left: 280px;
 }
 
 @keyframes fadeIn {
@@ -317,6 +315,10 @@ body {
   order: -1; 
   margin-right: auto; 
 }
+#btn-save{
+  background-color: #6366f1;
+}
+
 .btn-action {
   background: #fff;
   border: none;
@@ -441,12 +443,12 @@ body {
 }
 /* ✅ Bigger fonts inside Create Note modal */
 #createNoteModal input#note-title {
-  font-size: 24px;   /* title input */
+  font-size: 20px;   /* title input */
   font-weight: 600;
 }
 
 #createNoteModal textarea#note-content {
-  font-size: 24px;   /* content textarea */
+  font-size: 16px;   /* content textarea */
   line-height: 1.5;
 }
 

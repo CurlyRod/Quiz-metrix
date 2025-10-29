@@ -43,28 +43,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     });
 
-    // Also validate on form submission
-        // eventForm.addEventListener('submit', function(e) {
-        //     const selectedDate = new Date(eventDateInput.value);
-        //     const today = new Date();
-        //     today.setHours(0, 0, 0, 0);
-            
-        //     if (selectedDate < today) {
-        //         e.preventDefault();
-        //         alert("Please select a current or future date for your event.");
-        //         eventDateInput.value = todayFormatted;
-        //         eventDateInput.focus();
-        //     }
-        // });
-    
-    // Rest of your modal opening handlers...
-    // document.getElementById('setGoalBtn').addEventListener('click', function() {
-    //     openModal('goalModal');
-    // });
-    
-    // document.getElementById('settingsBtn').addEventListener('click', function() {
-    //     openModal('timerModal');
-    // });
     
     // Close modals
     closeButtons.forEach(button => {
