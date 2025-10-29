@@ -86,6 +86,9 @@
           <div id="calendar-container">
             <!-- Calendar will be generated here -->
           </div>
+          <div class="card-footer">
+          <a class="view-button" href="calendar.php" id="viewFullCalendar" style="color: #6366f1"><u>Full Calendar</u></a>
+        </div>
         </div>
       </div>
 
@@ -126,7 +129,7 @@
         </div>
         <div class="card-body">
           <div class="todo-input">
-            <input type="text" id="newTodoInput" placeholder="Add a new task...">
+            <input type="text" id="newTodoInput" placeholder="Add a new task..." maxlength="30">
             <button id="addTodoBtn" class="btn icon-btn">
               <i class="fas fa-plus"></i>
             </button>
@@ -139,6 +142,7 @@
         <div class="card-footer">
           <button id="finishAllBtn" class="btn outline-btn">Finish All</button>
         </div>
+      </div>
       </div>
 
      
@@ -153,7 +157,7 @@
         <input type="hidden" id="eventId">
         <div class="form-group">
           <label for="eventTitle">Event Title</label>
-          <input type="text" id="eventTitle" placeholder="Enter event title">
+          <input type="text" id="eventTitle" placeholder="Enter event title" maxlength="30">
         </div>
         <div class="form-group">
           <label for="eventDate">Date</label>

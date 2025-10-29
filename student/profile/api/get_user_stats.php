@@ -95,9 +95,13 @@ try {
     $files_uploaded = $result->fetch_assoc()['files_count'];
     $stmt->close();
 
-    // Notes created (if you have a notes table)
-    // For now, we'll set it to 0 as requested
-    $notes_created = 0;
+    // Notes created - count all notes for this user
+    $stmt = $conn->prepare("SELECT COUNT(*) as notes_count FROM notes WHERE user_id = ? AND is_deleted = 0");
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $notes_created = $result->fetch_assoc()['notes_count'];
+    $stmt->close();
 
     $response = [
         'success' => true,

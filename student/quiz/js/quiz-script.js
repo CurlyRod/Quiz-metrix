@@ -129,7 +129,6 @@ document.addEventListener("DOMContentLoaded", () => {
       timeRemaining = savedState.timeRemaining;
       preparedQuestions = savedState.preparedQuestions;
       correctAnswers = savedState.correctAnswers;
-      console.log("Loaded saved quiz state with preserved questions");
     } else {
       // Initialize fresh state - generate randomized questions once
       userAnswers = Array(currentQuiz.questions.length).fill(null);

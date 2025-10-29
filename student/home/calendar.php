@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home</title>
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <link href='https://unpkg.com/boxicons@2.0.9/css/boxicons.min.css' rel='stylesheet'>
+	<link rel="stylesheet" href="../../vendor/student/home/home.css">
+	<link rel="stylesheet" href="../../vendor/admin/users/users.css">
+	
+  <link rel="icon" type="image/x-icon" href="../../assets/img/logo/apple-touch-icon.png">
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="css/calendar.css">
+
+</head>
+
+<body>
+  <?php
+  session_start();
+  // Check if user is logged in
+  if (!isset($_SESSION['user'])) {
+    header("Location: ../../landing-page/");
+    exit();
+  }
+
+  require '../../middleware/Auth/UserAuthenticate.php';  
+  require '../../student/home/db_connect.php'; 
+  
+  $userAthenticate = new UserAuthenticate($conn);
+  $userData = $_SESSION['user'];
+  $email = $userData['mail']; 
+  $_SESSION['USER_NAME'] = $userData['displayName'];
+
+  $getUser = $userAthenticate->GetUserLogin($email); 
+
+  if (!$getUser['isAuthenticate']) {
+      $registerNewUser = $userAthenticate->RegisterUser($email);  
+  
+      if ($registerNewUser['isAuthenticate']) {
+          $_SESSION['USER_EMAIL'] = $registerNewUser['userinfo'][0]; 
+      }
+  } else {
+      $_SESSION['USER_EMAIL'] = $getUser['userinfo'][0];
+  }
+  $currentPage = 'home'; 
+
+  include '../../shared-student/sidebar.php';
+  include '../../shared-student/navbar.php';
+  ?>
+
+  <input type="hidden" name="user-current-id" id="user-current-id">
+
+  <div class="calendar-wrapper">
+    <!-- Calendar Header -->
+    <div class="calendar-header">
+      <button class="today-button" id="todayButton" style="color: #6366f1"><u>Today</u></button>
+      <div class="month-navigation">
+        <button class="nav-button" id="prevMonth">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        <span class="month-title" id="currentMonth">May 2025</span>
+        <button class="nav-button" id="nextMonth">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
+      <button class="btn primary-btn" id="addEventBtn">Add Event</button>
+    </div>
+
+    <!-- Calendar Grid with Inline Events -->
+    <div id="calendar-container">
+      <!-- Calendar will be generated here -->
+    </div>
+  </div>
+
+  <!-- Modal for Adding/Editing Events -->
+  <div class="modal" id="eventModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="eventModalTitle">Add New Event</h3>
+        <button class="close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="eventId">
+        <div class="form-group">
+          <label for="eventTitle">Event Title</label>
+          <input type="text" id="eventTitle" placeholder="Enter event title" maxlength="30">
+        </div>
+        <div class="form-group">
+          <label for="eventDate">Date</label>
+          <input type="date" id="eventDate">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="deleteEventBtn" class="btn delete-btn" style="display: none;">Delete</button>
+        <button id="saveEventBtn" class="btn primary-btn">Save Event</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- jQuery -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+  <!-- Custom JS -->
+  <script src="js/full-calendar.js"></script>
+  <?php include '../../shared-student/script.php'; ?>
+
+  <style>
+    
+  </style>
+
+</body>
+
+</html>
