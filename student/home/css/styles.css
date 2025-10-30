@@ -82,16 +82,6 @@
     cursor: not-allowed;
   }
 
-  /* Style for invalid dates */
-  input[type="date"]:invalid {
-      border-color: #ff4444;
-      background-color: #fff0f0;
-  }
-
-  /* Style for valid dates */
-  input[type="date"]:valid {
-      border-color: #4CAF50;
-  }
   
   .card-body {
     padding: 15px;
@@ -583,51 +573,46 @@
     justify-content: center;
     align-items: center;
   }
-  
-  .modal.active {
-    display: flex;
-  }
-  
-  .modal-content {
-    background-color: white;
-    border-radius: 8px;
-    width: 350px;
-    max-width: 90%;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  }
-  
-  .modal-header {
-    padding: 12px 15px;
-    border-bottom: 1px solid #f0f0f0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  
-  .modal-header h3 {
-    font-size: 16px;
-    font-weight: 600;
-    margin: 0;
-  }
-  
-  .close-btn {
-    background: none;
-    border: none;
-    font-size: 20px;
-    cursor: pointer;
-    color: #9ca3af;
-  }
-  
-  .modal-body {
-    padding: 15px;
-  }
-  
-  .modal-footer {
-    padding: 12px 15px;
-    border-top: 1px solid #f0f0f0;
-    display: flex;
-    justify-content: flex-end;
-  }
+ 
+/* Modal */
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal.active {
+  display: flex;
+}
+
+.modal-content {
+  background-color: white;
+  border-radius: 8px;
+  width: 350px;
+  max-width: 90%;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.modal-header {
+  padding: 15px 20px;
+  border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+}
   
   /* Form Elements */
   .form-group {

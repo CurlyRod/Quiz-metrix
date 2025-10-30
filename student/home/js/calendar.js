@@ -371,51 +371,72 @@ document.addEventListener("DOMContentLoaded", () => {
       loadEventsForDate(dayElement.dataset.date)
     }
   
-    // Function to load events
-    function loadEvents() {
-      fetch("api/events.php?action=getMonthEvents")
+    // Function to load events for card calendar
+function loadEvents() {
+    // Get all visible date elements from the calendar
+    const allDateElements = document.querySelectorAll('.calendar-day[data-date]');
+    const visibleDates = Array.from(allDateElements).map(day => day.dataset.date);
+    
+    if (visibleDates.length === 0) return;
+
+    // Create a date range for the visible dates
+    const sortedDates = visibleDates.sort();
+    const startDate = sortedDates[0];
+    const endDate = sortedDates[sortedDates.length - 1];
+
+    // Fetch events for the date range
+    fetch(`api/events.php?action=getEventsForDateRange&start_date=${startDate}&end_date=${endDate}`)
         .then((response) => response.json())
         .then((data) => {
-          // Check if the request was successful and events exist
-          if (!data.success || !data.events) {
-            console.error("Error loading events:", data.message || "No events data received");
-            return;
-          }
-
-          // Group events by date
-          const eventsByDate = {};
-
-          data.events.forEach((event) => {
-            const eventDate = event.event_date;
-            if (!eventsByDate[eventDate]) {
-              eventsByDate[eventDate] = [];
+            // Check if the request was successful and events exist
+            if (!data.success || !data.events) {
+                console.error("Error loading events:", data.message || "No events data received");
+                return;
             }
-            eventsByDate[eventDate].push(event);
-          });
 
-          // Add event indicators and count badges to calendar days
-          for (const [date, events] of Object.entries(eventsByDate)) {
-            const dayElement = document.querySelector(`.calendar-day[data-date="${date}"]`);
+            // Group events by date
+            const eventsByDate = {};
 
-            if (dayElement) {
-              dayElement.classList.add("has-event");
-
-              // Add event count badge
-              const eventCount = events.length;
-              if (eventCount > 0) {
-                let badge = dayElement.querySelector(".event-count-badge");
-                if (!badge) {
-                  badge = document.createElement("span");
-                  badge.className = "event-count-badge";
-                  dayElement.appendChild(badge);
+            data.events.forEach((event) => {
+                const eventDate = event.event_date;
+                if (!eventsByDate[eventDate]) {
+                    eventsByDate[eventDate] = [];
                 }
-                badge.textContent = eventCount;
-              }
+                eventsByDate[eventDate].push(event);
+            });
+
+            // Clear existing event indicators first
+            document.querySelectorAll('.calendar-day.has-event').forEach(day => {
+                day.classList.remove('has-event');
+                const badge = day.querySelector(".event-count-badge");
+                if (badge) {
+                    badge.remove();
+                }
+            });
+
+            // Add event indicators and count badges to calendar days
+            for (const [date, events] of Object.entries(eventsByDate)) {
+                const dayElement = document.querySelector(`.calendar-day[data-date="${date}"]`);
+
+                if (dayElement) {
+                    dayElement.classList.add("has-event");
+
+                    // Add event count badge
+                    const eventCount = events.length;
+                    if (eventCount > 0) {
+                        let badge = dayElement.querySelector(".event-count-badge");
+                        if (!badge) {
+                            badge = document.createElement("span");
+                            badge.className = "event-count-badge";
+                            dayElement.appendChild(badge);
+                        }
+                        badge.textContent = eventCount;
+                    }
+                }
             }
-          }
         })
         .catch((error) => console.error("Error loading events:", error));
-    }
+}
   
     // Function to load events for a specific date
     function loadEventsForDate(dateStr) {

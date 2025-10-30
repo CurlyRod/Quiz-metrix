@@ -31,6 +31,9 @@ switch ($action) {
     case 'deleteEvent':
         deleteEvent($conn);
         break;
+    case 'getEventsForDateRange':
+        getEventsForDateRange($conn);
+        break;
     default:
         echo json_encode(['success' => false, 'message' => 'Invalid action']);
         break;
@@ -80,6 +83,82 @@ function getMonthEvents($conn) {
         
         $likePattern = $currentMonth . '%';
         $stmt->bind_param("si", $likePattern, $user_id);
+        if (!$stmt->execute()) {
+            throw new Exception('Execute failed: ' . $stmt->error);
+        }
+        
+        $result = $stmt->get_result();
+        $events = [];
+        while ($row = $result->fetch_assoc()) {
+            $events[] = $row;
+        }
+        $stmt->close();
+        
+        $response = [
+            'success' => true,
+            'events' => $events
+        ];
+
+    } catch (Exception $e) {
+        $response['message'] = $e->getMessage();
+        http_response_code(401); // Unauthorized for auth errors
+    }
+
+    header('Content-Type: application/json');
+    echo json_encode($response);
+}
+
+// Function to get events for a date range
+function getEventsForDateRange($conn) {
+    // Initialize response
+    $response = ['success' => false, 'message' => '', 'events' => []];
+
+    try {
+        
+        // Get user ID from session
+        if (!isset($_SESSION['USER_EMAIL'])) {
+            throw new Exception('User not authenticated');
+        }
+        
+        $email = $_SESSION['USER_EMAIL'];
+        $user_id = null;
+
+        // Prepare and execute query to get user ID
+        $stmt = $conn->prepare("SELECT id FROM user_credential WHERE email = ?");
+        if (!$stmt) {
+            throw new Exception('Database prepare error: ' . $conn->error);
+        }
+
+        $stmt->bind_param("s", $email);
+        if (!$stmt->execute()) {
+            throw new Exception('Execution error: ' . $stmt->error);
+        }
+
+        $result = $stmt->get_result();
+        if ($result->num_rows > 0) {
+            $row = $result->fetch_assoc();
+            $user_id = $row['id'];
+        } else {
+            throw new Exception('User not found');
+        }
+        $stmt->close();
+
+        // Get date range from request
+        $startDate = isset($_GET['start_date']) ? $_GET['start_date'] : '';
+        $endDate = isset($_GET['end_date']) ? $_GET['end_date'] : '';
+        
+        // Validate date format
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $startDate) || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $endDate)) {
+            throw new Exception('Invalid date format');
+        }
+
+        // Get events for the date range
+        $stmt = $conn->prepare("SELECT * FROM events WHERE event_date BETWEEN ? AND ? AND user_id = ? ORDER BY event_date ASC");
+        if (!$stmt) {
+            throw new Exception('Prepare failed: ' . $conn->error);
+        }
+        
+        $stmt->bind_param("ssi", $startDate, $endDate, $user_id);
         if (!$stmt->execute()) {
             throw new Exception('Execute failed: ' . $stmt->error);
         }
