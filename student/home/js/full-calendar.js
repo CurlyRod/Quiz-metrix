@@ -183,76 +183,88 @@ document.addEventListener("DOMContentLoaded", () => {
     selectedDate = new Date(dayDate)
   }
 
-  // Function to load events for the month
-  function loadEvents() {
-    fetch("api/events.php?action=getMonthEvents")
-      .then((response) => response.json())
-      .then((data) => {
-        if (!data.success || !data.events) {
-          console.error("Error loading events:", data.message || "No events data received")
-          return
-        }
+  // Function to load events for all visible dates in the calendar
+function loadEvents() {
+    // Get all visible date elements from the calendar
+    const allDateElements = document.querySelectorAll('.calendar-day[data-date]');
+    const visibleDates = Array.from(allDateElements).map(day => day.dataset.date);
+    
+    if (visibleDates.length === 0) return;
 
-        // Group events by date
-        const eventsByDate = {}
-        data.events.forEach((event) => {
-          const eventDate = event.event_date
-          if (!eventsByDate[eventDate]) {
-            eventsByDate[eventDate] = []
-          }
-          eventsByDate[eventDate].push(event)
-        })
+    // Create a date range for the visible dates
+    const sortedDates = visibleDates.sort();
+    const startDate = sortedDates[0];
+    const endDate = sortedDates[sortedDates.length - 1];
 
-        // Add events to calendar cells
-        for (const [date, events] of Object.entries(eventsByDate)) {
-          const dayCell = document.querySelector(`.calendar-day[data-date="${date}"]`)
-          if (dayCell) {
-            const eventsContainer = dayCell.querySelector(".events-container")
-            eventsContainer.innerHTML = ""
-
-            // Limit to 10 events per date
-            const displayEvents = events.slice(0, 10)
-            displayEvents.forEach((event) => {
-              const eventItem = document.createElement("div")
-              eventItem.className = "event-item"
-              eventItem.dataset.eventId = event.event_id
-
-              const eventTitle = document.createElement("span")
-              eventTitle.className = "event-title"
-              eventTitle.textContent = event.title
-
-              const deleteBtn = document.createElement("button")
-              deleteBtn.className = "event-delete-btn"
-              deleteBtn.innerHTML = '<i class="fas fa-times"></i>'
-              deleteBtn.addEventListener("click", (e) => {
-                e.stopPropagation()
-                deleteEventFromCalendar(event.event_id)
-              })
-
-              eventItem.appendChild(eventTitle)
-              eventItem.appendChild(deleteBtn)
-
-              eventItem.addEventListener("click", (e) => {
-                if (!e.target.closest(".event-delete-btn")) {
-                  openEventModal(event)
-                }
-              })
-
-              eventsContainer.appendChild(eventItem)
-            })
-
-            // Show "more" indicator if there are more than 10 events
-            if (events.length > 10) {
-              const moreItem = document.createElement("div")
-              moreItem.className = "event-item has-more"
-              moreItem.textContent = `+${events.length - 10} more`
-              eventsContainer.appendChild(moreItem)
+    // Fetch events for the date range
+    fetch(`api/events.php?action=getEventsForDateRange&start_date=${startDate}&end_date=${endDate}`)
+        .then((response) => response.json())
+        .then((data) => {
+            if (!data.success || !data.events) {
+                console.error("Error loading events:", data.message || "No events data received");
+                return;
             }
-          }
-        }
-      })
-      .catch((error) => console.error("Error loading events:", error))
-  }
+
+            // Group events by date
+            const eventsByDate = {};
+            data.events.forEach((event) => {
+                const eventDate = event.event_date;
+                if (!eventsByDate[eventDate]) {
+                    eventsByDate[eventDate] = [];
+                }
+                eventsByDate[eventDate].push(event);
+            });
+
+            // Add events to all calendar cells
+            for (const [date, events] of Object.entries(eventsByDate)) {
+                const dayCell = document.querySelector(`.calendar-day[data-date="${date}"]`);
+                if (dayCell) {
+                    const eventsContainer = dayCell.querySelector(".events-container");
+                    eventsContainer.innerHTML = "";
+
+                    // Limit to 10 events per date
+                    const displayEvents = events.slice(0, 10);
+                    displayEvents.forEach((event) => {
+                        const eventItem = document.createElement("div");
+                        eventItem.className = "event-item";
+                        eventItem.dataset.eventId = event.event_id;
+
+                        const eventTitle = document.createElement("span");
+                        eventTitle.className = "event-title";
+                        eventTitle.textContent = event.title;
+
+                        const deleteBtn = document.createElement("button");
+                        deleteBtn.className = "event-delete-btn";
+                        deleteBtn.innerHTML = '<i class="fas fa-times"></i>';
+                        deleteBtn.addEventListener("click", (e) => {
+                            e.stopPropagation();
+                            deleteEventFromCalendar(event.event_id);
+                        });
+
+                        eventItem.appendChild(eventTitle);
+                        eventItem.appendChild(deleteBtn);
+
+                        eventItem.addEventListener("click", (e) => {
+                            if (!e.target.closest(".event-delete-btn")) {
+                                openEventModal(event);
+                            }
+                        });
+
+                        eventsContainer.appendChild(eventItem);
+                    });
+
+                    // Show "more" indicator if there are more than 10 events
+                    if (events.length > 10) {
+                        const moreItem = document.createElement("div");
+                        moreItem.className = "event-item has-more";
+                        moreItem.textContent = `+${events.length - 10} more`;
+                        eventsContainer.appendChild(moreItem);
+                    }
+                }
+            }
+        })
+        .catch((error) => console.error("Error loading events:", error));
+}
 
   // Function to open the event modal
   function openEventModal(event = null, date = null) {
