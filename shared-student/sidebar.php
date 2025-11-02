@@ -8,6 +8,7 @@
 	<ul class="side-menu" id="side-menu" style="flex:1;">
 		<li><a href="../home" class="nav-link <?php echo ($currentPage == 'home') ? 'active' : ''; ?>"><i class='bx bx-home-alt icon'></i>Home</a></li>		
 		<li><a href="../study-materials" class="nav-link <?php echo ($currentPage == 'study-materials') ? 'active' : ''; ?>"><i class='bx bx-folder-open icon'></i> File Manager </a></li>
+		<li><a href="../ai-tools" class="nav-link <?php echo ($currentPage == 'ai-tools') ? 'active' : ''; ?>"><i class='bi bi-robot icon'></i> AI Tool </a></li>
 		<li class="divider" data-text="study - tools">Tools</li>
 		<li><a href="../flashcard" class="nav-link <?php echo ($currentPage == 'flashcard') ? 'active' : ''; ?>"><i class='bx bx-card icon'></i> Flashcard</a></li>	
 		<li><a href="../quiz" class="nav-link <?php echo ($currentPage == 'quiz') ? 'active' : ''; ?>"><i class='bx bx-check-double icon'></i> Quiz</a></li>		
