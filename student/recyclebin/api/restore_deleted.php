@@ -52,6 +52,9 @@ try {
         $stmt->bind_param("ii", $item_id, $user_id);
     } elseif ($item_type === 'note') {
         $stmt = $conn->prepare("UPDATE notes SET is_deleted = 0 WHERE id = ? AND user_id = ?");
+        $stmt->bind_param("ii", $item_id, $user_id); 
+    } elseif ($item_type === 'flashcard') {
+        $stmt = $conn->prepare("UPDATE flashcards SET is_deleted = 0 WHERE id = ? AND user_id = ?");
         $stmt->bind_param("ii", $item_id, $user_id);
     } else {
         throw new Exception('Invalid item type');
