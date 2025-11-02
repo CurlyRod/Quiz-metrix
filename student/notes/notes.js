@@ -30,12 +30,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const viewEditBtn = document.getElementById("viewEditBtn");
   const viewDeleteBtn = document.getElementById("viewDeleteBtn");
 
-  // ✅ Delete confirmation modal
+  // ✅ Updated Delete confirmation modal elements
   const deleteConfirmModal = document.getElementById("deleteConfirmModal");
-  const deleteConfirmBtn = document.getElementById("deleteConfirmBtn");
-  const deleteCancelBtn = document.getElementById("deleteCancelBtn");
+  const deleteConfirmBtn = document.getElementById("confirmDeleteBtn");
+  const deleteCancelBtn = document.querySelector(".delete-confirm-cancel");
   const deleteModalTitle = document.getElementById("deleteModalTitle");
-  const deleteModalMessage = document.getElementById("deleteModalMessage");
+  const deleteModalBody = document.getElementById("deleteModalBody");
 
   let deleteTargetId = null;
   let deleteMode = "single"; 
@@ -251,7 +251,7 @@ document.addEventListener("DOMContentLoaded", () => {
       viewModal.style.display = "none";
     }
     if (e.target === deleteConfirmModal) {
-      deleteConfirmModal.style.display = "none";
+      deleteConfirmModal.classList.remove("show");
       deleteTargetId = null;
       bulkIds = [];
     }
@@ -344,11 +344,10 @@ document.addEventListener("DOMContentLoaded", () => {
   function openViewModal(note) {
     viewTitle.textContent = note.title || "Untitled";
 
-viewContent.innerHTML = (note.content || "")
-  .replace(/\r\n/g, "<br>")
-  .replace(/\n/g, "<br>")
-  .replace(/\r/g, "<br>");
-
+    viewContent.innerHTML = (note.content || "")
+      .replace(/\r\n/g, "<br>")
+      .replace(/\n/g, "<br>")
+      .replace(/\r/g, "<br>");
 
     viewDate.textContent = note.created_at || "";
 
@@ -378,9 +377,9 @@ viewContent.innerHTML = (note.content || "")
   viewDeleteBtn.addEventListener("click", () => {
     deleteTargetId = viewDeleteBtn.dataset.id;
     deleteMode = "single";
-    deleteModalTitle.textContent = "Delete this note?";
-    deleteModalMessage.textContent = "This action cannot be undone.";
-    deleteConfirmModal.style.display = "flex";
+    deleteModalTitle.textContent = "Delete Note";
+    deleteModalBody.textContent = "Are you sure you want to move this note to recycling bin? You can restore it later.";
+    deleteConfirmModal.classList.add("show");
   });
 
   bulkDeleteBtn.addEventListener("click", () => {
@@ -391,16 +390,28 @@ viewContent.innerHTML = (note.content || "")
     }
     bulkIds = selected.map(cb => cb.dataset.id);
     deleteMode = "bulk";
-    deleteModalTitle.textContent = `Delete ${bulkIds.length} notes?`;
-    deleteModalMessage.textContent = "This action cannot be undone.";
-    deleteConfirmModal.style.display = "flex";
+    deleteModalTitle.textContent = `Delete ${bulkIds.length} Notes`;
+    deleteModalBody.textContent = `Are you sure you want to move ${bulkIds.length} notes to recycling bin? You can restore them later.`;
+    deleteConfirmModal.classList.add("show");
   });
 
-  deleteCancelBtn.addEventListener("click", () => {
-    deleteConfirmModal.style.display = "none";
-    deleteTargetId = null;
-    bulkIds = [];
-  });
+  // Close modal when clicking cancel button or close icon
+  const deleteCloseBtn = document.querySelector(".delete-confirm-close");
+  if (deleteCloseBtn) {
+    deleteCloseBtn.addEventListener("click", () => {
+      deleteConfirmModal.classList.remove("show");
+      deleteTargetId = null;
+      bulkIds = [];
+    });
+  }
+
+  if (deleteCancelBtn) {
+    deleteCancelBtn.addEventListener("click", () => {
+      deleteConfirmModal.classList.remove("show");
+      deleteTargetId = null;
+      bulkIds = [];
+    });
+  }
 
   deleteConfirmBtn.addEventListener("click", () => {
     if (deleteMode === "single" && deleteTargetId) {
@@ -450,7 +461,7 @@ viewContent.innerHTML = (note.content || "")
         });
     }
 
-    deleteConfirmModal.style.display = "none";
+    deleteConfirmModal.classList.remove("show");
     deleteTargetId = null;
     bulkIds = [];
   });

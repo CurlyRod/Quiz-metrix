@@ -123,20 +123,28 @@
     </div>
   </div>
 
-  <!-- Delete Confirmation Modal -->
-<div id="deleteConfirmModal" class="modal delete-modal">
-  <div class="modal-content small">
-    <h5 id="deleteModalTitle">Delete?</h5>
-    <p id="deleteModalMessage">This action cannot be undone.</p>
-    <div class="mt-3 d-flex justify-content-end gap-2">
-      <button id="deleteCancelBtn" class="btn btn-light">Cancel</button>
-      <button id="deleteConfirmBtn" class="btn btn-danger">Delete</button>
+<!-- Delete Confirmation Modal -->
+<div class="delete-confirm-modal" id="deleteConfirmModal">
+    <div class="delete-confirm-overlay"></div>
+    <div class="delete-confirm-content">
+        <div class="delete-confirm-header">
+            <h3 class="delete-confirm-title" id="deleteModalTitle">Delete Quiz</h3>
+            <button type="button" class="delete-confirm-close" data-dismiss="modal">
+                <svg class="delete-confirm-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <div class="delete-confirm-body">
+            <p id="deleteModalBody">Are you sure you want to move this quiz to recycling bin? You can restore it later.</p>
+        </div>
+        <div class="delete-confirm-footer">
+            <button type="button" class="delete-confirm-btn delete-confirm-cancel" data-dismiss="modal">Cancel</button>
+            <button type="button" class="delete-confirm-btn delete-confirm-delete" id="confirmDeleteBtn">Move to Bin</button>
+        </div>
     </div>
-  </div>
 </div>
-
-
-
 
 
     <!-- Toast container -->
