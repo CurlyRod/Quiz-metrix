@@ -98,6 +98,18 @@ async function fetchDeletedItems() {
                 itemType: 'note'
             })));
         }
+
+        // Process flashcards
+        if (data.success && data.flashcards) {
+            items = items.concat(data.flashcards.map(flashcard => ({
+                id: `flashcard_${flashcard.id}`,
+                name: flashcard.title,
+                type: 'Flashcards',
+                deletedDate: flashcard.updated_at || flashcard.created_at,
+                originalId: flashcard.id,
+                itemType: 'flashcard'
+            })));
+        }
         
         return items;
     } catch (error) {

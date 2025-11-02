@@ -123,8 +123,8 @@
             font-size: 1.25rem;
         }
 
-        .icon-files { background: rgba(168, 85, 247, 0.1); color: var(--primary-purple); }
-        .icon-flashcards { background: rgba(99, 102, 241, 0.1); color: var(--accent-blue); }
+        .icon-files { background: rgba(168, 85, 247, 0.1); color: var(--accent-blue);}
+        .icon-flashcards { background: rgba(99, 102, 241, 0.1); color:  var(--primary-purple);}
         .icon-quiz { background: rgba(34, 197, 94, 0.1); color: var(--success-green); }
         .icon-notes { background: rgba(239, 68, 68, 0.1); color: var(--danger-red); }
 

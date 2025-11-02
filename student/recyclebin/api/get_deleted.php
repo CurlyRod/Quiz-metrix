@@ -89,11 +89,26 @@ try {
         $stmt->close();
     }
 
+    // Get DELETED flashcards for this user
+    $flashcards = [];
+    $stmt = $conn->prepare("SELECT deck_id, title, created_at, updated_at FROM decks WHERE user_id = ? AND is_deleted = 1 ORDER BY updated_at DESC");
+    if ($stmt) {
+        $stmt->bind_param("i", $user_id);
+        if ($stmt->execute()) {
+            $result = $stmt->get_result();
+            while ($row = $result->fetch_assoc()) {
+                $flashcards[] = $row;
+            }
+        }
+        $stmt->close();
+    }
+
     $response = [
         'success' => true,
         'quizzes' => $quizzes,
         'files' => $files,
-        'notes' => $notes
+        'notes' => $notes,
+        'flashcards' => $flashcards
     ];
 
 } catch (Exception $e) {

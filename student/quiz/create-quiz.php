@@ -50,8 +50,8 @@
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h3 class="mb-0">Create Quiz</h3>
                 <div>
-                    <button class="btn me-2" id="createQuizBtn" style="background-color: #6366f1; color: white;">Create Quiz</button>
-                    <button class="btn btn-success" id="startQuizBtn">Create and Start Quiz</button>
+                    <button class="btn me-2" id="createQuizBtn" style="background-color: #6366f1; color: white;">Save Quiz</button>
+                    <button class="btn btn-success" id="startQuizBtn">Save and Start Quiz</button>
 
                 </div>
             </div>
@@ -93,10 +93,7 @@
             <button class="btn btn-light w-100 add-card-btn mt-3" id="addCardBtn">
                 Add question <i class="bi bi-plus"></i>
             </button>
-            <div class="d-flex justify-content-end" style="margin-top: 20px;">
-                    <button class="btn me-2" id="createQuizBtn" style="background-color: #6366f1; color: white;">Create Quiz</button>
-                    <button class="btn btn-success" id="startQuizBtn">Create and Start Quiz</button>
-                </div>
+           
 
                 </div>
         </div>

@@ -53,6 +53,9 @@ try {
     } elseif ($item_type === 'note') {
         $stmt = $conn->prepare("DELETE FROM notes WHERE id = ? AND user_id = ?");
         $stmt->bind_param("ii", $item_id, $user_id);
+    } elseif ($item_type === 'flashcard') {
+    $stmt = $conn->prepare("DELETE FROM flashcards WHERE id = ? AND user_id = ?");
+    $stmt->bind_param("ii", $item_id, $user_id);
     } else {
         throw new Exception('Invalid item type');
     }
