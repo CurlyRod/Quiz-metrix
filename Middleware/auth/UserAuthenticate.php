@@ -1,5 +1,5 @@
 <?php
-require_once '../../student/home/db_connect.php';
+require_once 'database.php';
 class UserAuthenticate{  
 
     private $conn; 

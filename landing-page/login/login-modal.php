@@ -65,31 +65,22 @@
             </div>
 
             <div class="modal-body p-4">
-                <form>
+                <form id="adminLoginForm" method="POST" action="../admin_login.php">
+                    <div id="errorMessage" class="alert alert-danger d-none"></div>
+                    
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Username</label>
-                        <input type="text" class="form-control rounded-3 shadow-sm" placeholder="Enter your Username" >
+                        <input type="text" name="username" class="form-control rounded-3 shadow-sm" placeholder="Enter your Username" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Password</label>
-                        <input type="password" class="form-control rounded-3 shadow-sm" placeholder="Enter your Password">
+                        <input type="password" name="password" class="form-control rounded-3 shadow-sm" placeholder="Enter your Password" required>
                     </div>
 
-                    <!-- Remember Me + Forgot Password -->
-                    <!-- <div class="d-flex justify-content-between align-items-center mb-4">
-                        <div class="form-check">
-                            <input type="checkbox" class="form-check-input" id="rememberMe">
-                            <label class="form-check-label" for="rememberMe">Remember Me</label>
-                        </div>
-                        <a href="#" class="text-decoration-none text-primary fw-semibold" data-bs-toggle="modal" data-bs-target="#forgotPassword">Forgot Password?</a>
-                    </div> -->
-
                     <!-- Login Button -->
-                    <a href="../quiz-metrix/admin/home/index.php">
-                    <button type="button" class="btn w-100 rounded-3 shadow-sm" style="background-color: #6366f1; color: white;">
+                    <button type="submit" class="btn w-100 rounded-3 shadow-sm" style="background-color: #6366f1; color: white;">
                         Login
                     </button>
-                </a>
                 </form>
             </div>
 
@@ -99,4 +90,57 @@
         </div>
     </div>
 </div>
-
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const adminLoginForm = document.getElementById('adminLoginForm');
+    
+    if (adminLoginForm) {
+        adminLoginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const errorMessage = document.getElementById('errorMessage');
+            const submitButton = this.querySelector('button[type="submit"]');
+            
+            // Show loading state
+            submitButton.disabled = true;
+            submitButton.textContent = 'Logging in...';
+            errorMessage.classList.add('d-none');
+            
+            fetch('admin_login.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.text())
+            .then(text => {
+                console.log('Raw response:', text);
+                
+                try {
+                    const data = JSON.parse(text);
+                    
+                    if (data.success) {
+                        // Redirect to admin dashboard
+                        window.location.href = '../admin/home/index.php';
+                    } else {
+                        errorMessage.textContent = data.message || 'Login failed.';
+                        errorMessage.classList.remove('d-none');
+                    }
+                } catch (parseError) {
+                    console.error('JSON Parse Error:', parseError);
+                    errorMessage.textContent = 'Server error. Please try again.';
+                    errorMessage.classList.remove('d-none');
+                }
+            })
+            .catch(error => {
+                console.error('Fetch Error:', error);
+                errorMessage.textContent = 'Network error. Please check your connection.';
+                errorMessage.classList.remove('d-none');
+            })
+            .finally(() => {
+                submitButton.disabled = false;
+                submitButton.textContent = 'Login';
+            });
+        });
+    }
+});
+</script>

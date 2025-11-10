@@ -13,7 +13,8 @@ let quizData = {
     settings: {
         timed: false,
         time: 5,
-        answerTypes: ["multiple"]
+        answerTypes: ["multiple"],
+        studyMode: "sequential"
     },
 }
 
@@ -95,6 +96,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 timerSettings.classList.add("d-none");
             }
             
+            // Set study mode to match current quiz data
+            const studyMode = quizData.settings.studyMode || 'sequential';
+            document.querySelector(`input[name="studyMode"][value="${studyMode}"]`).checked = true;
+            
             answerTypeWarning.classList.add("d-none");
             
             quizSettingsModal = new bootstrap.Modal(document.getElementById("quizSettingsModal"))
@@ -134,6 +139,9 @@ document.addEventListener("DOMContentLoaded", () => {
             return
         }
 
+        // Get study mode
+        const studyMode = document.querySelector('input[name="studyMode"]:checked').value;
+
         // Update global answer types
         globalAnswerTypes = selectedTypes
         
@@ -141,6 +149,7 @@ document.addEventListener("DOMContentLoaded", () => {
         quizData.settings.answerTypes = globalAnswerTypes;
         quizData.settings.timed = timedQuizSwitch.checked;
         quizData.settings.time = parseInt(quizTimeInput.value) || 5;
+        quizData.settings.studyMode = studyMode; // Add study mode
         
         // Apply the new answer types to all existing cards
         applyAnswerTypesToAllCards()
@@ -198,74 +207,123 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Process imported cards from localStorage if available
     function processImportedCards() {
-        const importedCardsJson = localStorage.getItem("importedCards")
-        if (importedCardsJson) {
+        let importedCards = [];
+        
+        // Try custom format first (no JSON)
+        const customImportedCards = localStorage.getItem("importedCardsCustom");
+        if (customImportedCards) {
             try {
-                const importedCards = JSON.parse(importedCardsJson)
-                
-                // Clear existing cards if we have imported ones
-                if (importedCards.length > 0) {
-                    questionCards.innerHTML = ""
-                }
-                
-                // Add each imported card
-                importedCards.forEach((card, index) => {
-                    const answerType = card.answerType || 
-                        (globalAnswerTypes.length === 1 ? globalAnswerTypes[0] : 
-                         globalAnswerTypes[Math.floor(Math.random() * globalAnswerTypes.length)]);
-
-                    const newCard = document.createElement("div")
-                    newCard.className = "card question-card mb-3"
-                    newCard.setAttribute("data-card-id", index + 1)
-                    newCard.setAttribute("draggable", "true")
-                    
-                    newCard.innerHTML = `
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <span class="card-number">${index + 1}</span>
-                            <div class="d-flex align-items-center">
-                                <select class="form-select form-select-sm answer-type-select me-2" style="width: auto;">
-                                    <option value="multiple" ${answerType === 'multiple' ? 'selected' : ''}>Multiple Choice</option>
-                                    <option value="typed" ${answerType === 'typed' ? 'selected' : ''}>Typed Answer</option>
-                                    <option value="truefalse" ${answerType === 'truefalse' ? 'selected' : ''}>True/False</option>
-                                </select>
-                                <button class="btn btn-sm btn-light move-card-btn" title="Drag to reorder"><i class="bi bi-grip-vertical"></i></button>
-                                <button class="btn btn-sm btn-light delete-card-btn"><i class="bi bi-trash"></i></button>
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-6 mb-3 mb-md-0">
-                                    <label class="form-label">Answer (Term)</label>
-                                    <textarea class="form-control term-input auto-resize" placeholder="Enter the answer" rows="1">${card.term}</textarea>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Question (Description)</label>
-                                    <textarea class="form-control description-input auto-resize" placeholder="Enter the question" rows="1">${card.description}</textarea>
-                                </div>
-                            </div>
-                        </div>
-                    `
-                    
-                    questionCards.appendChild(newCard)
-                    addCardEventListeners(newCard)
-                    initCardDragAndDrop(newCard)
-                    initAutoResizeForCard(newCard)
-                })
-                
-                updateCardNumbers()
-                localStorage.removeItem("importedCards")
-                showSuccess(`Successfully imported ${importedCards.length} cards.`)
+                importedCards = customImportedCards.split(':::').map(cardStr => {
+                    const [term, description] = cardStr.split('|||');
+                    return {
+                        term: term.replace(/\\\|/g, '|'),
+                        description: description.replace(/\\\|/g, '|')
+                    };
+                });
+                console.log("Loaded cards using custom format:", importedCards);
             } catch (error) {
-                console.error("Error processing imported cards:", error)
+                console.error("Error parsing custom imported cards:", error);
             }
+        }
+        
+        // If custom format didn't work or doesn't exist, try JSON format
+        if (importedCards.length === 0) {
+            const importedCardsJson = localStorage.getItem("importedCards");
+            if (importedCardsJson) {
+                try {
+                    importedCards = JSON.parse(importedCardsJson);
+                    console.log("Loaded cards using JSON format:", importedCards);
+                } catch (error) {
+                    console.error("Error parsing JSON imported cards:", error);
+                }
+            }
+        }
+        
+        if (importedCards.length > 0) {
+            // Clear existing cards if we have imported ones
+            questionCards.innerHTML = "";
+            
+            // Add each imported card
+            importedCards.forEach((card, index) => {
+                const answerType = card.answerType || 
+                    (globalAnswerTypes.length === 1 ? globalAnswerTypes[0] : 
+                     globalAnswerTypes[Math.floor(Math.random() * globalAnswerTypes.length)]);
+
+                const newCard = document.createElement("div");
+                newCard.className = "card question-card mb-3";
+                newCard.setAttribute("data-card-id", index + 1);
+                newCard.setAttribute("draggable", "true");
+                
+                // Use textContent for textarea values to avoid HTML escaping
+                newCard.innerHTML = `
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span class="card-number">${index + 1}</span>
+                        <div class="d-flex align-items-center">
+                            <select class="form-select form-select-sm answer-type-select me-2" style="width: auto;">
+                                <option value="multiple" ${answerType === 'multiple' ? 'selected' : ''}>Multiple Choice</option>
+                                <option value="typed" ${answerType === 'typed' ? 'selected' : ''}>Typed Answer</option>
+                                <option value="truefalse" ${answerType === 'truefalse' ? 'selected' : ''}>True/False</option>
+                            </select>
+                            <button class="btn btn-sm btn-light move-card-btn" title="Drag to reorder"><i class="bi bi-grip-vertical"></i></button>
+                            <button class="btn btn-sm btn-light delete-card-btn"><i class="bi bi-trash"></i></button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3 mb-md-0">
+                                <label class="form-label">Answer (Term)</label>
+                                <textarea class="form-control term-input auto-resize" placeholder="Enter the answer" rows="1" maxlength="300"></textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Question (Description)</label>
+                                <textarea class="form-control description-input auto-resize" placeholder="Enter the question" rows="1" maxlength="300"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // Set textarea values directly to avoid HTML escaping issues
+                const termTextarea = newCard.querySelector('.term-input');
+                const descTextarea = newCard.querySelector('.description-input');
+                
+                if (termTextarea) termTextarea.value = card.term;
+                if (descTextarea) descTextarea.value = card.description;
+                
+                questionCards.appendChild(newCard);
+                addCardEventListeners(newCard);
+                initCardDragAndDrop(newCard);
+                initAutoResizeForCard(newCard);
+            });
+            
+            updateCardNumbers();
+            
+            // Clean up storage
+            localStorage.removeItem("importedCards");
+            localStorage.removeItem("importedCardsCustom");
+            localStorage.removeItem("importedCardsSafe");
+            
+            // Fix any escaped characters
+            setTimeout(() => {
+                fixEscapedCharacters();
+            }, 100);
+            
+            showSuccess(`Successfully imported ${importedCards.length} cards.`);
         }
     }
 
-    function addNewCard() {
-        const cardCount = document.querySelectorAll(".question-card").length
-        const newCardId = cardCount + 1
+    // Helper function to fix escaped quotes and apostrophes
+    function fixEscapedCharacters() {
+        document.querySelectorAll('.term-input, .description-input').forEach(textarea => {
+            // Remove backslashes that were added before quotes and apostrophes
+            textarea.value = textarea.value.replace(/\\(['"])/g, '$1');
+        });
+    }
 
-        // Determine the answer type for this new card
+    function addNewCard() {
+        const cardCount = document.querySelectorAll(".question-card").length;
+        const newCardId = cardCount + 1;
+
+        // Determine the answer type for this new card - use global setting as default
         let answerType;
         if (globalAnswerTypes.length === 1) {
             answerType = globalAnswerTypes[0];
@@ -275,10 +333,10 @@ document.addEventListener("DOMContentLoaded", () => {
             answerType = globalAnswerTypes[randomIndex];
         }
 
-        const newCard = document.createElement("div")
-        newCard.className = "card question-card mb-3"
-        newCard.setAttribute("data-card-id", newCardId)
-        newCard.setAttribute("draggable", "true")
+        const newCard = document.createElement("div");
+        newCard.className = "card question-card mb-3";
+        newCard.setAttribute("data-card-id", newCardId);
+        newCard.setAttribute("draggable", "true");
 
         newCard.innerHTML = `
             <div class="card-header d-flex justify-content-between align-items-center">
@@ -297,21 +355,21 @@ document.addEventListener("DOMContentLoaded", () => {
                 <div class="row">
                     <div class="col-md-6 mb-3 mb-md-0">
                         <label class="form-label">Answer (Term)</label>
-                        <textarea class="form-control term-input auto-resize" placeholder="Enter the answer" rows="1"></textarea>
+                        <textarea class="form-control term-input auto-resize" placeholder="Enter the answer" rows="1" maxlength="300"></textarea>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Question (Description)</label>
-                        <textarea class="form-control description-input auto-resize" placeholder="Enter the question" rows="1"></textarea>
+                        <textarea class="form-control description-input auto-resize" placeholder="Enter the question" rows="1" maxlength="300"></textarea>
                     </div>
                 </div>
             </div>
-        `
+        `;
 
-        questionCards.appendChild(newCard)
-        addCardEventListeners(newCard)
-        initCardDragAndDrop(newCard)
-        initAutoResizeForCard(newCard)
-        updateCardNumbers()
+        questionCards.appendChild(newCard);
+        addCardEventListeners(newCard);
+        initCardDragAndDrop(newCard);
+        initAutoResizeForCard(newCard);
+        updateCardNumbers();
         
         // Mark as having changes
         hasUnsavedChanges = true;
@@ -319,10 +377,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function addCardEventListeners(card) {
         card.querySelector(".delete-card-btn").addEventListener("click", () => {
-            card.remove()
-            updateCardNumbers()
+            card.remove();
+            updateCardNumbers();
             hasUnsavedChanges = true;
-        })
+        });
+        
+        // Add change listener to answer type select
+        const answerTypeSelect = card.querySelector('.answer-type-select');
+        if (answerTypeSelect) {
+            answerTypeSelect.addEventListener('change', () => {
+                hasUnsavedChanges = true;
+            });
+        }
         
         // Add change listeners to inputs
         const inputs = card.querySelectorAll('textarea, select');
@@ -401,125 +467,130 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function createQuiz(showSettingsModal = false) {
-        quizData.title = document.getElementById("quizTitle").value || "Untitled Quiz";
-        quizData.description = document.getElementById("quizDescription").value || "No description provided";
-        quizData.user_current_id = document.getElementById("user-current-id").value;
+    quizData.title = document.getElementById("quizTitle").value || "Untitled Quiz";
+    quizData.description = document.getElementById("quizDescription").value || "No description provided";
+    quizData.user_current_id = document.getElementById("user-current-id").value;
 
-        // Ensure answer types are included in settings
-        quizData.settings.answerTypes = globalAnswerTypes;
+    // Get questions with their individual answer types
+    quizData.questions = [];
+    document.querySelectorAll(".question-card").forEach((card) => {
+        let term = card.querySelector(".term-input").value;
+        let description = card.querySelector(".description-input").value;
+        const answerType = card.querySelector(".answer-type-select").value;
 
-        // Get questions with their answer types
-        quizData.questions = [];
-        document.querySelectorAll(".question-card").forEach((card) => {
-            const term = card.querySelector(".term-input").value;
-            const description = card.querySelector(".description-input").value;
-            const answerType = card.querySelector(".answer-type-select").value;
+        // Remove escaped backslashes before sending to server
+        term = term.replace(/\\(['"])/g, '$1');
+        description = description.replace(/\\(['"])/g, '$1');
 
-            if (term || description) {
-                quizData.questions.push({
-                    term: term || "No answer provided",
-                    description: description || "No question provided",
-                    answerType: answerType
-                });
-            }
-        });
-
-        if (quizData.questions.length <= 3) {
-            showError("Please add at least 4 questions to your quiz.");
-            return;
+        if (term || description) {
+            quizData.questions.push({
+                term: term || "No answer provided",
+                description: description || "No question provided",
+                answerType: answerType
+            });
         }
+    });
 
-        if (quizId) {
-            quizData.quiz_id = quizId;
-        }
-
-        fetch("api/save_quiz.php", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(quizData),
-        })
-        .then((response) => response.json())
-        .then((data) => {
-            if (data.success) {
-                quizData.quiz_id = data.quiz_id;
-                // Reset change tracking after successful save
-                hasUnsavedChanges = false;
-                isQuizSubmitted = true;
-                
-                if (showSettingsModal) {
-                    clearForm();
-                    showSuccess("Quiz saved successfully!");
-                    setTimeout(() => {
-                        window.location.href = "index.php";
-                    }, 1500);
-                }
-            } else {
-                showError("Error saving quiz: " + data.message);
-            }
-        })
+    if (quizData.questions.length <= 3) {
+        showError("Please add at least 4 questions to your quiz.");
+        return;
     }
+
+    if (quizId) {
+        quizData.quiz_id = quizId;
+    }
+
+    fetch("api/save_quiz.php", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(quizData),
+    })
+    .then((response) => response.json())
+    .then((data) => {
+        if (data.success) {
+            quizData.quiz_id = data.quiz_id;
+            // Reset change tracking after successful save
+            hasUnsavedChanges = false;
+            isQuizSubmitted = true;
+            
+            if (showSettingsModal) {
+                clearForm();
+                showSuccess("Quiz saved successfully!");
+                setTimeout(() => {
+                    window.location.href = "index.php";
+                }, 1500);
+            }
+        } else {
+            showError("Error saving quiz: " + data.message);
+        }
+    });
+}
 
     function startQuiz() {
-        // Save the quiz first, then redirect to quiz page
-        quizData.title = document.getElementById("quizTitle").value || "Untitled Quiz";
-        quizData.description = document.getElementById("quizDescription").value || "No description provided";
-        quizData.user_current_id = document.getElementById("user-current-id").value;
+    // Save the quiz first, then redirect to quiz page
+    quizData.title = document.getElementById("quizTitle").value || "Untitled Quiz";
+    quizData.description = document.getElementById("quizDescription").value || "No description provided";
+    quizData.user_current_id = document.getElementById("user-current-id").value;
 
-        // Ensure settings are up to date
-        quizData.settings.answerTypes = globalAnswerTypes;
+    // Ensure settings are up to date
+    quizData.settings.answerTypes = globalAnswerTypes;
 
-        // Get questions with their answer types
-        quizData.questions = [];
-        document.querySelectorAll(".question-card").forEach((card) => {
-            const term = card.querySelector(".term-input").value;
-            const description = card.querySelector(".description-input").value;
-            const answerType = card.querySelector(".answer-type-select").value;
+    // Get questions with their answer types
+    quizData.questions = [];
+    document.querySelectorAll(".question-card").forEach((card) => {
+        let term = card.querySelector(".term-input").value;
+        let description = card.querySelector(".description-input").value;
+        const answerType = card.querySelector(".answer-type-select").value;
 
-            if (term || description) {
-                quizData.questions.push({
-                    term: term || "No answer provided",
-                    description: description || "No question provided",
-                    answerType: answerType
-                });
-            }
-        });
+        // Remove escaped backslashes before sending to server
+        term = term.replace(/\\(['"])/g, '$1');
+        description = description.replace(/\\(['"])/g, '$1');
 
-        if (quizData.questions.length <= 3) {
-            showError("Please add at least 4 questions to your quiz.");
-            return;
+        if (term || description) {
+            quizData.questions.push({
+                term: term || "No answer provided",
+                description: description || "No question provided",
+                answerType: answerType
+            });
         }
+    });
 
-        if (quizId) {
-            quizData.quiz_id = quizId;
-        }
-
-        fetch("api/save_quiz.php", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(quizData),
-        })
-        .then((response) => response.json())
-        .then((data) => {
-            if (data.success) {
-                // Reset change tracking
-                hasUnsavedChanges = false;
-                isQuizSubmitted = true;
-                
-                // Redirect directly to quiz page without showing modal
-                window.location.href = "quiz.php?id=" + data.quiz_id;
-            } else {
-                showError("Error starting quiz: " + data.message);
-            }
-        })
-        .catch((error) => {
-            console.error("Error:", error);
-            showError("Error starting quiz. Please try again.");
-        });
+    if (quizData.questions.length <= 3) {
+        showError("Please add at least 4 questions to your quiz.");
+        return;
     }
+
+    if (quizId) {
+        quizData.quiz_id = quizId;
+    }
+
+    fetch("api/save_quiz.php", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(quizData),
+    })
+    .then((response) => response.json())
+    .then((data) => {
+        if (data.success) {
+            // Reset change tracking
+            hasUnsavedChanges = false;
+            isQuizSubmitted = true;
+            
+            // Redirect directly to quiz page without showing modal
+            window.location.href = "quiz.php?id=" + data.quiz_id;
+        } else {
+            showError("Error starting quiz: " + data.message);
+        }
+    })
+    .catch((error) => {
+        console.error("Error:", error);
+        showError("Error starting quiz. Please try again.");
+    });
+}
 
     function loadQuiz(quizId) {
         fetch(`api/get_quiz.php?id=${quizId}`)
@@ -534,9 +605,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function populateQuizForm(quiz) {
-        document.getElementById("quizTitle").value = quiz.title
-        document.getElementById("quizDescription").value = quiz.description
-        questionCards.innerHTML = ""
+        document.getElementById("quizTitle").value = quiz.title;
+        document.getElementById("quizDescription").value = quiz.description;
+        questionCards.innerHTML = "";
 
         // Load saved answer types if they exist in settings
         if (quiz.settings && quiz.settings.answerTypes) {
@@ -550,15 +621,16 @@ document.addEventListener("DOMContentLoaded", () => {
         if (quiz.settings) {
             quizData.settings.timed = quiz.settings.timed || false;
             quizData.settings.time = quiz.settings.time || 5;
+            quizData.settings.studyMode = quiz.settings.studyMode || 'sequential'; // Load study mode
         }
 
         quiz.questions.forEach((question, index) => {
-            const answerType = question.answerType || 'multiple';
+            const answerType = question.answerType || 'multiple'; // Use saved answer type
             
-            const newCard = document.createElement("div")
-            newCard.className = "card question-card mb-3"
-            newCard.setAttribute("data-card-id", index + 1)
-            newCard.setAttribute("draggable", "true")
+            const newCard = document.createElement("div");
+            newCard.className = "card question-card mb-3";
+            newCard.setAttribute("data-card-id", index + 1);
+            newCard.setAttribute("draggable", "true");
 
             newCard.innerHTML = `
                 <div class="card-header d-flex justify-content-between align-items-center">
@@ -577,29 +649,41 @@ document.addEventListener("DOMContentLoaded", () => {
                     <div class="row">
                         <div class="col-md-6 mb-3 mb-md-0">
                             <label class="form-label">Answer (Term)</label>
-                            <textarea class="form-control term-input auto-resize" placeholder="Enter the answer" rows="1">${question.term}</textarea>
+                            <textarea class="form-control term-input auto-resize" placeholder="Enter the answer" rows="1" maxlength="300"></textarea>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Question (Description)</label>
-                            <textarea class="form-control description-input auto-resize" placeholder="Enter the question" rows="1">${question.description}</textarea>
+                            <textarea class="form-control description-input auto-resize" placeholder="Enter the question" rows="1" maxlength="300"></textarea>
                         </div>
                     </div>
                 </div>
-            `
+            `;
 
-            questionCards.appendChild(newCard)
-            addCardEventListeners(newCard)
-            initCardDragAndDrop(newCard)
-            initAutoResizeForCard(newCard)
-        })
+            // Set textarea values directly to avoid HTML escaping issues
+            const termTextarea = newCard.querySelector('.term-input');
+            const descTextarea = newCard.querySelector('.description-input');
+            
+            if (termTextarea) termTextarea.value = question.term;
+            if (descTextarea) descTextarea.value = question.description;
+
+            questionCards.appendChild(newCard);
+            addCardEventListeners(newCard);
+            initCardDragAndDrop(newCard);
+            initAutoResizeForCard(newCard);
+        });
 
         if (quiz.questions.length === 0) {
             for (let i = 0; i < 5; i++) {
-                addNewCard()
+                addNewCard();
             }
         }
 
-        quizData = quiz
+        // Fix any escaped characters
+        setTimeout(() => {
+            fixEscapedCharacters();
+        }, 100);
+
+        quizData = quiz;
         // Reset change tracking when loading an existing quiz
         hasUnsavedChanges = false;
     }

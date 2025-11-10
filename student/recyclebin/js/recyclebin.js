@@ -2,6 +2,7 @@
 let deletedItems = [];
 let selectedTypes = [];
 let dateFilter = 'all';
+let pendingDelete = null;
 
 // Helper functions
 function getTypeIcon(type) {
@@ -51,6 +52,25 @@ function showToast(message, type = 'success') {
     }, 3000);
 }
 
+// Modal functions
+function showDeleteModal(item) {
+    const modal = document.getElementById('deleteModal');
+    const modalTitle = document.getElementById('deleteModalTitle');
+    const modalBody = document.getElementById('deleteModalBody');
+    
+    modalTitle.textContent = `Permanently Delete ${item.type}`;
+    modalBody.textContent = `Are you sure you want to permanently delete "${item.name}"? This action cannot be undone.`;
+    
+    modal.classList.add('show');
+    pendingDelete = item;
+}
+
+function hideDeleteModal() {
+    const modal = document.getElementById('deleteModal');
+    modal.classList.remove('show');
+    pendingDelete = null;
+}
+
 // API functions
 async function fetchDeletedItems() {
     try {
@@ -93,20 +113,21 @@ async function fetchDeletedItems() {
                 id: `note_${note.id}`,
                 name: note.title,
                 type: 'Notes',
-                deletedDate: note.updated_at || note.created_at, // Use updated_at since deleted_at doesn't exist
+                deletedDate: note.updated_at || note.created_at, 
                 originalId: note.id,
                 itemType: 'note'
             })));
         }
 
+        
         // Process flashcards
         if (data.success && data.flashcards) {
             items = items.concat(data.flashcards.map(flashcard => ({
-                id: `flashcard_${flashcard.id}`,
+                id: `flashcard_${flashcard.deck_id}`,  
                 name: flashcard.title,
                 type: 'Flashcards',
                 deletedDate: flashcard.updated_at || flashcard.created_at,
-                originalId: flashcard.id,
+                originalId: flashcard.deck_id,  
                 itemType: 'flashcard'
             })));
         }
@@ -205,7 +226,7 @@ function renderItems() {
                     <button class="btn-restore flex-fill" onclick="handleRestore('${item.id}', '${item.name.replace(/'/g, "\\'")}', '${item.itemType}', ${item.originalId})">
                         <i class="bi bi-arrow-counterclockwise"></i> Restore
                     </button>
-                    <button class="btn-delete flex-fill" onclick="handleDelete('${item.id}', '${item.name.replace(/'/g, "\\'")}', '${item.itemType}', ${item.originalId})">
+                    <button class="btn-delete flex-fill" onclick="handleDeleteClick('${item.id}', '${item.name.replace(/'/g, "\\'")}', '${item.itemType}', ${item.originalId})">
                         <i class="bi bi-trash3"></i> Delete
                     </button>
                 </div>
@@ -236,13 +257,23 @@ async function handleRestore(id, name, itemType, originalId) {
     }
 }
 
-async function handleDelete(id, name, itemType, originalId) {
-    if (!confirm(`Are you sure you want to permanently delete "${name}"? This action cannot be undone.`)) {
-        return;
-    }
+function handleDeleteClick(id, name, itemType, originalId) {
+    const item = {
+        id: id,
+        name: name,
+        type: itemType,
+        originalId: originalId
+    };
+    showDeleteModal(item);
+}
+
+async function handleDelete() {
+    if (!pendingDelete) return;
+    
+    const { id, name, type, originalId } = pendingDelete;
     
     try {
-        const endpoint = `api/permanent_delete.php?id=${originalId}&type=${itemType}`;
+        const endpoint = `api/permanent_delete.php?id=${originalId}&type=${type}`;
         
         const response = await fetch(endpoint);
         const result = await response.json();
@@ -258,6 +289,8 @@ async function handleDelete(id, name, itemType, originalId) {
     } catch (error) {
         console.error('Error deleting item:', error);
         showToast(`Error deleting "${name}"`, 'error');
+    } finally {
+        hideDeleteModal();
     }
 }
 
@@ -287,6 +320,22 @@ document.addEventListener('DOMContentLoaded', async function() {
             
             renderItems();
         });
+    });
+
+    // Modal event listeners
+    document.querySelectorAll('[data-dismiss="modal"]').forEach(btn => {
+        btn.addEventListener('click', hideDeleteModal);
+    });
+
+    document.querySelector('.modal-overlay').addEventListener('click', hideDeleteModal);
+
+    document.getElementById('confirmDeleteBtn').addEventListener('click', handleDelete);
+
+    // Close modal with Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            hideDeleteModal();
+        }
     });
 
     // Load initial data

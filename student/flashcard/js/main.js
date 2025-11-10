@@ -40,7 +40,7 @@ document.addEventListener("DOMContentLoaded", () => {
       deckCard.className = "col-md-3 col-sm-6 mb-3"
       deckCard.innerHTML = `
                 <div class="recent-quiz-card" data-deck-id="${deck.deck_id}">
-                    <div class="label-user">Deck | ${formattedDate}</div>
+                    <div class="label-user">${formattedDate}</div>
                     <div class="title">${deck.title}</div>
                     <div class="date">${deck.description ? deck.description.substring(0, 30) + (deck.description.length > 30 ? "..." : "") : "No description"}</div>
                     <div class="card-count">${deck.card_count} cards</div>

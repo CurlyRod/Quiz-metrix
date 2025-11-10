@@ -29,7 +29,6 @@ body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     background-color: var(--background);
     color: var(--foreground);
-    line-height: 1.6;
     min-height: 100vh;
 }
 
@@ -73,18 +72,19 @@ p{
 
 @media (min-width: 1024px) {
     .grid-layout {
-        grid-template-columns: 2fr 1fr;
+        grid-template-columns: 1fr 1fr 1fr;
     }
 }
 
 /* Profile Card */
 .profile-card {
-    background: linear-gradient(135deg, var(--card), var(--muted));
+    background: white;
     border: 1px solid var(--border);
     border-radius: var(--radius);
     padding: 1.5rem;
     box-shadow: var(--shadow-md);
     transition: box-shadow 0.3s ease;
+    height: 100%;
 }
 
 .profile-card:hover {
@@ -93,7 +93,7 @@ p{
 
 .profile-content {
     display: flex;
-    gap: 1.5rem;
+    gap: 1rem;
     align-items: start;
 }
 
@@ -165,7 +165,7 @@ p{
 
 /* Stat Card */
 .stat-card {
-    background: linear-gradient(135deg, var(--card), rgba(240, 240, 250, 0.2));
+    background: white;
     border: 1px solid var(--border);
     border-radius: var(--radius);
     padding: 1.5rem;
@@ -241,7 +241,7 @@ p{
 
 /* Chart Card */
 .chart-card {
-    background: linear-gradient(135deg, var(--card), rgba(240, 240, 250, 0.2));
+    background: white;
     border: 1px solid var(--border);
     border-radius: var(--radius);
     padding: 1.5rem;
@@ -378,12 +378,8 @@ p{
     
     .profile-content {
         flex-direction: column;
-        text-align: center;
     }
-    
-    .profile-info {
-        align-items: center;
-    }
+
     
     .chart-header {
         flex-direction: column;

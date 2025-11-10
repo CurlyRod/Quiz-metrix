@@ -118,6 +118,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Set quiz title and description
     quizTitle.textContent = currentQuiz.title;
 
+
     // Set up unique key for this quiz session
     quizStateKey = `quiz_${currentQuizId}_state`;
 
@@ -148,11 +149,6 @@ document.addEventListener("DOMContentLoaded", () => {
       timerDisplay.classList.add("d-none");
     }
 
-    // Ensure answer types are properly set
-    if (!currentQuiz.settings.answerTypes || currentQuiz.settings.answerTypes.length === 0) {
-      currentQuiz.settings.answerTypes = ['typed']; // default fallback
-    }
-
     speakQuestionBtn.addEventListener("click", () => speakQuestion(0));
 
     // Show all questions at once
@@ -163,71 +159,67 @@ document.addEventListener("DOMContentLoaded", () => {
     
     // Update progress display
     updateProgress();
-  }
+}
 
-  function prepareQuizQuestions() {
-  const questions = JSON.parse(JSON.stringify(currentQuiz.questions)); // Deep copy
+ function prepareQuizQuestions() {
+  // Use the original questions with their individual answer types
+  let preparedQuestions = JSON.parse(JSON.stringify(currentQuiz.questions));
   
-  // Create a shuffled copy of questions
-  const shuffledQuestions = JSON.parse(JSON.stringify(currentQuiz.questions));
-  shuffleArray(shuffledQuestions);
+  // Apply study mode - shuffle if randomized
+  const studyMode = currentQuiz.settings.studyMode || 'sequential';
   
-  const preparedQuestions = [];
+  if (studyMode === 'randomized') {
+    shuffleArray(preparedQuestions);
+  }
   
-  // If we have fewer questions than needed, we'll need to reuse some
-  // But try to minimize duplicates in the same quiz
-  for (let i = 0; i < questions.length; i++) {
-    let questionForSlot;
+  // Reset correctAnswers array
+  correctAnswers = [];
+  
+  // Set up correct answers and question formatting based on INDIVIDUAL answer types
+  preparedQuestions.forEach((question, index) => {
+    // REMOVE BACKSLASHES FROM ALL TEXT FIELDS
+    if (question.term) question.term = question.term.replace(/\\/g, '');
+    if (question.description) question.description = question.description.replace(/\\/g, '');
     
-    if (i < shuffledQuestions.length) {
-      // Use a unique question from the shuffled array
-      questionForSlot = { ...shuffledQuestions[i] };
-    } else {
-      // If we need more questions than available, reuse from the beginning
-      const reuseIndex = i % shuffledQuestions.length;
-      questionForSlot = { ...shuffledQuestions[reuseIndex] };
-    }
-    
-    // Assign random answer type if not specified
-    if (!currentQuiz.settings.answerTypes.includes(questionForSlot.answerType)) {
-      const availableTypes = currentQuiz.settings.answerTypes.length > 0 
-        ? currentQuiz.settings.answerTypes 
-        : ['typed'];
-      const randomIndex = Math.floor(Math.random() * availableTypes.length);
-      questionForSlot.answerType = availableTypes[randomIndex];
-    }
-    
-    // Set up the question based on its answer type
-    switch (questionForSlot.answerType) {
+    // Use the individual question's answerType from the database
+    switch (question.answerType) {
       case "multiple":
-        questionForSlot.options = generateMultipleChoiceOptions(currentQuiz.questions, questionForSlot, i);
-        correctAnswers[i] = questionForSlot.term;
+        question.options = generateMultipleChoiceOptions(currentQuiz.questions, question, index);
+        correctAnswers[index] = question.term;
         break;
 
       case "typed":
-        correctAnswers[i] = questionForSlot.term;
+        correctAnswers[index] = question.term;
         break;
 
       case "truefalse":
         const isTrueStatement = Math.random() < 0.5;
         if (isTrueStatement) {
-          questionForSlot.statement = `${questionForSlot.term} – ${questionForSlot.description}`;
-          correctAnswers[i] = "true";
+          question.statement = `${question.term} – ${question.description}`;
+          correctAnswers[index] = "true";
         } else {
-          const otherQuestions = currentQuiz.questions.filter(q => q.term !== questionForSlot.term);
+          const otherQuestions = currentQuiz.questions.filter(q => q.term !== question.term);
           if (otherQuestions.length > 0) {
             const randomQuestion = otherQuestions[Math.floor(Math.random() * otherQuestions.length)];
-            questionForSlot.statement = `${questionForSlot.term} – ${randomQuestion.description}`;
+            question.statement = `${question.term} – ${randomQuestion.description}`;
           } else {
-            questionForSlot.statement = `${questionForSlot.term} – ${questionForSlot.description} (modified)`;
+            question.statement = `${question.term} – ${question.description} (modified)`;
           }
-          correctAnswers[i] = "false";
+          correctAnswers[index] = "false";
         }
+        // Remove backslashes from statement too
+        if (question.statement) question.statement = question.statement.replace(/\\/g, '');
+        break;
+        
+      default:
+        const fallbackType = currentQuiz.settings.answerTypes && currentQuiz.settings.answerTypes.length > 0 
+          ? currentQuiz.settings.answerTypes[0] 
+          : 'typed';
+        question.answerType = fallbackType;
+        correctAnswers[index] = question.term;
         break;
     }
-    
-    preparedQuestions.push(questionForSlot);
-  }
+  });
   
   return preparedQuestions;
 }
@@ -295,23 +287,49 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  function generateMultipleChoiceOptions(allQuestions, question, questionIndex) {
-    const options = [question.term];
-    const otherTerms = allQuestions.filter((q, i) => i !== questionIndex).map((q) => q.term);
-    shuffleArray(otherTerms);
-
-    const numberOfOptions = Math.min(4, otherTerms.length + 1);
-    while (options.length < numberOfOptions && otherTerms.length > 0) {
-      options.push(otherTerms.pop());
+  function generateMultipleChoiceOptions(allQuestions, currentQuestion, questionIndex) {
+    const options = new Set();
+    
+    // Always include the correct answer first
+    options.add(currentQuestion.term.replace(/\\/g, ''));
+    
+    // Get all unique terms from other questions
+    const allUniqueTerms = new Set();
+    allQuestions.forEach((q, index) => {
+        if (q.term && q.term.trim() !== "" && index !== questionIndex) {
+            allUniqueTerms.add(q.term.replace(/\\/g, ''));
+        }
+    });
+    
+    // Convert to array and shuffle
+    const availableTerms = Array.from(allUniqueTerms);
+    shuffleArray(availableTerms);
+    
+    // Add unique terms until we have 4 options or run out
+    for (let term of availableTerms) {
+        if (options.size >= 4) break;
+        if (!options.has(term)) {
+            options.add(term);
+        }
     }
-
-    while (options.length < 4) {
-      options.push(`Option ${options.length + 1}`);
+    
+    // If we still need more options, add generic ones
+    const genericOptions = ['Option A', 'Option B', 'Option C', 'Option D'];
+    let genericIndex = 0;
+    while (options.size < 4 && genericIndex < genericOptions.length) {
+        const genericOption = genericOptions[genericIndex];
+        if (!options.has(genericOption)) {
+            options.add(genericOption);
+        }
+        genericIndex++;
     }
-
-    shuffleArray(options);
-    return options;
-  }
+    
+    // Final shuffle and return as array
+    const finalOptions = Array.from(options);
+    shuffleArray(finalOptions);
+    
+    return finalOptions;
+}
 
   function showAllQuestions() {
     // Clear question container
@@ -330,7 +348,7 @@ document.addEventListener("DOMContentLoaded", () => {
     addAllAnswerEventListeners();
   }
 
-  function createQuestionCard(question, index) {
+ function createQuestionCard(question, index) {
     const questionCard = document.createElement("div");
     questionCard.className = "question-card";
     questionCard.id = `question-${index}`;
@@ -347,7 +365,8 @@ document.addEventListener("DOMContentLoaded", () => {
       </div>
     `;
 
-    // Create question content based on answer type
+    // Create question content based on INDIVIDUAL question's answer type
+    // Use question.answerType instead of any global settings
     switch (question.answerType) {
       case "multiple":
         questionContent += `
@@ -359,7 +378,6 @@ document.addEventListener("DOMContentLoaded", () => {
       case "typed":
         questionContent += `
           <div class="question-description">${question.description}</div>
-          <p class="text-muted mb-3">Define: <strong>${question.term}</strong></p>
           ${createTypedAnswerInterface(index, question)}
         `;
         break;
@@ -370,11 +388,19 @@ document.addEventListener("DOMContentLoaded", () => {
           ${createTrueFalseInterface(index, question)}
         `;
         break;
+        
+      default:
+        // Fallback to typed if answer type is not recognized
+        questionContent += `
+          <div class="question-description">${question.description}</div>
+          ${createTypedAnswerInterface(index, question)}
+        `;
+        break;
     }
 
     questionCard.innerHTML = questionContent;
     return questionCard;
-  }
+}
 
   // Global function for speak buttons
   window.speakQuestionAt = function(index) {
@@ -513,23 +539,46 @@ document.addEventListener("DOMContentLoaded", () => {
     `;
   }
 
-  function createTrueFalseInterface(index, question) {
-    const trueChecked = userAnswers[index] === "true" ? "checked" : "";
-    const falseChecked = userAnswers[index] === "false" ? "checked" : "";
-  
-    return `
-      <div class="true-false-container mt-3">
-        <div class="quiz-option true-false-option" onclick="selectOption(this, 'q${index}true')">
-          <input type="radio" name="q${index}" id="q${index}true" value="true" ${trueChecked}>
-          <label for="q${index}true" class="text-center">True</label>
-        </div>
-        <div class="quiz-option true-false-option" onclick="selectOption(this, 'q${index}false')">
-          <input type="radio" name="q${index}" id="q${index}false" value="false" ${falseChecked}>
-          <label for="q${index}false" class="text-center">False</label>
-        </div>
+ function createTrueFalseInterface(index, question) {
+  const trueChecked = userAnswers[index] === "true" ? "checked" : "";
+  const falseChecked = userAnswers[index] === "false" ? "checked" : "";
+  const trueSelected = userAnswers[index] === "true" ? "selected" : "";
+  const falseSelected = userAnswers[index] === "false" ? "selected" : "";
+
+  return `
+    <div class="true-false-container mt-3">
+      <div class="quiz-option true-false-option ${trueSelected}" onclick="handleTrueFalseClick(this, ${index}, 'true')">
+        <input type="radio" name="q${index}" id="q${index}true" value="true" ${trueChecked}>
+        <label for="q${index}true" class="text-center">True</label>
       </div>
-    `;
+      <div class="quiz-option true-false-option ${falseSelected}" onclick="handleTrueFalseClick(this, ${index}, 'false')">
+        <input type="radio" name="q${index}" id="q${index}false" value="false" ${falseChecked}>
+        <label for="q${index}false" class="text-center">False</label>
+      </div>
+    </div>
+  `;
+}
+
+// Add this global function
+window.handleTrueFalseClick = function(element, index, value) {
+  const input = document.getElementById(`q${index}${value}`);
+  if (!input) return;
+  
+  input.checked = true;
+  
+  // Trigger change event
+  const changeEvent = new Event('change', { bubbles: true });
+  input.dispatchEvent(changeEvent);
+  
+  // Update visual selection
+  const container = element.closest('.true-false-container');
+  if (container) {
+    container.querySelectorAll('.true-false-option').forEach(el => {
+      el.classList.remove('selected');
+    });
+    element.classList.add('selected');
   }
+};
 
   window.selectOption = function(div, inputId) {
     document.getElementById(inputId).checked = true;
@@ -708,9 +757,8 @@ document.addEventListener("DOMContentLoaded", () => {
       .then((response) => response.json())
       .then((data) => {
         if (data.success) {
-          // console.log("Result saved successfully with ID:", data.result_id)
         } else {
-          // console.error("Error saving result:", data.message)
+          console.error("Error saving result:", data.message)
         }
       })
       .catch((error) => {

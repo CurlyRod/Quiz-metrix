@@ -7,7 +7,10 @@ session_start();
 header('Content-Type: application/json');
 
 function checkAndUpdateExtractionLimit($conn, $user_id) {
-    $EXTRACTION_LIMIT = 2; // Max extractions per week per user ( change this value for testing purposes )
+    $EXTRACTION_LIMIT = 2; // Max extractions per week per user
+    
+    // Set Philippines timezone
+    date_default_timezone_set('Asia/Manila');
     
     // Check existing limit record
     $stmt = $conn->prepare("SELECT extraction_count, last_reset_date FROM user_extraction_limits WHERE user_id = ?");
@@ -23,27 +26,29 @@ function checkAndUpdateExtractionLimit($conn, $user_id) {
     $result = $stmt->get_result();
     $current_time = time();
     
+    // Calculate the last reset point (most recent Monday 8:00 AM Philippines Time)
+    $last_reset_monday_8am = strtotime('last monday 8:00');
+    
     if ($result->num_rows > 0) {
         // User has existing record
         $row = $result->fetch_assoc();
         $extraction_count = $row['extraction_count'];
         $last_reset_date = strtotime($row['last_reset_date']);
         
-        // Check if it's past Monday 8:00 AM since last reset
-        $last_reset_monday_8am = strtotime('last monday 8:00', $current_time);
+        // Check if last reset was before the most recent Monday 8:00 AM
         if ($last_reset_date < $last_reset_monday_8am) {
             // Reset the counter (it's a new week)
             $extraction_count = 0;
-            $update_stmt = $conn->prepare("UPDATE user_extraction_limits SET extraction_count = 0, last_reset_date = NOW() WHERE user_id = ?");
-            $update_stmt->bind_param("i", $user_id);
+            $update_stmt = $conn->prepare("UPDATE user_extraction_limits SET extraction_count = 0, last_reset_date = FROM_UNIXTIME(?) WHERE user_id = ?");
+            $update_stmt->bind_param("ii", $last_reset_monday_8am, $user_id);
             $update_stmt->execute();
             $update_stmt->close();
         }
     } else {
-        // First time user - create record
+        // First time user - create record with current week's reset timestamp
         $extraction_count = 0;
-        $insert_stmt = $conn->prepare("INSERT INTO user_extraction_limits (user_id, extraction_count) VALUES (?, 0)");
-        $insert_stmt->bind_param("i", $user_id);
+        $insert_stmt = $conn->prepare("INSERT INTO user_extraction_limits (user_id, extraction_count, last_reset_date) VALUES (?, 0, FROM_UNIXTIME(?))");
+        $insert_stmt->bind_param("ii", $user_id, $last_reset_monday_8am);
         $insert_stmt->execute();
         $insert_stmt->close();
     }
@@ -88,6 +93,17 @@ try {
         throw new Exception('User not authenticated');
     }
     
+    $status_stmt = $conn->prepare("SELECT status FROM user_credential WHERE email = ?");
+    $status_stmt->bind_param("s", $_SESSION['USER_EMAIL']);
+    $status_stmt->execute();
+    $status_result = $status_stmt->get_result();
+
+    if ($status_result->num_rows === 0 || $status_result->fetch_assoc()['status'] !== 'Active') {
+        session_destroy();
+        throw new Exception('Your account has been deactivated. Please contact administrator.');
+    }
+    $status_stmt->close();
+
     $email = $_SESSION['USER_EMAIL'];
     $user_id = null;
 

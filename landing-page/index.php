@@ -25,15 +25,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Quizmetrix</title>
+    <title>Quizmetrix - Interactive Quiz Platform</title>
     <!-- Linking Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
     <!-- Linking Swiper CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <link rel="stylesheet" href="../vendor/bootstrap/bootstrap.min.css">
     <link rel="stylesheet" href="landing-page.css" />
-    <link rel="icon" type="image/x-icon" href="../../assets/img/logo/apple-touch-icon.png">
-
+    <link rel="icon" type="image/x-icon" href="../assets/img/logo/apple-touch-icon.png">
 
   </head>
   <body>
@@ -41,7 +40,7 @@
     <header>
       <nav class="navbar">
         <a href="#" class="nav-logo">
-          <h2 class="logo-text">Quizmetrix</h2>
+          <img class="icon" src="../assets/img/logo/apple-touch-icon.png" alt="Quizmetrix Logo" style="height:43px; width:43px;"><h2 class="logo-text">Quizmetrix</h2>
         </a>
         <ul class="nav-menu">
           <button id="menu-close-button" class="fas fa-times"></button>
@@ -69,31 +68,61 @@
       <section class="hero-section">
         <div class="section-content">
           <div class="hero-details">
-            <h3 class="subtitle">"I thought making quizzes was hard… <br>then I found QuizMetrix!"</h3>
-            <p class="description">An interactive quiz platform designed to enhance learning and assessment</p>
-            <div class="buttons">
-              <a href="#" class="button order-now">Try Now</a>
-              <a href="#contact" class="button contact-us">Learn More</a>
+            <div class="hero-badge">
+              <span class="badge-icon">✨</span>
+              <span class="badge-text">Introducing Quizmetrix</span>
             </div>
-          </div>
-          <div class="hero-image-wrapper">
-            <img src="../assets/DrawKit/DrawKit - Education Illustration Pack/PNG/3 SCENE.png" alt="Coffee" class="hero-image" />
+            <h1 class="hero-title">Master Your Learning with Interactive Quizzes</h1>
+            <p class="hero-description">A quiz web-platform designed to enhance learning and assessment. Create and ace every quiz with study tools.</p>
+            <div class="buttons">
+              <button type="button" 
+                    class="button button-primary" id="btnAddUser" data-bs-toggle="modal" data-bs-target="#loginUser">
+                    Start Learning Now
+                </button>
+              <a href="#tools" class="button button-secondary">Explore Tools</a>
+            </div>
           </div>
         </div>
       </section>
+
       <!-- About section -->
       <section class="about-section" id="about">
         <div class="section-content">
-          <div class="about-image-wrapper">
-            <img src="../assets/DrawKit/DrawKit - Education Illustration Pack/PNG/7 SCENE.png" alt="About" class="about-image" />
-          </div>
           <div class="about-details">
-            <h2 class="section-title">About Us</h2>
-            <p class="text">Welcome to Quizmetrix, designed to help students like you excel in your studies through interactive quizzes and assessments! Whether you are preparing for exams, reviewing lessons, or just testing your knowledge, Quizmetrix is here to make your learning journey easier and more effective.</p>
-            <div class="social-link-list">
-              <!-- <a href="#" class="social-link"><i class="fa-brands fa-facebook"></i></a>
-              <a href="#" class="social-link"><i class="fa-brands fa-instagram"></i></a> -->
-              <!-- <a href="#" class="social-link"><i class="fa-brands fa-x-twitter"></i></a> -->
+            <div class="about-header">
+              <h2 class="section-title">About Quizmetrix</h2>
+              <p class="section-subtitle">Revolutionizing the way students learn and assess their knowledge</p>
+            </div>
+            <p class="about-text">Welcome to Quizmetrix, your comprehensive learning companion designed to help students excel through interactive quizzes and assessments. Whether you're preparing for critical exams, reviewing challenging lessons, or testing your knowledge on new topics, Quizmetrix makes your learning journey more effective and engaging.</p>
+            
+            <div class="about-features">
+              <div class="feature-item">
+                <div class="feature-icon">
+                  <i class="fas fa-brain"></i>
+                </div>
+                <div>
+                  <h3>Smart Learning</h3>
+                  <p>Study Tools that adapt to your learning style</p>
+                </div>
+              </div>
+              <div class="feature-item">
+                <div class="feature-icon">
+                  <i class="fas fa-chart-line"></i>
+                </div>
+                <div>
+                  <h3>Track Progress</h3>
+                  <p>Real-time analytics of your performance</p>
+                </div>
+              </div>
+              <div class="feature-item">
+                <div class="feature-icon">
+                  <i class="fa-solid fa-file"></i>
+                </div>
+                <div>
+                  <h3>Study Materials</h3>
+                  <p>Upload and Access your files</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -101,52 +130,55 @@
         
       <!-- Study Tools section -->
       <section class="tools-section" id="tools">
-        <h2 class="section-title">Study Tools</h2>
         <div class="section-content">
+          <div class="tools-header">
+            <h2 class="section-title">Study Tools</h2>
+            <p class="section-subtitle">Everything you need to succeed in your studies</p>
+          </div>
+          
           <div class="swiper-container">
             <div class="swiper">
               <div class="swiper-wrapper">
                 <div class="tool-card swiper-slide">
                   <div class="tool-icon">
-                    <i class="fas fa-book-open"></i>
+                    <i class="fas fa-file-alt"></i>
                   </div>
-                  <h3>Interactive Quizzes</h3>
-                  <p>Engage with dynamic quizzes that adapt to your learning style</p>
+                  <h3>Quizzes</h3>
+                  <p>Engage with quizzes that adapt to your learning style</p>
+                </div>
+                <div class="tool-card swiper-slide">
+                  <div class="tool-icon">
+                    <i class="fas fa-layer-group"></i>
+                  </div>
+                  <h3>Flashcards</h3>
+                  <p>Create and study with flashcards for better knowledge retention and recall</p>
+                </div>
+                <div class="tool-card swiper-slide">
+                  <div class="tool-icon">
+                    <i class="fas fa-sticky-note"></i>
+                  </div>
+                  <h3>Notes</h3>
+                  <p>Organize your study materials with integrated notes</p>
                 </div>
                 <div class="tool-card swiper-slide">
                   <div class="tool-icon">
                     <i class="fas fa-chart-line"></i>
                   </div>
                   <h3>Progress Tracking</h3>
-                  <p>Monitor your improvement with detailed analytics</p>
+                  <p>Monitor your improvement with analytics</p>
                 </div>
                 <div class="tool-card swiper-slide">
                   <div class="tool-icon">
-                    <i class="fas fa-users"></i>
-                  </div>
-                  <h3>Collaborative Learning</h3>
-                  <p>Share quizzes and study with friends in real-time</p>
-                </div>
-                <div class="tool-card swiper-slide">
-                  <div class="tool-icon">
-                    <i class="fas fa-brain"></i>
-                  </div>
-                  <h3>Flashcard</h3>
-                  <p>High knowlede and retention high grades</p>
-                </div>
-                <div class="tool-card swiper-slide">
-                  <div class="tool-icon">
-                    <i class="fas fa-clock"></i>
+                    <i class="fas fa-hourglass-end"></i>
                   </div>
                   <h3>Timed Assessments</h3>
-                  <p>Practice under exam conditions with timed quizzes</p>
+                  <p>Practice under exam conditions with timed quizzes to boost confidence</p>
                 </div>
               </div>
               <div class="swiper-pagination"></div>
               <div class="swiper-button-prev"></div>
               <div class="swiper-button-next"></div>
             </div>
-
           </div>
         </div>
       </section>

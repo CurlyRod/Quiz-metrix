@@ -11,6 +11,17 @@ try {
         throw new Exception('User not authenticated');
     }
 
+     $status_stmt = $conn->prepare("SELECT status FROM user_credential WHERE email = ?");
+    $status_stmt->bind_param("s", $_SESSION['USER_EMAIL']);
+    $status_stmt->execute();
+    $status_result = $status_stmt->get_result();
+
+    if ($status_result->num_rows === 0 || $status_result->fetch_assoc()['status'] !== 'Active') {
+        session_destroy();
+        throw new Exception('Your account has been deactivated. Please contact administrator.');
+    }
+    $status_stmt->close();
+
     // Get user ID from session
     $email = $_SESSION['USER_EMAIL'];
     $user_id = null;
@@ -103,6 +114,28 @@ try {
     $notes_created = $result->fetch_assoc()['notes_count'];
     $stmt->close();
 
+
+    $stmt = $conn->prepare("SELECT COUNT(*) as flashcards_count FROM decks WHERE user_id = ? AND is_deleted = 0");
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $flashcards_created = $result->fetch_assoc()['flashcards_count'];
+    $stmt->close();
+
+    
+
+    // Flashcards taken - count all flashcard study sessions for this user
+    $stmt = $conn->prepare("
+        SELECT COUNT(*) as flashcards_taken_count 
+        FROM flashcard_results 
+        WHERE user_id = ?
+    ");
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $flashcards_taken = $result->fetch_assoc()['flashcards_taken_count'];
+    $stmt->close();
+
     $response = [
         'success' => true,
         'stats' => [
@@ -110,7 +143,9 @@ try {
             'quizzes_taken' => (int)$quizzes_taken,
             'quiz_accuracy' => (float)$quiz_accuracy,
             'files_uploaded' => (int)$files_uploaded,
-            'notes_created' => (int)$notes_created
+            'notes_created' => (int)$notes_created,
+            'flashcards_created' => (int)$flashcards_created,
+            'flashcards_taken' => (int)$flashcards_taken
         ]
     ];
 

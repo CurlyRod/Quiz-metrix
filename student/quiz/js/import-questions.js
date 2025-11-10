@@ -57,41 +57,51 @@ document.addEventListener("DOMContentLoaded", () => {
     const processedCards = []
     const invalidLines = []
 
-    cards.forEach((card, index) => {
-      const trimmedCard = card.trim()
+    // In the processImport function, update the part where cards are processed:
+cards.forEach((card, index) => {
+    const trimmedCard = card.trim();
 
-      // Skip empty cards
-      if (trimmedCard === "") {
-        return
-      }
+    // Skip empty cards
+    if (trimmedCard === "") {
+        return;
+    }
 
-      // Split the card into term and description
-      let parts
-      if (termSeparator === "\t") {
-        parts = trimmedCard.split(/\t+/)
-      } else {
+    // Split the card into term and description
+    let parts;
+    if (termSeparator === "\t") {
+        parts = trimmedCard.split(/\t+/);
+    } else {
         // For dash or semicolon, we need to handle the case where the separator might appear in the content
         // We'll split by the first occurrence only
-        const separatorIndex = trimmedCard.indexOf(termSeparator)
+        const separatorIndex = trimmedCard.indexOf(termSeparator);
         if (separatorIndex !== -1) {
-          parts = [trimmedCard.substring(0, separatorIndex).trim(), trimmedCard.substring(separatorIndex + 1).trim()]
+            parts = [trimmedCard.substring(0, separatorIndex).trim(), trimmedCard.substring(separatorIndex + 1).trim()];
         } else {
-          parts = [trimmedCard]
+            parts = [trimmedCard];
         }
-      }
+    }
 
-      // Validate parts
-      if (parts.length !== 2 || !parts[0].trim() || !parts[1].trim()) {
-        invalidLines.push(`Line ${index + 1}: "${trimmedCard}"`)
-        return
-      }
+    // Validate parts
+    if (parts.length !== 2 || !parts[0].trim() || !parts[1].trim()) {
+        invalidLines.push(`Line ${index + 1}: "${trimmedCard}"`);
+        return;
+    }
 
-      // Add valid card
-      processedCards.push({
-        term: parts[0].trim(),
-        description: parts[1].trim(),
-      })
-    })
+    // NEW: Truncate to 300 characters if needed
+    const term = parts[0].trim().substring(0, 300);
+    const description = parts[1].trim().substring(0, 300);
+    
+    // NEW: Add warning if truncation occurred
+    if (parts[0].trim().length > 300 || parts[1].trim().length > 300) {
+        invalidLines.push(`Line ${index + 1}: Content truncated (exceeded 300 characters)`);
+    }
+
+    // Add valid card
+    processedCards.push({
+        term: term,
+        description: description,
+    });
+});
 
     // Check if we have any valid cards
     if (processedCards.length === 0) {
@@ -106,7 +116,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Store the processed cards in localStorage to be used in index.html
-    localStorage.setItem("importedCards", JSON.stringify(processedCards))
+    // Use a custom encoding approach to avoid JSON escaping issues
+    storeCardsSafely(processedCards);
 
     // Show success message
     showSuccess(`Successfully processed ${processedCards.length} cards. Redirecting...`)
@@ -116,6 +127,19 @@ document.addEventListener("DOMContentLoaded", () => {
       window.location.href = "create-quiz.php?import=true"
     }, 1500)
   }
+
+  // NEW FUNCTION: Store cards without JSON escaping issues
+  function storeCardsSafely(cards) {
+    // Use a custom delimiter format that doesn't require JSON
+    const cardData = cards.map(card => 
+        `${card.term.replace(/\|/g, '\\|')}|||${card.description.replace(/\|/g, '\\|')}`
+    ).join(':::');
+    
+    localStorage.setItem("importedCardsCustom", cardData);
+    
+    // Also store the regular JSON version for backward compatibility
+    localStorage.setItem("importedCards", JSON.stringify(cards));
+}
 
   // NEW FUNCTION: Clean text by removing all \n and extra whitespace
   function cleanText(text) {

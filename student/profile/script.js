@@ -33,6 +33,10 @@ async function fetchUserStats() {
             document.getElementById('files-uploaded').textContent = stats.files_uploaded;
             document.getElementById('notes-created').textContent = stats.notes_created;
             document.getElementById('quiz-accuracy').textContent = stats.quiz_accuracy + '%';
+            
+            // Update flashcard statistics
+            document.getElementById('flashcards-created').textContent = stats.flashcards_created;
+            document.getElementById('flashcards-taken').textContent = stats.flashcards_taken;
         } else {
             console.error('Failed to fetch stats:', data.message);
             // Fallback to showing zeros if there's an error
@@ -53,6 +57,8 @@ function setFallbackValues() {
     document.getElementById('files-uploaded').textContent = '0';
     document.getElementById('notes-created').textContent = '0';
     document.getElementById('quiz-accuracy').textContent = '0%';
+    document.getElementById('flashcards-created').textContent = '0';
+    document.getElementById('flashcards-taken').textContent = '0';
 }
 
 // Show loading state
@@ -62,7 +68,9 @@ function showLoadingState() {
         'quizzes-taken',
         'files-uploaded',
         'notes-created',
-        'quiz-accuracy'
+        'quiz-accuracy',
+        'flashcards-created',
+        'flashcards-taken'
     ];
     
     elements.forEach(id => {

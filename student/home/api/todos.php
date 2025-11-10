@@ -48,6 +48,17 @@ function getTasks($conn) {
             throw new Exception('User not authenticated', 401);
         }
         
+         $status_stmt = $conn->prepare("SELECT status FROM user_credential WHERE email = ?");
+    $status_stmt->bind_param("s", $_SESSION['USER_EMAIL']);
+    $status_stmt->execute();
+    $status_result = $status_stmt->get_result();
+
+    if ($status_result->num_rows === 0 || $status_result->fetch_assoc()['status'] !== 'Active') {
+        session_destroy();
+        throw new Exception('Your account has been deactivated. Please contact administrator.');
+    }
+    $status_stmt->close();
+
         $email = $_SESSION['USER_EMAIL'];
         $user_id = null;
 
