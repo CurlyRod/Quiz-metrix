@@ -1,6 +1,9 @@
 <?php
-// Include database connection
+// Change this line in each API file:
 require_once '../db.php';
+
+// To this (since API files are now in /admin/api/ and db.php is in /admin/home/):
+require_once __DIR__ . '/../home/db.php';
 
 // Query to count total users
 $query = "SELECT COUNT(*) as total FROM user_credential";

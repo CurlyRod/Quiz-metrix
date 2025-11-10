@@ -1,4 +1,8 @@
 <?php
+// Add output buffering at the very top
+if (ob_get_length()) ob_end_clean();
+ob_start();
+
 require_once('../db_connect.php');
 session_start();
 
@@ -10,6 +14,17 @@ try {
     if (!isset($_SESSION['USER_EMAIL'])) {
         throw new Exception('User not authenticated');
     }
+
+     $status_stmt = $conn->prepare("SELECT status FROM user_credential WHERE email = ?");
+    $status_stmt->bind_param("s", $_SESSION['USER_EMAIL']);
+    $status_stmt->execute();
+    $status_result = $status_stmt->get_result();
+
+    if ($status_result->num_rows === 0 || $status_result->fetch_assoc()['status'] !== 'Active') {
+        session_destroy();
+        throw new Exception('Your account has been deactivated. Please contact administrator.');
+    }
+    $status_stmt->close();
 
     // Get user ID from session
     $email = $_SESSION['USER_EMAIL'];
@@ -54,7 +69,7 @@ try {
         $stmt = $conn->prepare("UPDATE notes SET is_deleted = 0 WHERE id = ? AND user_id = ?");
         $stmt->bind_param("ii", $item_id, $user_id); 
     } elseif ($item_type === 'flashcard') {
-        $stmt = $conn->prepare("UPDATE flashcards SET is_deleted = 0 WHERE id = ? AND user_id = ?");
+        $stmt = $conn->prepare("UPDATE decks SET is_deleted = 0 WHERE deck_id = ? AND user_id = ?");
         $stmt->bind_param("ii", $item_id, $user_id);
     } else {
         throw new Exception('Invalid item type');
@@ -73,13 +88,18 @@ try {
 
 } catch (Exception $e) {
     $response['message'] = $e->getMessage();
-    http_response_code(400); // Bad request for other errors
+    http_response_code(400);
 }
 
+// Clear all output buffers and send JSON
+while (ob_get_level()) {
+    ob_end_clean();
+}
 header('Content-Type: application/json');
 echo json_encode($response);
 
 // Close connections if they exist
 if (isset($stmt)) $stmt->close();
 if (isset($conn)) $conn->close();
-?>
+
+?> 

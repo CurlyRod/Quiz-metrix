@@ -987,33 +987,57 @@ if (confirmActionButton) {
 
 
   // Preview file
-  document.querySelectorAll(".preview-file").forEach((button) => {
-    button.addEventListener("click", function (e) {
-      e.preventDefault()
+document.querySelectorAll(".preview-file").forEach((button) => {
+  button.addEventListener("click", function (e) {
+    e.preventDefault()
 
-      const fileId = this.getAttribute("data-id")
-      const fileType = this.getAttribute("data-type")
-      const filePath = this.getAttribute("data-path")
+    const fileId = this.getAttribute("data-id")
+    const fileType = this.getAttribute("data-type")
+    const filePath = this.getAttribute("data-path")
+    const fileName = this.getAttribute("data-name") // Get the original file name
 
-      // For PDF files, open in a new tab instead of modal
-      if (fileType === "pdf") {
-        window.open(`uploads/${filePath}`, "_blank")
-        return
+    // For PDF files, open in a new tab instead of modal
+    if (fileType === "pdf") {
+  // Open PDF in new tab
+  const pdfWindow = window.open(`uploads/${filePath}`, "_blank");
+  
+  if (pdfWindow && fileName) {
+    setTimeout(() => {
+      try {
+        pdfWindow.document.title = fileName;
+      } catch (e) {
+        // Security restrictions may prevent this
       }
+    }, 1000);
+  }
+  return;
+}
 
-      const previewContent = document.getElementById("previewContent")
-      const previewDownloadBtn = document.getElementById("previewDownloadBtn")
+    const previewContent = document.getElementById("previewContent")
+    const previewDownloadBtn = document.getElementById("previewDownloadBtn")
+    const previewTitle = document.getElementById("previewTitle") // If you have a title element
 
-      if (!previewContent || !previewDownloadBtn) {
-        console.error("Preview elements not found")
-        return
-      }
+    if (!previewContent || !previewDownloadBtn) {
+      console.error("Preview elements not found")
+      return
+    }
 
-      // Clear previous content
-      previewContent.innerHTML = ""
+    // Clear previous content
+    previewContent.innerHTML = ""
 
-      // Set download link
-      previewDownloadBtn.href = "api/download.php?id=" + fileId
+    // Set download link with original filename
+    previewDownloadBtn.href = "api/download.php?id=" + fileId
+    previewDownloadBtn.download = fileName // Set the download filename to original name
+
+    if (previewTitle && fileName) {
+      previewTitle.textContent = "Preview: " + fileName;
+    }
+
+    // Set download link with original filename
+    previewDownloadBtn.href = "api/download.php?id=" + fileId;
+    if (fileName) {
+      previewDownloadBtn.download = fileName; // Set the download filename to original name
+    }
 
       // Load preview based on file type
       if (fileType === "txt") {

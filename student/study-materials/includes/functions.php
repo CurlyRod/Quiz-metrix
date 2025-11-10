@@ -1,16 +1,31 @@
 <?php
 require_once 'config.php';
-session_start();
 
-/**
- * Helper function to get user ID from session
- */
-function getUserId() {
+
+function checkUserStatus() {
     global $conn;
     
     if (!isset($_SESSION['USER_EMAIL'])) {
         throw new Exception('User not authenticated');
     }
+    
+    $status_stmt = $conn->prepare("SELECT status FROM user_credential WHERE email = ?");
+    $status_stmt->bind_param("s", $_SESSION['USER_EMAIL']);
+    $status_stmt->execute();
+    $status_result = $status_stmt->get_result();
+
+    if ($status_result->num_rows === 0 || $status_result->fetch_assoc()['status'] !== 'Active') {
+        session_destroy();
+        throw new Exception('Your account has been deactivated. Please contact administrator.');
+    }
+    $status_stmt->close();
+ 
+}
+
+function getUserId() {
+    global $conn;
+    
+    checkUserStatus(); 
     
     $email = $_SESSION['USER_EMAIL'];
     $user_id = null;
@@ -38,9 +53,6 @@ function getUserId() {
     return $user_id;
 }
 
-/**
- * Get all files and folders for a specific parent folder
- */
 function getFilesAndFolders($folderId = null) {
     global $conn;
     
@@ -107,9 +119,6 @@ function getFilesAndFolders($folderId = null) {
     return $result;
 }
 
-/**
- * Search files and folders by name
- */
 function searchFilesAndFolders($query) {
     global $conn;
     
@@ -157,9 +166,6 @@ function searchFilesAndFolders($query) {
     return $result;
 }
 
-/**
- * Get recent files
- */
 function getRecentFiles($limit = 5) {
     global $conn;
     
@@ -193,9 +199,6 @@ function getRecentFiles($limit = 5) {
     return [];
 }
 
-/**
- * Get folder path (breadcrumb)
- */
 function getFolderPath($folderId) {
     global $conn;
     
@@ -234,9 +237,6 @@ function getFolderPath($folderId) {
     }
 }
 
-/**
- * Get file type icon class
- */
 function getFileIcon($type) {
     switch ($type) {
         case 'pdf':
@@ -250,9 +250,6 @@ function getFileIcon($type) {
     }
 }
 
-/**
- * Format file size
- */
 function formatFileSize($bytes) {
     if ($bytes >= 1048576) {
         return number_format($bytes / 1048576, 2) . ' MB';
@@ -263,16 +260,10 @@ function formatFileSize($bytes) {
     }
 }
 
-/**
- * Format date
- */
 function formatDate($date) {
     return date('M j, Y', strtotime($date));
 }
 
-/**
- * Sanitize filename
- */
 function sanitizeFilename($filename) {
     // Remove any path information
     $filename = basename($filename);
@@ -286,16 +277,10 @@ function sanitizeFilename($filename) {
     return $filename;
 }
 
-/**
- * Get file extension
- */
 function getFileExtension($filename) {
     return strtolower(pathinfo($filename, PATHINFO_EXTENSION));
 }
 
-/**
- * Check if file type is allowed
- */
 function isAllowedFileType($extension) {
     $allowedTypes = array('pdf', 'docx', 'txt');
     return in_array($extension, $allowedTypes);

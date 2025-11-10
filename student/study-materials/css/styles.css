@@ -173,6 +173,9 @@ main.container-fluid {
   color: var(--dark-text);
 }
 
+.table-responsive {
+  overflow-x: visible !important;
+}
 /* ===== CARDS ===== */
 .card {
   border-radius: var(--radius-xl);
@@ -181,7 +184,6 @@ main.container-fluid {
   position: relative;
   transition: var(--transition);
   box-shadow: var(--shadow-sm);
-  overflow: hidden;
 }
 
 .card:hover {
@@ -205,7 +207,7 @@ main.container-fluid {
   padding: 1.5rem;
   display: flex;
   align-items: center;
-  gap: 1rem;
+  overflow: hidden;
 }
 
 .folder-icon {
@@ -461,6 +463,18 @@ main.container-fluid {
   padding-right: 1rem;
 }
 
+.btn.show{
+  border: none !important;
+}
+
+.btn.btn-outline-primary {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.text-primary{
+  color: var(--primary) !important;
+}
 .view-toggle.btn-group {
   display: inline-flex;
   border-radius: var(--radius-md);
@@ -479,7 +493,8 @@ main.container-fluid {
   border: 1px solid var(--gray-300);
   color: var(--gray-600);
   transition: var(--transition);
-  border-radius: 0;
+  border: 2px solid var(--primary);
+  color: var(--primary);
 }
 
 .view-toggle.btn-group .btn:hover {

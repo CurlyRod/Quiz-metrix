@@ -1,26 +1,4 @@
-<?php
-require_once 'includes/config.php';
-require_once 'includes/functions.php';
 
-// Get current folder ID from query string
-$currentFolderId = isset($_GET['folder']) ? intval($_GET['folder']) : null;
-
-// Get search query if any
-$searchQuery = isset($_GET['search']) ? trim($_GET['search']) : '';
-
-// Get files and folders
-if (!empty($searchQuery)) {
-    $items = searchFilesAndFolders($searchQuery);
-} else {
-    $items = getFilesAndFolders($currentFolderId);
-}
-
-// Get folder path for breadcrumb
-$folderPath = getFolderPath($currentFolderId);
-
-// Get recent files
-$recentFiles = getRecentFiles(5);
-?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -36,12 +14,14 @@ $recentFiles = getRecentFiles(5);
     <link href="css/styles.css" rel="stylesheet">
     <link rel="stylesheet" href="../../vendor/student/home/home.css">
     <link rel="stylesheet" href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css'>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
     <link rel="icon" type="image/x-icon" href="../../assets/img/logo/apple-touch-icon.png">
 
 </head>
 
 <body>
     <?php
+    session_start();
     // Check if user is logged in
     if (!isset($_SESSION['user'])) {
         header("Location: ../../landing-page/");
@@ -53,10 +33,31 @@ $recentFiles = getRecentFiles(5);
     ?>
     <?php
     $currentPage = 'study-materials'; 
-    
+    require_once 'includes/config.php';
+    require_once 'includes/functions.php';
+
+    // Get current folder ID from query string
+    $currentFolderId = isset($_GET['folder']) ? intval($_GET['folder']) : null;
+
+    // Get search query if any
+    $searchQuery = isset($_GET['search']) ? trim($_GET['search']) : '';
+
+    // Get files and folders
+    if (!empty($searchQuery)) {
+        $items = searchFilesAndFolders($searchQuery);
+    } else {
+        $items = getFilesAndFolders($currentFolderId);
+    }
+
+    // Get folder path for breadcrumb
+    $folderPath = getFolderPath($currentFolderId);
+
+    // Get recent files
+    $recentFiles = getRecentFiles(5);
+
     include '../../shared-student/sidebar.php';
     include '../../shared-student/navbar.php';
-    ?>
+?>
     <input type="hidden" name="user-current-id" id="user-current-id">
 
 
@@ -276,8 +277,7 @@ $recentFiles = getRecentFiles(5);
                                                 <i class="bx bx-dots-vertical-rounded"></i>
                                             </button>
                                             <ul class="dropdown-menu dropdown-menu-end">
-                                                <li><a class="dropdown-item preview-file" href="#" data-id="<?php echo $file['id']; ?>" data-type="<?php echo $file['type']; ?>" data-path="<?php echo htmlspecialchars($file['file_path']); ?>">Preview</a></li>
-                                                <!-- Added download attribute to force file download -->
+                                                <li><a class="dropdown-item preview-file" href="#" data-id="<?php echo $file['id']; ?>" data-type="<?php echo $file['type']; ?>" data-path="<?php echo htmlspecialchars($file['file_path']); ?>" data-name="<?php echo htmlspecialchars($file['name']); ?>">Preview</a></li>
                                                
                                                 <li><a class="dropdown-item delete-file" href="#" data-id="<?php echo $file['id']; ?>">Delete</a></li>
                                             </ul>
@@ -333,12 +333,11 @@ $recentFiles = getRecentFiles(5);
                                             </td>
                                             <td>
                                                 <div class="dropdown">
-                                                    <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                                        Actions
+                                                    <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"> 
                                                     </button>
                                                     <ul class="dropdown-menu">
                                                         <li>
-                                                            <a class="dropdown-item preview-file" href="#" data-id="<?php echo $file['id']; ?>" data-type="<?php echo $file['type']; ?>" data-path="<?php echo htmlspecialchars($file['file_path']); ?>">
+                                                            <a class="dropdown-item preview-file" href="#" data-id="<?php echo $file['id']; ?>" data-type="<?php echo $file['type']; ?>" data-path="<?php echo htmlspecialchars($file['file_path']); ?>" data-name="<?php echo htmlspecialchars($file['name']); ?>">
                                                                 <i class="bx bx-show me-2"></i> Preview
                                                             </a>
                                                         </li>

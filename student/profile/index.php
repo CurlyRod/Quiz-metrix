@@ -9,6 +9,8 @@
      <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <!-- Custom CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -36,40 +38,64 @@ include '../../shared-student/navbar.php';
         </header>
 
         <!-- Profile Section -->
-        <div class="grid-layout">
-            <div class="profile-section">
-                <div class="profile-card">
-                    <div class="profile-content">
-                        <div class="avatar-wrapper">
-                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Student" alt="Student Avatar" class="avatar">
+<div class="grid-layout">
+    <div class="profile-section">
+        <div class="profile-card">
+            <div class="profile-content">
+                
+                <div class="profile-info">
+                    <div class="info-item">
+                        <div class="info-label">
+                            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                            <span>Name</span>
                         </div>
-                        <div class="profile-info">
-                            <div class="info-item">
-                                <div class="info-label">
-                                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                                        <circle cx="12" cy="7" r="4"></circle>
-                                    </svg>
-                                    <span>Name</span>
-                                </div>
-                                <?php 
-                                echo str_replace(" (Student)", "", $_SESSION['USER_NAME']); 
-                            ?>
-                            </div>
-                            <div class="info-item">
-                                <div class="info-label">
-                                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <rect x="2" y="4" width="20" height="16" rx="2"></rect>
-                                        <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
-                                    </svg>
-                                    <span>Email</span>
-                                </div>
-                                <?php echo $_SESSION['USER_EMAIL']; ?>
-                            </div>
+                        <?php echo $displayName; ?>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">
+                            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
+                            </svg>
+                            <span>Email</span>
                         </div>
+                        <?php echo $_SESSION['USER_EMAIL']; ?>
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+
+                <!-- Quick Stats Column for flashcard -->
+                            <div class="quick-stats">
+                                <div class="stat-card stat-primary quiz-card">
+                                    <div class="quiz-card-header">
+                                        <p class="quiz-card-title">Flashcard</p>
+                                        <div class="stat-icon stat-icon-primary">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                                                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    <div class="quiz-separator"></div>
+                                    <div class="quiz-split">
+                                        <div class="quiz-split-item">
+                                            <p class="quiz-split-label">Created</p>
+                                            <p class="quiz-split-value" id="flashcards-created">5</p>
+                                        </div>
+                                        <div class="quiz-split-divider"></div>
+                                        <div class="quiz-split-item">
+                                            <p class="quiz-split-label">Taken</p>
+                                            <p class="quiz-split-value" id="flashcards-taken">12</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
 
             <!-- Quick Stats Column -->
             <div class="quick-stats">
@@ -135,7 +161,7 @@ include '../../shared-student/navbar.php';
             <div class="stat-card stat-success">
                 <div class="stat-content">
                     <div class="stat-text">
-                        <p class="stat-label">Quiz Accuracy</p>
+                        <p class="stat-label">Quiz Average</p>
                         <p class="stat-value" id="quiz-accuracy">85%</p>
                     </div>
                     <div class="stat-icon stat-icon-success">
@@ -153,7 +179,7 @@ include '../../shared-student/navbar.php';
         <div class="chart-card">
             <div class="chart-header">
                 <div>
-                    <h3 class="chart-title">Quiz Accuracy Trend</h3>
+                    <h3 class="chart-title">Quiz Average Trend</h3>
                     <p class="chart-subtitle" id="current-month">January 2024</p>
                 </div>
                 <div class="chart-controls">

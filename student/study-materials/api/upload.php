@@ -13,6 +13,17 @@ try {
         throw new Exception('User not authenticated');
     }
 
+     $status_stmt = $conn->prepare("SELECT status FROM user_credential WHERE email = ?");
+    $status_stmt->bind_param("s", $_SESSION['USER_EMAIL']);
+    $status_stmt->execute();
+    $status_result = $status_stmt->get_result();
+
+    if ($status_result->num_rows === 0 || $status_result->fetch_assoc()['status'] !== 'Active') {
+        session_destroy();
+        throw new Exception('Your account has been deactivated. Please contact administrator.');
+    }
+    $status_stmt->close();
+
     $email = $_SESSION['USER_EMAIL'];
     $user_id = null;
 
@@ -42,7 +53,7 @@ try {
     $uploaded = [];
     $errors = [];
 
-    // Function to get unique filename for DB/user display
+    // Function to get unique filename for both display and physical storage
     function getUniqueFileName($conn, $fileName, $folderId, $user_id) {
         $baseName = pathinfo($fileName, PATHINFO_FILENAME);
         $extension = pathinfo($fileName, PATHINFO_EXTENSION);
@@ -62,11 +73,15 @@ try {
             $result = $stmt->get_result();
             $row = $result->fetch_assoc();
             if ($row['count'] == 0) {
-                $stmt->close();
-                return $newFileName; // found unique name
+                // Also check if physical file doesn't exist
+                $physicalPath = '../uploads/' . $newFileName;
+                if (!file_exists($physicalPath)) {
+                    $stmt->close();
+                    return $newFileName; // found unique name
+                }
             }
 
-            // Append (n)
+            // Append (n) if file exists in DB or physically
             $newFileName = $baseName . " (" . $counter . ")";
             if (!empty($extension)) {
                 $newFileName .= "." . $extension;
@@ -82,44 +97,50 @@ try {
             continue;
         }
 
-        $fileName = sanitizeFilename($name);
-        $fileName = getUniqueFileName($conn, $fileName, $folderId, $user_id); // <-- ensure uniqueness
-        $fileSize = $_FILES['files']['size'][$key];
-        $fileTmpPath = $_FILES['files']['tmp_name'][$key];
-        $fileExtension = getFileExtension($fileName);
-
-        // Validate file type
-        if (!isAllowedFileType($fileExtension)) {
-            $errors[] = "File type not allowed: " . $fileName;
+        // Validate file size first
+        $maxFileSize = 5 * 1024 * 1024; // 5 MB
+        if ($_FILES['files']['size'][$key] > $maxFileSize) {
+            $errors[] = "File '{$name}' exceeds 5 MB upload limit.";
             continue;
         }
 
-        // Always store physical file uniquely
-        $uniqueFileName = time() . '_' . uniqid() . '_' . $fileName;
+        $originalFileName = sanitizeFilename($name);
+        $uniqueFileName = getUniqueFileName($conn, $originalFileName, $folderId, $user_id); // This will be "filename.pdf" or "filename (1).pdf" etc.
+        $fileSize = $_FILES['files']['size'][$key];
+        $fileTmpPath = $_FILES['files']['tmp_name'][$key];
+        $fileExtension = getFileExtension($originalFileName);
+
+        // Validate file type
+        if (!isAllowedFileType($fileExtension)) {
+            $errors[] = "File type not allowed: " . $originalFileName;
+            continue;
+        }
+
         $uploadPath = '../uploads/' . $uniqueFileName;
 
         if (move_uploaded_file($fileTmpPath, $uploadPath)) {
             $sql = "INSERT INTO files (name, type, size, folder_id, file_path, user_id) VALUES (?, ?, ?, ?, ?, ?)";
             $stmt = $conn->prepare($sql);
             if (!$stmt) {
-                $errors[] = "Database prepare error for file: " . $fileName;
+                $errors[] = "Database prepare error for file: " . $uniqueFileName;
                 unlink($uploadPath);
                 continue;
             }
 
-            $stmt->bind_param('ssissi', $fileName, $fileExtension, $fileSize, $folderId, $uniqueFileName, $user_id);
+            // Use the same unique filename for both display name and physical storage
+            $stmt->bind_param('ssissi', $uniqueFileName, $fileExtension, $fileSize, $folderId, $uniqueFileName, $user_id);
             if ($stmt->execute()) {
                 $uploaded[] = [
                     'file_id' => $stmt->insert_id,
-                    'name' => $fileName
+                    'name' => $uniqueFileName
                 ];
             } else {
-                $errors[] = "Error saving file info: " . $fileName . " (" . $stmt->error . ")";
+                $errors[] = "Error saving file info: " . $uniqueFileName . " (" . $stmt->error . ")";
                 unlink($uploadPath);
             }
             $stmt->close();
         } else {
-            $errors[] = "Error moving file: " . $fileName;
+            $errors[] = "Error moving file: " . $uniqueFileName;
         }
     }
 
@@ -134,19 +155,5 @@ try {
         'success' => false,
         'message' => $e->getMessage()
     ]);
-}
-
-$maxFileSize = 5 * 1024 * 1024; // 5 MB
-
-foreach ($_FILES['files']['name'] as $key => $name) {
-    if ($_FILES['files']['error'][$key] !== UPLOAD_ERR_OK) continue;
-
-    if ($_FILES['files']['size'][$key] > $maxFileSize) {
-        echo json_encode([
-            "success" => false,
-            "message" => "File '{$name}' exceeds 5 MB upload limit."
-        ]);
-        exit;
-    }
 }
 ?>

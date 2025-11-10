@@ -13,6 +13,18 @@ try {
         throw new Exception('User not authenticated');
     }
     
+     $status_stmt = $conn->prepare("SELECT status FROM user_credential WHERE email = ?");
+    $status_stmt->bind_param("s", $_SESSION['USER_EMAIL']);
+    $status_stmt->execute();
+    $status_result = $status_stmt->get_result();
+
+    if ($status_result->num_rows === 0 || $status_result->fetch_assoc()['status'] !== 'Active') {
+        session_destroy();
+        throw new Exception('Your account has been deactivated. Please contact administrator.');
+    }
+    $status_stmt->close();
+
+    
     $email = $_SESSION['USER_EMAIL'];
     $user_id = null;
 
@@ -62,8 +74,8 @@ try {
     $quiz['settings'] = json_decode($quiz['settings'], true);
     $stmt->close();
 
-    // Get questions
-    $stmt = $conn->prepare("SELECT * FROM questions WHERE quiz_id = ? ORDER BY question_order");
+    // Get questions - MAKE SURE TO FETCH answer_type COLUMN
+    $stmt = $conn->prepare("SELECT question_id, quiz_id, term, description, answer_type, question_order FROM questions WHERE quiz_id = ? ORDER BY question_order");
     if (!$stmt) {
         throw new Exception('Prepare failed: ' . $conn->error);
     }
@@ -79,8 +91,9 @@ try {
         $questions[] = [
             'term' => $row['term'],
             'description' => $row['description'],
-            'answerType' => $row['answer_type'],
+            'answerType' => $row['answer_type'], // Make sure this matches the column name
             'question_id' => $row['question_id'],
+            'question_order' => $row['question_order'],
             'options' => []
         ];
     }

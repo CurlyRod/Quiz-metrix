@@ -152,6 +152,29 @@
                             Please select at least one answer type.
                         </div>
                     </div>
+
+
+                                        <hr>
+
+                    <div class="mb-3">
+                        <h6 class="mb-3">Study Mode</h6>
+                        <p class="text-muted mb-3">Choose how questions are presented during the quiz.</p>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input study-mode-radio" type="radio" name="studyMode" id="sequentialMode" value="sequential" checked>
+                                <label class="form-check-label" for="sequentialMode">
+                                    Sequential - Questions appear in the order you created them
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input study-mode-radio" type="radio" name="studyMode" id="randomizedMode" value="randomized">
+                                <label class="form-check-label" for="randomizedMode">
+                                    Randomized - Questions appear in random order
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>

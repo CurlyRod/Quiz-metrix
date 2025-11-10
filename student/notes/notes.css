@@ -272,7 +272,7 @@ body {
 .view-modal {
   background: #f28b82;
   color: #000;
-  border-radius: 20px;
+  border-radius: 0 !important;
   padding: 2.5rem;
   width: 1200px;
   max-width: 95%;

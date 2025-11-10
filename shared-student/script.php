@@ -1,5 +1,5 @@
 <!-- <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script> hindi na need to -->
-	<script src="../../vendor/admin/home/home.js"></script>
+	<script src="../../vendor/student/home/home.js"></script>
     <!-- <script src="../../vendor/bootstrap/bootsrap.bundle.min.js" ></script> ERROR TO -->
     <script src="../../vendor/bootstrap/jquery.min.js" ></script>
 

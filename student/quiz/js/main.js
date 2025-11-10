@@ -31,7 +31,7 @@
                 return;
             }
 
-            // Display up to 4 most recent quizzes
+            // Display up to 12 most recent quizzes
             const recentQuizzesData = quizzes.slice(0, 12);
 
             recentQuizzesData.forEach((quiz) => {
@@ -42,7 +42,7 @@
                 quizCard.className = "col-md-3 col-sm-6 mb-3";
                 quizCard.innerHTML = `
                     <div class="recent-quiz-card" data-quiz-id="${quiz.quiz_id}">
-                        <div class="label-user">Quiz | ${formattedDate}</div>
+                        <div class="label-user"> ${formattedDate}</div>
                         <div class="title">${quiz.title}</div>
                         <div class="date">${quiz.description ? (quiz.description.substring(0, 30) + (quiz.description.length > 30 ? "..." : "")) : 'No description'}</div>
                     </div>

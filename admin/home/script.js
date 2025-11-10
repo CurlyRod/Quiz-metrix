@@ -1,326 +1,286 @@
 document.addEventListener("DOMContentLoaded", () => {
-  // DOM elements
-  const userTable = document.getElementById("userTableBody");
-  const searchInput = document.getElementById("searchInput");
-  const clearSearch = document.getElementById("clearSearch");
-  const paginationControls = document.getElementById("paginationControls");
-  const paginationInfo = document.getElementById("paginationInfo");
-  const prevPage = document.getElementById("prevPage");
-  const nextPage = document.getElementById("nextPage");
+  // DOM Elements
+  const userTable = document.getElementById("userTableBody")
+  const searchInput = document.getElementById("searchInput")
+  const prevPage = document.getElementById("prevPage")
+  const nextPage = document.getElementById("nextPage")
+  const prevMonth = document.getElementById("prevMonth")
+  const nextMonth = document.getElementById("nextMonth")
+  const btnRefresh = document.querySelector(".btn-refresh")
 
   // Pagination variables
-  const itemsPerPage = 10;
-  let currentPage = 1;
-  let totalPages = 1;
+  const itemsPerPage = 10
+  let currentPage = 1
+  let totalPages = 1
+  const currentMonth = new Date()
+  let chartInstance = null
 
-  // User data
-  let allUsers = [];
-  let filteredUsers = [];
-
-  // Initial load
-  loadUsers();
-  generateCalendar();
-  loadTotalUsers();
+  // Initialize
+  loadUsers()
+  loadAnalytics()
 
   // Event listeners
-  searchInput.addEventListener("input", filterUsers);
-  if (clearSearch) clearSearch.addEventListener("click", clearSearchField);
-  if (prevPage) prevPage.addEventListener("click", goToPrevPage);
-  if (nextPage) nextPage.addEventListener("click", goToNextPage);
+  searchInput.addEventListener("input", () => {
+    currentPage = 1
+    loadUsers()
+  })
+  prevPage.addEventListener("click", goToPrevPage)
+  nextPage.addEventListener("click", goToNextPage)
+  prevMonth.addEventListener("click", goToPrevMonth)
+  nextMonth.addEventListener("click", goToNextMonth)
+  btnRefresh?.addEventListener("click", () => {
+    loadUsers()
+    loadAnalytics()
+  })
 
   async function loadUsers() {
-    // Show loading state
-    userTable.innerHTML = '<tr><td colspan="4" class="text-center">Loading users...</td></tr>';
-    
+    userTable.innerHTML =
+      '<tr class="loading-row"><td colspan="5" style="text-align: center; padding: 40px;"><div class="spinner"></div><p>Loading users...</p></td></tr>'
+
     try {
-        const response = await fetch(`api/fetch_users.php?page=${currentPage}&limit=${itemsPerPage}&search=${encodeURIComponent(searchInput.value.trim())}`);
-        const data = await response.json();
-        
-        if (data.success) {
-            allUsers = data.users;
-            filteredUsers = [...allUsers];
-            totalPages = data.pagination.totalPages;
-            updatePagination();
-            displayUsers();
-        } else {
-            userTable.innerHTML = `<tr><td colspan="4" class="text-center text-danger">${data.message || 'Error loading users'}</td></tr>`;
-        }
+      const response = await fetch(
+        `../api/fetch_users_with_status.php?page=${currentPage}&limit=${itemsPerPage}&search=${encodeURIComponent(searchInput.value.trim())}`,
+      )
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      
+      const text = await response.text()
+      const data = JSON.parse(text)
+
+      if (data.success) {
+        totalPages = data.pagination.totalPages
+        updatePaginationInfo(data)
+        displayUsers(data.users)
+        updateStats(data.users, data.pagination.totalRecords)
+      } else {
+        userTable.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--danger); padding: 40px;">${
+          data.message || "Error loading users"
+        }</td></tr>`
+      }
     } catch (error) {
-        console.error("Error:", error);
-        userTable.innerHTML = '<tr><td colspan="4" class="text-center text-danger">Network error</td></tr>';
+      console.error("Error:", error)
+      userTable.innerHTML =
+        '<tr><td colspan="5" style="text-align: center; color: var(--danger); padding: 40px;">Network error: ' + error.message + '</td></tr>'
     }
-}
-
-  function filterUsers() {
-    const searchTerm = searchInput.value.toLowerCase().trim();
-
-    if (searchTerm === "") {
-      filteredUsers = [...allUsers];
-    } else {
-      filteredUsers = allUsers.filter(
-        user => user.name.toLowerCase().includes(searchTerm) || 
-               user.email.toLowerCase().includes(searchTerm)
-      );
-    }
-
-    // Reset to first page when filtering
-    currentPage = 1;
-    updatePagination();
-    displayUsers();
   }
 
-  function clearSearchField() {
-    searchInput.value = "";
-    filterUsers();
-  }
-
-  function updatePagination() {
-    totalPages = Math.max(1, Math.ceil(filteredUsers.length / itemsPerPage));
-
-    // Ensure current page is valid
-    if (currentPage > totalPages) {
-      currentPage = totalPages;
+  function displayUsers(users) {
+    if (users.length === 0) {
+      userTable.innerHTML =
+        '<tr><td colspan="5" style="text-align: center; color: var(--text-secondary); padding: 40px;">No users found</td></tr>'
+      return
     }
 
-    // Update pagination controls
-    if (paginationControls) {
-      paginationControls.innerHTML = "";
+    userTable.innerHTML = ""
+    users.forEach((user) => {
+      const row = document.createElement("tr")
+      const isActive = user.status === "Active"
 
-      // Previous button
-      const prevLi = document.createElement("li");
-      prevLi.className = `page-item ${currentPage === 1 ? "disabled" : ""}`;
-      prevLi.innerHTML = `
-        <a class="page-link" href="#" aria-label="Previous">
-          <span aria-hidden="true">&laquo;</span>
-        </a>
-      `;
-      prevLi.addEventListener("click", goToPrevPage);
-      paginationControls.appendChild(prevLi);
+      row.innerHTML = `
+                <td><strong>${user.id}</strong></td>
+                <td>${user.name}</td>
+                <td>${user.email}</td>
+                <td>
+                    <select class="status-dropdown" data-user-id="${user.id}" data-user-name="${user.name}">
+                        <option value="Active" ${isActive ? "selected" : ""}>Active</option>
+                        <option value="Inactive" ${!isActive ? "selected" : ""}>Inactive</option>
+                    </select>
+                </td>
+                <td>${user.date_created}</td>
+            `
+      userTable.appendChild(row)
 
-      // Page numbers
-      const startPage = Math.max(1, currentPage - 2);
-      const endPage = Math.min(totalPages, startPage + 4);
+      const dropdown = row.querySelector(".status-dropdown")
+      dropdown.addEventListener("change", (e) => updateUserStatus(e.target, user.id))
+    })
+  }
 
-      for (let i = startPage; i <= endPage; i++) {
-        const pageLi = document.createElement("li");
-        pageLi.className = `page-item ${i === currentPage ? "active" : ""}`;
-        pageLi.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+  async function updateUserStatus(dropdown, userId) {
+    const newStatus = dropdown.value
+    const userName = dropdown.getAttribute("data-user-name")
 
-        pageLi.addEventListener("click", (e) => {
-          e.preventDefault();
-          currentPage = i;
-          displayUsers();
-          updatePagination();
-        });
+    try {
+      const formData = new FormData()
+      formData.append("user_id", userId)
+      formData.append("status", newStatus)
 
-        paginationControls.appendChild(pageLi);
+      const response = await fetch("../api/update_user_status.php", {
+        method: "POST",
+        body: formData,
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
       }
 
-      // Next button
-      const nextLi = document.createElement("li");
-      nextLi.className = `page-item ${currentPage === totalPages ? "disabled" : ""}`;
-      nextLi.innerHTML = `
-        <a class="page-link" href="#" aria-label="Next">
-          <span aria-hidden="true">&raquo;</span>
-        </a>
-      `;
-      nextLi.addEventListener("click", goToNextPage);
-      paginationControls.appendChild(nextLi);
+      const text = await response.text()
+      const data = JSON.parse(text)
+      
+      if (data.success) {
+        console.log(`User ${userName} status updated to ${newStatus}`)
+        dropdown.style.borderColor = "rgba(102, 126, 234, 1)"
+        setTimeout(() => {
+          dropdown.style.borderColor = ""
+        }, 1000)
+      } else {
+        alert("Error updating status: " + data.message)
+        loadUsers()
+      }
+    } catch (error) {
+      console.error("Error:", error)
+      alert("Failed to update user status: " + error.message)
+      loadUsers()
     }
+  }
 
-    // Update pagination info text
-    if (paginationInfo) {
-      const start = (currentPage - 1) * itemsPerPage + 1;
-      const end = Math.min(start + itemsPerPage - 1, filteredUsers.length);
-      paginationInfo.textContent = `Showing ${start}-${end} of ${filteredUsers.length} users`;
-    }
+  function updatePaginationInfo(data) {
+    const startRecord = (currentPage - 1) * itemsPerPage + 1
+    const endRecord = Math.min(startRecord + itemsPerPage - 1, data.pagination.totalRecords)
+
+    document.getElementById("startRecord").textContent = startRecord
+    document.getElementById("endRecord").textContent = endRecord
+    document.getElementById("totalRecords").textContent = data.pagination.totalRecords
+    document.getElementById("pageNumber").textContent = currentPage
+
+    prevPage.disabled = currentPage === 1
+    nextPage.disabled = currentPage === totalPages
+  }
+
+  function updateStats(users, totalUsers) {
+    document.getElementById("totalUsersStat").textContent = totalUsers
+
+    const activeCount = users.filter((u) => u.status === "Active").length
+    const inactiveCount = users.filter((u) => u.status === "Inactive").length
+
+    document.getElementById("activeUsersStat").textContent = activeCount
+    document.getElementById("inactiveUsersStat").textContent = inactiveCount
   }
 
   function goToPrevPage(e) {
-    e.preventDefault();
+    e.preventDefault()
     if (currentPage > 1) {
-      currentPage--;
-      displayUsers();
-      updatePagination();
+      currentPage--
+      loadUsers()
+      window.scrollTo({ top: 0, behavior: "smooth" })
     }
   }
 
   function goToNextPage(e) {
-    e.preventDefault();
+    e.preventDefault()
     if (currentPage < totalPages) {
-      currentPage++;
-      displayUsers();
-      updatePagination();
+      currentPage++
+      loadUsers()
+      window.scrollTo({ top: 0, behavior: "smooth" })
     }
   }
 
-  function displayUsers() {
-    if (filteredUsers.length === 0) {
-      userTable.innerHTML = '<tr><td colspan="4" class="text-center">No users found</td></tr>';
-      return;
-    }
+  async function loadAnalytics() {
+    const monthStr = currentMonth.toISOString().slice(0, 7)
+    updateChartMonth()
 
-    userTable.innerHTML = "";
-
-    // Get users for current page
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const pageUsers = filteredUsers.slice(startIndex, startIndex + itemsPerPage);
-
-    pageUsers.forEach(user => {
-      const row = document.createElement("tr");
-      row.innerHTML = `
-        <td>${user.id}</td>
-        <td>${user.name}</td>
-        <td>${user.email}</td>
-        <td>${new Date(user.date_created).toLocaleString()}</td>
-      `;
-      userTable.appendChild(row);
-    });
-  }
-
-  // Function to load total users count
-function loadTotalUsers() {
-    fetch('api/count_users.php')
-        .then(response => response.json())
-        .then(data => {
-            document.getElementById('totalUsersCount').textContent = data.total;
-        })
-        .catch(error => {
-            console.error('Error fetching total users:', error);
-        });
-}
-
-
-// Function to generate the calendar with limited interactivity
-function generateCalendar() {
-  // Calendar variables
-  const calendarContainer = document.getElementById("calendar-container");
-  const currentMonthElement = document.getElementById("currentMonth");
-  const prevMonthButton = document.getElementById("prevMonth");
-  const nextMonthButton = document.getElementById("nextMonth");
-  const todayButton = document.getElementById("todayButton");
-  
-  // Current date
-  let currentDate = new Date();
-  let today = new Date();
-  today.setHours(0, 0, 0, 0); // Normalize today's date
-  
-  // Initialize calendar
-  renderCalendar(currentDate);
-  
-  // Event listeners for navigation
-  prevMonthButton.addEventListener("click", () => {
-    currentDate.setMonth(currentDate.getMonth() - 1);
-    renderCalendar(currentDate);
-  });
-  
-  nextMonthButton.addEventListener("click", () => {
-    currentDate.setMonth(currentDate.getMonth() + 1);
-    renderCalendar(currentDate);
-  });
-  
-  todayButton.addEventListener("click", () => {
-    currentDate = new Date();
-    renderCalendar(currentDate);
-  });
-  
-  // Function to render the calendar
-  function renderCalendar(date) {
-    // Update month title
-    const monthNames = [
-      "January", "February", "March", "April", "May", "June",
-      "July", "August", "September", "October", "November", "December"
-    ];
-    currentMonthElement.textContent = `${monthNames[date.getMonth()]} ${date.getFullYear()}`;
-    
-    // Clear calendar container
-    calendarContainer.innerHTML = "";
-    
-    // Create day headers
-    const dayHeaders = document.createElement("div");
-    dayHeaders.className = "calendar-grid";
-    
-    const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-    daysOfWeek.forEach((day) => {
-      const dayHeader = document.createElement("div");
-      dayHeader.className = "calendar-day-header";
-      dayHeader.textContent = day;
-      dayHeaders.appendChild(dayHeader);
-    });
-    
-    calendarContainer.appendChild(dayHeaders);
-    
-    // Create calendar days
-    const calendarDays = document.createElement("div");
-    calendarDays.className = "calendar-grid";
-    
-    // Get first day of month and starting day of week
-    const firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
-    const startingDay = firstDay.getDay();
-    
-    // Get last day of month
-    const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
-    const totalDays = lastDay.getDate();
-    
-    // Get last day of previous month
-    const prevMonthLastDay = new Date(date.getFullYear(), date.getMonth(), 0).getDate();
-    
-    // Days from previous month (disabled)
-    for (let i = startingDay - 1; i >= 0; i--) {
-      const day = document.createElement("div");
-      day.className = "calendar-day other-month";
-      day.textContent = prevMonthLastDay - i;
-      day.style.opacity = "0.5";
-      calendarDays.appendChild(day);
-    }
-    
-    // Days from current month
-    for (let i = 1; i <= totalDays; i++) {
-      const day = document.createElement("div");
-      day.className = "calendar-day";
-      day.textContent = i;
+    try {
+      const response = await fetch(`../api/fetch_weekly_analytics.php?month=${monthStr}`)
       
-      // Create a date object for this day
-      const dayDate = new Date(date.getFullYear(), date.getMonth(), i);
-      
-      // Check if this day is today
-      if (dayDate.getTime() === today.getTime()) {
-        day.classList.add("today");
-        // Only make today clickable
-        day.addEventListener("click", function() {
-          alert("Today is clicked!");
-        });
-      } else {
-        day.style.pointerEvents = "none"; // Disable clicking
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
       }
       
-      calendarDays.appendChild(day);
+      const text = await response.text()
+      const data = JSON.parse(text)
+
+      if (data.success) {
+        renderChart(data.data)
+      }
+    } catch (error) {
+      console.error("Error fetching analytics:", error)
     }
-    
-    // Days from next month (disabled)
-    const totalCells = 42; // 6 rows x 7 days
-    const remainingCells = totalCells - (startingDay + totalDays);
-    
-    for (let i = 1; i <= remainingCells; i++) {
-      const day = document.createElement("div");
-      day.className = "calendar-day other-month";
-      day.textContent = i;
-      day.style.opacity = "0.5";
-      calendarDays.appendChild(day);
-    }
-    
-    calendarContainer.appendChild(calendarDays);
   }
-}
 
+  function updateChartMonth() {
+    const monthNames = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ]
+    const monthStr = monthNames[currentMonth.getMonth()] + " " + currentMonth.getFullYear()
+    document.getElementById("chartMonth").textContent = monthStr
+  }
 
-// PROFILE DROPDOWN
-const profile = document.querySelector('nav .profile');
-const imgProfile = profile.querySelector('img');
-const dropdownProfile = profile.querySelector('.profile-link');
+  function renderChart(data) {
+    const ctx = document.getElementById("analyticsChart").getContext("2d")
 
-imgProfile.addEventListener('click', function () {
-	dropdownProfile.classList.toggle('show');
+    if (chartInstance) {
+      chartInstance.destroy()
+    }
+
+    chartInstance = new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: data.map((d) => {
+          const date = new Date(d.week)
+          return date.toLocaleDateString("en-US", { month: "short", day: "numeric" })
+        }),
+        datasets: [
+          {
+            label: "Registrations",
+            data: data.map((d) => d.count),
+            backgroundColor: "rgba(102, 126, 234, 0.8)",
+            borderColor: "rgba(102, 126, 234, 1)",
+            borderRadius: 6,
+            borderSkipped: false,
+            fill: true,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false,
+          },
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            border: {
+              display: false,
+            },
+            grid: {
+              color: "rgba(0, 0, 0, 0.05)",
+            },
+          },
+          x: {
+            border: {
+              display: false,
+            },
+            grid: {
+              display: false,
+            },
+          },
+        },
+      },
+    })
+  }
+
+  function goToPrevMonth() {
+    currentMonth.setMonth(currentMonth.getMonth() - 1)
+    loadAnalytics()
+  }
+
+  function goToNextMonth() {
+    currentMonth.setMonth(currentMonth.getMonth() + 1)
+    loadAnalytics()
+  }
 })
-
-});
