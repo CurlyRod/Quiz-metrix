@@ -304,7 +304,8 @@ input[type="checkbox"] {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 20px;
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
 }
 
 .pagination-info {
@@ -316,8 +317,6 @@ input[type="checkbox"] {
   list-style: none;
   display: flex;
   gap: 5px;
-  margin: 0;
-  padding: 0;
 }
 
 .page-item {
@@ -509,5 +508,9 @@ input[type="checkbox"] {
 
     .modal-content {
         width: 95%;
+    }
+
+    .pagination-info {
+        display: none;
     }
 }

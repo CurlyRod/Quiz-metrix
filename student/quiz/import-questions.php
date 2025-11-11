@@ -18,9 +18,9 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h2 class="mb-0">Import Questions</h2>
-                    <div>
-                        <button class="btn btn-outline-secondary me-2" id="cancelBtn">Cancel</button>
-                        <button class="btn " id="importBtn" style="background-color: #6366f1; color: white;">Import</button>
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <button class="btn btn-outline-secondary me-2" id="cancelBtn" style="border: 2px solid #6366f1;color: #6366f1;background: white;font-weight: 600;">Cancel</button>
+                        <button class="btn " id="importBtn" style="background-color:#6366f1 ;color: white;font-weight: 600;border: none;">Import</button>
                     </div>
                 </div>
 

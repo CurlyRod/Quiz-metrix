@@ -344,6 +344,7 @@ input[type="checkbox"] {
     justify-content: space-between;
     align-items: center;
     margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
 }
 
 .pagination-info {
@@ -614,5 +615,9 @@ input[type="checkbox"] {
 
     .modal-content {
         width: 95%;
+    }
+
+    .pagination-info {
+        display: none;
     }
 }

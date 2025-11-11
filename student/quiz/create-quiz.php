@@ -76,12 +76,12 @@
             </div>
             
             <!-- Buttons Section -->
-            <div class="mb-4">
-                <button class="btn" id="importQuestionsBtn" style="background-color: #6366f1; color: white;">
-                    <i class="bi bi-upload"></i> Import Questions
-                </button>
+            <div class="d-flex justify-content-between align-items-center mb-4">
                 <button class="btn btn-outline-secondary ms-2" id="quizSettingsBtn">
                     <i class="bi bi-gear"></i> Quiz Settings
+                </button>
+                <button class="btn" id="importQuestionsBtn" style="background-color: #6366f1; color: white;">
+                    <i class="bi bi-upload"></i> Import
                 </button>
             </div>
             
@@ -177,8 +177,8 @@
 
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" id="saveQuizSettingsBtn">Save Settings</button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn primary-btn" id="saveQuizSettingsBtn">Save Settings</button>
                 </div>
             </div>
         </div>

@@ -1,4 +1,10 @@
 <!-- SIDEBAR -->
+ <!-- Add this at the top of your sidebar.php, inside the #sidebar section -->
+<div class="sidebar-mobile-header" style="display: none; padding: 15px 20px; border-bottom: 1px solid #eee; justify-content: space-between; align-items: center;">
+    <span style="font-weight: bold; color: var(--primary);">Menu</span>
+    <button class="close-sidebar-mobile" style="background: none; border: none; font-size: 24px; cursor: pointer; color: var(--dark-grey);">&times;</button>
+</div>
+
 <section id="sidebar" style="display:flex; flex-direction:column; height:100vh;">
 	<a href="../home" class="brand text-decoration-none">
 		<img class="icon" src="../../assets/img/logo/apple-touch-icon.png" alt="" style="height:43px">Quizmetrix

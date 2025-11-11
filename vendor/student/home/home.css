@@ -972,9 +972,70 @@ main .btn-send {
 main .btn-send:hover {
 	background: var(--dark-blue);
 }
-/* MAIN */
-/* CONTENT */
 
+@media screen and (max-width: 1000px) {
+    #sidebar {
+        transform: translateX(-100%);
+        max-width: 260px;
+        transition: transform 0.3s ease;
+        z-index: 300;
+    }
+    
+    #sidebar.show {
+        transform: translateX(0);
+        box-shadow: 4px 0 16px rgba(0, 0, 0, 0.1);
+    }
+    
+    #sidebar.hide {
+        transform: translateX(-100%);
+    }
+    
+    #content {
+        width: 100% !important;
+        left: 0 !important;
+    }
+    
+
+    .sidebar-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 299;
+        display: none;
+    }
+    
+    .sidebar-overlay.active {
+        display: block;
+    }
+    
+
+    #sidebar.hide:hover {
+        transform: translateX(-100%);
+        max-width: 260px;
+    }
+    
+    #sidebar.hide:hover .side-menu {
+        padding: 0 6px;
+    }
+    
+    #sidebar.hide:hover .divider {
+        text-align: center;
+    }
+}
+
+
+@media screen and (min-width: 1001px) {
+    #sidebar {
+        transform: translateX(0) !important;
+    }
+    
+    .sidebar-overlay {
+        display: none !important;
+    }
+}
 
 @media screen and (max-width: 768px) {
 	#content {
@@ -982,8 +1043,7 @@ main .btn-send:hover {
 		width: calc(100% - 60px);
 		transition: all .3s ease;
 	}
-	nav .nav-link,
-	nav .divider {
+	#userNameDisplay {
 		display: none;
 	}
 }

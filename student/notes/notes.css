@@ -369,8 +369,8 @@ body {
 }
 
 .select-note:checked {
-  background: #1e90ff;
-  border-color: #1e90ff;
+  background: #6366f1;
+  border-color: #6366f1;
 }
 
 .select-note:checked::after {

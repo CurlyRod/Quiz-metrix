@@ -69,11 +69,11 @@
                 
                 <!-- Action buttons -->
                 <div class="action-buttons d-flex align-items-center">
-                    <button type="button" class="btn primary-btn me-2" data-bs-toggle="modal" data-bs-target="#uploadModal" style="background-color: #6366f1; color: white;">
+                    <button type="button" class="btn primary-btn" id="uploadBtn" data-bs-toggle="modal" data-bs-target="#uploadModal" style="background-color: #6366f1; color: white;">
                         <i class="bx bx-upload me-1"></i> Upload
                     </button>
                     <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#newFolderModal">
-                        <i class="bx bx-folder-plus me-1"></i> New Folder
+                        <i class="bx bx-folder-plus me-1"></i> Folder
                     </button>
                 </div>
 
@@ -156,11 +156,11 @@
                                             </p>
                                         </div>
                                     </a>
-                                    <div class="card-actions dropdown">
+                                    <div class="card-actions dropstart">
                                         <button class="btn btn-sm dropdown-toggle no-arrow" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                                             <i class="bx bx-dots-vertical-rounded"></i>
                                         </button>
-                                        <ul class="dropdown-menu dropdown-menu-end">
+                                        <ul class="dropdown-menu">
                                             <li><a class="dropdown-item rename-folder" href="#" data-id="<?php echo $folder['id']; ?>" data-name="<?php echo htmlspecialchars($folder['name']); ?>">Rename</a></li>
                                             <li><a class="dropdown-item delete-folder" href="#" data-id="<?php echo $folder['id']; ?>">Delete</a></li>
                                         </ul>
@@ -412,7 +412,7 @@
 
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" id="uploadButton">Upload</button>
+                    <button type="button" class="btn primary-btn" id="uploadButton">Upload</button>
                 </div>
             </div>
         </div>
