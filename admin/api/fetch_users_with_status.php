@@ -13,17 +13,30 @@ try {
     $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
     $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 10;
     $search = isset($_GET['search']) ? $_GET['search'] : '';
+    $status = isset($_GET['status']) ? $_GET['status'] : 'both';
 
     // Calculate offset
     $offset = ($page - 1) * $limit;
 
     // Prepare the base query
     $query = "SELECT id, name, email, status, date_created FROM user_credential";
+    $whereConditions = [];
 
     // Add search condition if search parameter is provided
     if (!empty($search)) {
         $search = $conn->real_escape_string($search);
-        $query .= " WHERE name LIKE '%$search%' OR email LIKE '%$search%'";
+        $whereConditions[] = "(name LIKE '%$search%' OR email LIKE '%$search%')";
+    }
+
+    // Add status filter condition
+    if ($status !== 'both') {
+        $status = $conn->real_escape_string($status);
+        $whereConditions[] = "status = '$status'";
+    }
+
+    // Combine where conditions
+    if (!empty($whereConditions)) {
+        $query .= " WHERE " . implode(" AND ", $whereConditions);
     }
 
     // Add sorting and pagination
@@ -67,8 +80,8 @@ try {
 
     // Get total number of records for pagination
     $countQuery = "SELECT COUNT(*) as total FROM user_credential";
-    if (!empty($search)) {
-        $countQuery .= " WHERE name LIKE '%$search%' OR email LIKE '%$search%'";
+    if (!empty($whereConditions)) {
+        $countQuery .= " WHERE " . implode(" AND ", $whereConditions);
     }
 
     $countResult = $conn->query($countQuery);

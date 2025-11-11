@@ -605,14 +605,14 @@ body.break-modal-open {
 	width: calc(100% - 60px);
 	left: 60px;
 }
-/* NAVBAR */
+
 nav {
 	background: var(--light);
 	height: 64px;
 	padding: 0 20px;
 	display: flex;
 	align-items: center;
-	grid-gap: 28px;
+	grid-gap: 10px;
 	position: sticky;
 	top: 0;
 	left: 0;

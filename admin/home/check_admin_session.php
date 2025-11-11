@@ -6,7 +6,7 @@ use Middleware\Class\AdminAuth;
 $adminAuth = new AdminAuth();
 
 if (!$adminAuth->isLoggedIn()) {
-    header('Location: ../../index.php');
+    header('Location: ../../landing-page/index.php');
     exit();
 }
 ?>

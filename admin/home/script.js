@@ -24,6 +24,12 @@ document.addEventListener("DOMContentLoaded", () => {
     currentPage = 1
     loadUsers()
   })
+
+  document.getElementById("statusFilter")?.addEventListener("change", () => {
+    currentPage = 1
+    loadUsers()
+})
+
   prevPage.addEventListener("click", goToPrevPage)
   nextPage.addEventListener("click", goToNextPage)
   prevMonth.addEventListener("click", goToPrevMonth)
@@ -38,8 +44,11 @@ document.addEventListener("DOMContentLoaded", () => {
       '<tr class="loading-row"><td colspan="5" style="text-align: center; padding: 40px;"><div class="spinner"></div><p>Loading users...</p></td></tr>'
 
     try {
+      const searchTerm = searchInput.value.trim()
+      const statusFilterValue = statusFilter.value
+      
       const response = await fetch(
-        `../api/fetch_users_with_status.php?page=${currentPage}&limit=${itemsPerPage}&search=${encodeURIComponent(searchInput.value.trim())}`,
+        `../api/fetch_users_with_status.php?page=${currentPage}&limit=${itemsPerPage}&search=${encodeURIComponent(searchTerm)}&status=${encodeURIComponent(statusFilterValue)}`,
       )
       
       if (!response.ok) {
@@ -84,8 +93,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 <td>${user.email}</td>
                 <td>
                     <select class="status-dropdown" data-user-id="${user.id}" data-user-name="${user.name}">
-                        <option value="Active" ${isActive ? "selected" : ""}>Active</option>
-                        <option value="Inactive" ${!isActive ? "selected" : ""}>Inactive</option>
+                        <option value="Active" ${isActive ? "selected" : ""}>🟢 Active</option>
+                        <option value="Inactive" ${!isActive ? "selected" : ""}>🔴 Inactive</option>
                     </select>
                 </td>
                 <td>${user.date_created}</td>
@@ -124,6 +133,9 @@ document.addEventListener("DOMContentLoaded", () => {
         setTimeout(() => {
           dropdown.style.borderColor = ""
         }, 1000)
+        
+        // Reload users to reflect the change in stats
+        loadUsers()
       } else {
         alert("Error updating status: " + data.message)
         loadUsers()
@@ -227,15 +239,12 @@ document.addEventListener("DOMContentLoaded", () => {
     chartInstance = new Chart(ctx, {
       type: "bar",
       data: {
-        labels: data.map((d) => {
-          const date = new Date(d.week)
-          return date.toLocaleDateString("en-US", { month: "short", day: "numeric" })
-        }),
+        labels: data.map((d) => d.week_display),
         datasets: [
           {
             label: "Registrations",
             data: data.map((d) => d.count),
-            backgroundColor: "rgba(102, 126, 234, 0.8)",
+            backgroundColor: "rgba(99, 102, 241, 0.8)",
             borderColor: "rgba(102, 126, 234, 1)",
             borderRadius: 6,
             borderSkipped: false,
@@ -250,6 +259,13 @@ document.addEventListener("DOMContentLoaded", () => {
           legend: {
             display: false,
           },
+          tooltip: {
+            callbacks: {
+              title: function(context) {
+                return 'Week: ' + context[0].label;
+              }
+            }
+          }
         },
         scales: {
           y: {
@@ -260,6 +276,10 @@ document.addEventListener("DOMContentLoaded", () => {
             grid: {
               color: "rgba(0, 0, 0, 0.05)",
             },
+            title: {
+              display: true,
+              text: 'Number of Registrations'
+            }
           },
           x: {
             border: {
@@ -268,6 +288,10 @@ document.addEventListener("DOMContentLoaded", () => {
             grid: {
               display: false,
             },
+            title: {
+              display: true,
+              text: 'Weeks'
+            }
           },
         },
       },
