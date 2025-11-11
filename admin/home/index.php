@@ -105,7 +105,16 @@ require_once 'check_admin_session.php';
                                 <th class="col-id">ID</th>
                                 <th class="col-name">Name</th>
                                 <th class="col-email">Email</th>
-                                <th class="col-status">Status</th>
+                                <th class="col-status">
+                                    <div class="status-header">
+                                        <span>Status</span>
+                                        <select id="statusFilter" class="status-filter">
+                                            <option value="both">● Both</option>
+                                            <option value="Active">🟢 Active</option>
+                                            <option value="Inactive">🔴 Inactive</option>
+                                        </select>
+                                    </div>
+                                </th>
                                 <th class="col-date">Registered</th>
                             </tr>
                         </thead>
@@ -122,7 +131,7 @@ require_once 'check_admin_session.php';
 
                 <div class="card-footer">
                     <div class="pagination-info">
-                        Showing <span id="startRecord">1</span>–<span id="endRecord">10</span> of <span id="totalRecords">0</span>
+                        Showing <span id="startRecord">1</span> – <span id="endRecord">10</span> of <span id="totalRecords">0</span>
                     </div>
                     <div class="pagination-buttons">
                         <button id="prevPage" class="btn-pagination" title="Previous page" disabled>

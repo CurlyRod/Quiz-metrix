@@ -21,34 +21,45 @@ try {
     $date = DateTime::createFromFormat('Y-m', $month);
     $startDate = $date->format('Y-m-01');
     $endDate = $date->format('Y-m-t');
+    
+    // Get total days in month
+    $totalDays = $date->format('t');
+    $daysPerWeek = ceil($totalDays / 4);
 
-    // Query to get weekly registration counts
-    $query = "SELECT 
-                DATE_FORMAT(date_created, '%Y-%m-%d') as week,
-                COUNT(*) as count
-              FROM user_credential
-              WHERE DATE(date_created) BETWEEN ? AND ?
-              GROUP BY WEEK(date_created), DATE(date_created)
-              ORDER BY date_created ASC";
-
-    $stmt = $conn->prepare($query);
-
-    if (!$stmt) {
-        throw new Exception('Database error: ' . $conn->error);
-    }
-
-    $stmt->bind_param("ss", $startDate, $endDate);
-    $stmt->execute();
-    $result = $stmt->get_result();
-
-    $data = [];
-    while ($row = $result->fetch_assoc()) {
-        $data[] = $row;
+    // Create 4 weekly periods
+    $weeklyData = [];
+    for ($week = 1; $week <= 4; $week++) {
+        $weekStartDay = (($week - 1) * $daysPerWeek) + 1;
+        $weekEndDay = min($week * $daysPerWeek, $totalDays);
+        
+        $weekStartDate = $date->format('Y-m-') . str_pad($weekStartDay, 2, '0', STR_PAD_LEFT);
+        $weekEndDate = $date->format('Y-m-') . str_pad($weekEndDay, 2, '0', STR_PAD_LEFT);
+        
+        // Query to get registrations for this weekly period
+        $query = "SELECT COUNT(*) as count 
+                  FROM user_credential 
+                  WHERE DATE(date_created) BETWEEN ? AND ?";
+        
+        $stmt = $conn->prepare($query);
+        $stmt->bind_param("ss", $weekStartDate, $weekEndDate);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result->fetch_assoc();
+        
+        $weeklyData[] = [
+            'week_number' => $week,
+            'week_start' => $weekStartDate,
+            'week_end' => $weekEndDate,
+            'week_display' => "Week $week: " . date('M j', strtotime($weekStartDate)) . ' - ' . date('M j', strtotime($weekEndDate)),
+            'count' => (int)$row['count']
+        ];
+        
+        $stmt->close();
     }
 
     $response = [
         'success' => true,
-        'data' => $data
+        'data' => $weeklyData
     ];
 
 } catch (Exception $e) {

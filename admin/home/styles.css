@@ -137,7 +137,7 @@ body.admin-body {
 }
 
 .stat-icon.icon-users {
-  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  background: #6366f1;
   color: white;
 }
 
@@ -198,7 +198,6 @@ body.admin-body {
 
 .content-grid {
   display: grid;
-  grid-template-columns: 1fr 320px;
   gap: 24px;
 }
 
@@ -232,7 +231,8 @@ body.admin-body {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  background-color: var(--bg-primary);
+  color: white;
+  background-color: #6366f1;
   box-shadow: var(--shadow-sm);
 }
 
@@ -251,7 +251,7 @@ body.admin-body {
 
 .record-count {
   font-size: 13px;
-  color: var(--text-tertiary);
+  color: white;
 }
 
 .search-input-wrapper {
@@ -469,7 +469,7 @@ body.admin-body {
 .sidebar-header {
   padding: 16px 20px;
   border-bottom: 1px solid var(--border);
-  background: var(--bg-primary);
+  background: #6366f1;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -479,7 +479,7 @@ body.admin-body {
   font-size: 14px;
   font-weight: 600;
   margin: 0;
-  color: var(--text-primary);
+  color: white;
 }
 
 .month-controls {
@@ -626,3 +626,122 @@ body.admin-body {
     align-items: flex-start;
   }
 }
+/* Status Header with Filter */
+.status-header {
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+}
+
+.status-header span {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-filter {
+    width: 120px;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    color: var(--text-primary);
+    background: var(--bg-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=US-ASCII,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'><path fill='%23666' d='M2 0L0 2h4zm0 5L0 3h4z'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 8px 10px;
+}
+
+.status-filter:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.status-filter:hover {
+    border-color: var(--primary-light);
+}
+
+/* Remove border color and improve dropdown options */
+.status-filter option {
+    padding: 12px 16px;
+    font-size: 14px;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.status-filter option:hover {
+    background: var(--primary-light);
+    color: white;
+}
+
+/* Adjust table header for the filter */
+.col-status {
+    width: 160px;
+}
+
+.users-table th.col-status {
+    vertical-align: top;
+    padding-top: 12px;
+}
+
+/* Remove the old header filters */
+.header-filters {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    justify-content: flex-end;
+}
+
+.search-input-wrapper {
+    position: relative;
+    min-width: 240px;
+    max-width: 400px;
+}
+
+.status-filter option {
+    padding: 12px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.status-filter option[value="Active"] {
+    color: var(--success);
+}
+
+.status-filter option[value="Inactive"] {
+    color: var(--danger);
+}
+
+.status-filter option:hover {
+    background: var(--bg-primary);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .header-filters {
+        flex-direction: column;
+        width: 100%;
+        gap: 8px;
+    }
+    
+    .search-input-wrapper,
+    .status-filter-wrapper {
+        width: 100%;
+        max-width: 100%;
+    }
+    
+    .analytics-section {
+        margin-top: 16px;
+    }
+}
+
