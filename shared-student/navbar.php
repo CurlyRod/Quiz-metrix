@@ -21,7 +21,7 @@
         
         <form action="#"></form> 
         
-        <h6><?php 
+        <h6 id="userNameDisplay"><?php 
             echo str_replace(" (Student)", "", $_SESSION['USER_NAME']); 
         ?></h6>
         

@@ -176,15 +176,6 @@ body {
   border-color: #5558d9;
 }
 
-.btn-success {
-  background-color: #10b981;
-  border-color: #10b981;
-}
-
-.btn-success:hover {
-  background-color: #059669;
-  border-color: #059669;
-}
 
 .btn-danger {
   background-color: #ef4444;
@@ -228,7 +219,7 @@ body {
 }
 
 .deck-creator{
-  padding: 20px 70px;
+  padding: 20px;
 }
 
 

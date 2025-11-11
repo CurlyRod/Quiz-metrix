@@ -23,7 +23,7 @@
 
     ?>
     <div class="container">
-        <a href="index.php" class="back-btn">← Back to Extractor</a>
+        <a href="index.php" class="back-btn">Back to Extractor</a>
         
         <div class="header">
             <h1>Extraction Complete!</h1>
@@ -35,7 +35,7 @@
             <div class="card">
                 <span class="card-icon">📥</span>
                 <h2>Download Results</h2>
-                <p>Save your extracted terms as a text file to your computer. Downloading it will let you share it to others easily.</p>
+                <p>Save your extracted terms as a text file.</p>
                 <button class="card-btn" onclick="handleDownload()">Download Now</button>
             </div>
             

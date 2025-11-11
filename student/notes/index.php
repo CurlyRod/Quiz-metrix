@@ -154,8 +154,8 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Custom JavaScript -->
     <script src="notes.js"></script>
-    <script src="../../vendor/admin/home/home.js"></script>
     <script src="../../vendor/bootstrap/jquery.min.js"></script>
+    <?php include '../../shared-student/script.php'; ?>
 
 
 

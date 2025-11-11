@@ -63,14 +63,17 @@
                 </div>
             </div>
             
-            <div class="mb-4">
-                <button class="btn" id="importCardsBtn" href="import-flashcards.php" style="background-color: #6366f1; color: white;">
-                    <i class="bi bi-upload"></i> Import Flashcards
-                </button>
-                <button class="btn btn-outline-secondary ms-2" id="deckSettingsBtn">
-                    <i class="bi bi-gear"></i> Deck Settings
-                </button>
-            </div>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <button class="btn btn-outline-secondary" id="deckSettingsBtn">
+        <i class="bi bi-gear"></i> Deck Settings
+    </button>
+        
+    </div>
+    <button class="btn" id="importCardsBtn" href="import-flashcards.php" style="background-color: #6366f1; color: white;">
+            <i class="bi bi-upload"></i> Import
+        </button>
+</div>
             
             <div id="flashcardContainer">
                 <!-- Flashcard containers will be added here -->

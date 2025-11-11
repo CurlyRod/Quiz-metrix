@@ -25,66 +25,176 @@ allDropdown.forEach(item=> {
 const toggleSidebar = document.querySelector('nav .toggle-sidebar');
 const allSideDivider = document.querySelectorAll('#sidebar .divider');
 
-if(sidebar.classList.contains('hide')) {
-	allSideDivider.forEach(item=> {
-		item.textContent = '-'
-	})
-	allDropdown.forEach(item=> {
-		const a = item.parentElement.querySelector('a:first-child');
-		a.classList.remove('active');
-		item.classList.remove('show');
-	})
-} else {
-	allSideDivider.forEach(item=> {
-		item.textContent = item.dataset.text;
-	})
+// Create overlay element for mobile
+const sidebarOverlay = document.createElement('div');
+sidebarOverlay.className = 'sidebar-overlay';
+document.body.appendChild(sidebarOverlay);
+
+// Function to handle sidebar toggle
+function handleSidebarToggle() {
+    const isMobile = window.innerWidth <= 1000;
+    
+    if (isMobile) {
+        // Mobile behavior - toggle with overlay
+        sidebar.classList.toggle('show');
+        sidebarOverlay.classList.toggle('active');
+        
+        if (sidebar.classList.contains('show')) {
+            // When opening sidebar on mobile
+            allSideDivider.forEach(item=> {
+                item.textContent = item.dataset.text;
+            })
+        } else {
+            // When closing sidebar on mobile
+            allSideDivider.forEach(item=> {
+                item.textContent = '-'
+            })
+            allDropdown.forEach(item=> {
+                const a = item.parentElement.querySelector('a:first-child');
+                a.classList.remove('active');
+                item.classList.remove('show');
+            })
+        }
+    } else {
+        // Desktop behavior - original functionality
+        sidebar.classList.toggle('hide');
+        
+        if(sidebar.classList.contains('hide')) {
+            allSideDivider.forEach(item=> {
+                item.textContent = '-'
+            })
+            allDropdown.forEach(item=> {
+                const a = item.parentElement.querySelector('a:first-child');
+                a.classList.remove('active');
+                item.classList.remove('show');
+            })
+        } else {
+            allSideDivider.forEach(item=> {
+                item.textContent = item.dataset.text;
+            })
+        }
+    }
 }
 
-toggleSidebar.addEventListener('click', function () {
-	sidebar.classList.toggle('hide');
+// Initialize sidebar state based on screen size
+function initializeSidebar() {
+    const isMobile = window.innerWidth <= 1000;
+    
+    if (isMobile) {
+        sidebar.classList.remove('hide');
+        sidebar.classList.remove('show');
+        sidebarOverlay.classList.remove('active');
+    } else {
+        sidebar.classList.remove('show');
+        sidebarOverlay.classList.remove('active');
+        
+        // Check if sidebar should be hidden on desktop
+        if(sidebar.classList.contains('hide')) {
+            allSideDivider.forEach(item=> {
+                item.textContent = '-'
+            })
+        } else {
+            allSideDivider.forEach(item=> {
+                item.textContent = item.dataset.text;
+            })
+        }
+    }
+}
 
-	if(sidebar.classList.contains('hide')) {
-		allSideDivider.forEach(item=> {
-			item.textContent = '-'
-		})
+// Toggle sidebar event
+toggleSidebar.addEventListener('click', handleSidebarToggle);
 
-		allDropdown.forEach(item=> {
-			const a = item.parentElement.querySelector('a:first-child');
-			a.classList.remove('active');
-			item.classList.remove('show');
-		})
-	} else {
-		allSideDivider.forEach(item=> {
-			item.textContent = item.dataset.text;
-		})
-	}
-})
+// Close sidebar when overlay is clicked
+sidebarOverlay.addEventListener('click', function() {
+    sidebar.classList.remove('show');
+    this.classList.remove('active');
+    
+    // Reset divider text when closing
+    allSideDivider.forEach(item=> {
+        item.textContent = '-'
+    })
+    allDropdown.forEach(item=> {
+        const a = item.parentElement.querySelector('a:first-child');
+        a.classList.remove('active');
+        item.classList.remove('show');
+    })
+});
 
+// Update existing sidebar event listeners for desktop
 sidebar.addEventListener('mouseleave', function () {
-	if(this.classList.contains('hide')) {
-		allDropdown.forEach(item=> {
-			const a = item.parentElement.querySelector('a:first-child');
-			a.classList.remove('active');
-			item.classList.remove('show');
-		})
-		allSideDivider.forEach(item=> {
-			item.textContent = '-'
-		})
-	}
+    if(this.classList.contains('hide') && window.innerWidth > 1000) {
+        allDropdown.forEach(item=> {
+            const a = item.parentElement.querySelector('a:first-child');
+            a.classList.remove('active');
+            item.classList.remove('show');
+        })
+        allSideDivider.forEach(item=> {
+            item.textContent = '-'
+        })
+    }
 })
 
 sidebar.addEventListener('mouseenter', function () {
-	if(this.classList.contains('hide')) {
-		allDropdown.forEach(item=> {
-			const a = item.parentElement.querySelector('a:first-child');
-			a.classList.remove('active');
-			item.classList.remove('show');
-		})
-		allSideDivider.forEach(item=> {
-			item.textContent = item.dataset.text;
-		})
-	}
+    if(this.classList.contains('hide') && window.innerWidth > 1000) {
+        allDropdown.forEach(item=> {
+            const a = item.parentElement.querySelector('a:first-child');
+            a.classList.remove('active');
+            item.classList.remove('show');
+        })
+        allSideDivider.forEach(item=> {
+            item.textContent = item.dataset.text;
+        })
+    }
 })
+
+// Handle window resize
+window.addEventListener('resize', function() {
+    const isMobile = window.innerWidth <= 1000;
+    
+    if (isMobile) {
+        // Ensure sidebar is hidden on mobile unless explicitly shown
+        if (!sidebar.classList.contains('show')) {
+            sidebar.classList.remove('hide');
+        }
+        sidebarOverlay.classList.remove('active');
+    } else {
+        // Reset to desktop behavior
+        sidebar.classList.remove('show');
+        sidebarOverlay.classList.remove('active');
+        
+        // Restore divider text on desktop
+        if (!sidebar.classList.contains('hide')) {
+            allSideDivider.forEach(item=> {
+                item.textContent = item.dataset.text;
+            })
+        }
+    }
+});
+
+// Close sidebar when a menu item is clicked (on mobile)
+document.addEventListener('click', function(e) {
+    const isMobile = window.innerWidth <= 1000;
+    
+    if (isMobile && sidebar.classList.contains('show')) {
+        // Check if click is on a sidebar link
+        if (e.target.closest('#sidebar a')) {
+            sidebar.classList.remove('show');
+            sidebarOverlay.classList.remove('active');
+        }
+    }
+});
+
+// Mobile sidebar close button handler (if you add the close button to sidebar.php)
+const closeSidebarMobile = document.querySelector('.close-sidebar-mobile');
+if (closeSidebarMobile) {
+    closeSidebarMobile.addEventListener('click', function() {
+        sidebar.classList.remove('show');
+        sidebarOverlay.classList.remove('active');
+    });
+}
+
+// Initialize sidebar on page load
+initializeSidebar();
 
 // PROFILE DROPDOWN
 const profile = document.querySelector('nav .profile');
