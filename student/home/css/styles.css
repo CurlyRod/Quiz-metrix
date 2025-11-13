@@ -115,6 +115,16 @@
       overflow: hidden;
   }
 
+  .recent-decks-card {
+      max-width: none;
+      height: auto;
+      margin-bottom: 1.5rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      background-color: #fff;
+      overflow: hidden;
+  }
+
 
   .today-button {
     background: none;
@@ -212,7 +222,7 @@
   
   /* Events Card */
   .current-events-card .card-body {
-    max-height: 300px;
+    max-height: 400px;
     overflow-y: auto;
   }
 
@@ -687,7 +697,49 @@
   }
   
   .card.current-events-card {
-    height: auto;
+    height: 394.5px;
+}
+
+.recent-deck-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background-color: #e9ecef !important;
+}
+
+.recent-deck-card .title {
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.recent-deck-card .date {
+  color: #666;
+  margin-bottom: 5px;
+}
+
+.recent-deck-card .card-count {
+  color: #6366f1;
+  font-weight: 500;
+}
+
+.recent-quiz-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background-color: #e9ecef !important;
+}
+
+.recent-quiz-card .title {
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.recent-quiz-card .date {
+  color: #666;
+  margin-bottom: 5px;
+}
+
+.recent-quiz-card .card-count {
+  color: #6366f1;
+  font-weight: 500;
 }
 
 .icon-btn{

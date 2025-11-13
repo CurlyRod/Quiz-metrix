@@ -153,7 +153,7 @@
             </div>
             
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
                 <button type="button" class="btn btn-primary" id="saveDeckSettingsBtn">Save Settings</button>
             </div>
         </div>
@@ -175,7 +175,7 @@
                     <p class="text-danger"><strong>If you leave now, your changes will not be saved.</strong></p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Stay on Page</button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Stay on Page</button>
                     <a href="#" id="confirmExitBtn" class="btn btn-danger">Leave Anyway</a>
                 </div>
             </div>

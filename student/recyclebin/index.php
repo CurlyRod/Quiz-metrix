@@ -108,6 +108,30 @@
         </div>
     </div>
 
+    <!-- Preview Modal -->
+<div class="modal" id="previewModal">
+    <div class="modal-overlay"></div>
+    <div class="modal-content modal-lg">
+        <div class="modal-header">
+            <h3 class="modal-title" id="previewModalTitle">Preview</h3>
+            <button type="button" class="btn-close" data-dismiss="modal">
+                <svg class="quiz-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div id="previewContent">
+                <!-- Preview content will be loaded here -->
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+    </div>
+</div>
+
     <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
 

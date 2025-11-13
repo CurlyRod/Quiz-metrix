@@ -71,11 +71,7 @@
             </div>
         </form>
         
-        <div class="loading" id="loading">
-            <div class="spinner"></div>
-            <p>Processing PDF... This may take up to 60 seconds for larger files.</p>
-            <p><small>Extracting text and analyzing content...</small></p>
-        </div>
+        
     </div>
 
         <!-- Toast Container -->

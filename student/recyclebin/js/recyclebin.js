@@ -223,6 +223,9 @@ function renderItems() {
                     </div>
                 </div>
                 <div class="d-flex gap-2">
+                    <button class="btn-preview flex-fill" onclick="showPreviewModal(${JSON.stringify(item).replace(/"/g, '&quot;')})">
+                        <i class="bi bi-eye"></i> Preview
+                    </button>
                     <button class="btn-restore flex-fill" onclick="handleRestore('${item.id}', '${item.name.replace(/'/g, "\\'")}', '${item.itemType}', ${item.originalId})">
                         <i class="bi bi-arrow-counterclockwise"></i> Restore
                     </button>
@@ -294,6 +297,433 @@ async function handleDelete() {
     }
 }
 
+// Preview functions
+function showPreviewModal(item) {
+    const modal = document.getElementById('previewModal');
+    const modalTitle = document.getElementById('previewModalTitle');
+    const previewContent = document.getElementById('previewContent');
+    
+    modalTitle.textContent = `Preview ${item.type}: ${item.name}`;
+    previewContent.innerHTML = `
+        <div class="preview-loading">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2 text-muted">Loading preview...</p>
+        </div>
+    `;
+    
+    modal.classList.add('show');
+    
+    // Load preview content based on item type
+    loadPreviewContent(item);
+}
+
+function hidePreviewModal() {
+    const modal = document.getElementById('previewModal');
+    modal.classList.remove('show');
+}
+
+async function loadFilePreview(fileId, previewContent) {
+    try {
+        const response = await fetch(`api/get_deleted_file.php?id=${fileId}`);
+        const data = await response.json();
+        
+        
+        if (data.success && data.file) {
+            const file = data.file;
+            
+            const fileType = file.type || getFileExtension(file.name);
+            const fileSize = file.size ? formatFileSize(file.size) : 'Unknown size';
+            const uploadDate = file.upload_date || file.deleted_at;
+            
+            let html = `
+                <div class="preview-file-info">
+                    <div class="preview-file-header">
+                        <div class="preview-file-icon ${getFileIconClass(fileType)}">
+                            <i class="${getFileIcon(fileType)}"></i>
+                        </div>
+                        <div class="preview-file-details">
+                            <h4 class="preview-file-name">${file.name || 'Untitled File'}</h4>
+                            <div class="preview-file-meta">
+                                <div><strong>Type:</strong> ${fileType.toUpperCase()}</div>
+                                <div><strong>Size:</strong> ${fileSize}</div>
+                                <div><strong>Uploaded:</strong> ${new Date(uploadDate).toLocaleDateString()}</div>
+                                <div><strong>Deleted:</strong> ${formatDate(file.deleted_at)}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Add content preview based on file type
+            html += `<div class="preview-file-content">`;
+            
+            if (fileType === 'txt') {
+                html += await loadTextFilePreview(fileId);
+            } else if (fileType === 'pdf') {
+                html += `
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i>
+                        <p><strong>PDF File</strong></p>
+                        <p>This is a PDF document. You can restore it to access the content.</p>
+                        <p class="text-muted small">File: ${file.name}</p>
+                    </div>
+                `;
+            } else if (fileType === 'docx') {
+                html += `
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i>
+                        <p><strong>Word Document</strong></p>
+                        <p>This is a Microsoft Word document. You can restore it to access the content.</p>
+                        <p class="text-muted small">File: ${file.name}</p>
+                    </div>
+                `;
+            } else {
+                html += `
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i>
+                        <p><strong>${fileType.toUpperCase()} File</strong></p>
+                        <p>This file can be restored to access its content.</p>
+                        <p class="text-muted small">File: ${file.name}</p>
+                    </div>
+                `;
+            }
+            
+            html += `</div>`;
+            previewContent.innerHTML = html;
+        } else {
+            console.error("Failed to load file:", data.message);
+            throw new Error(data.message || 'Failed to load file');
+        }
+    } catch (error) {
+        console.error("Error loading file preview:", error);
+        throw new Error(`Could not load file preview: ${error.message}`);
+    }
+}
+
+async function loadQuizPreview(quizId, previewContent) {
+    try {
+        const response = await fetch(`api/get_deleted_quiz.php?id=${quizId}`);
+        const data = await response.json();
+        
+        if (data.success && data.quiz) {
+            const quiz = data.quiz;
+            let html = `
+                <div class="preview-quiz">
+                    <h4 class="preview-quiz-title">${quiz.title || 'Untitled Quiz'}</h4>
+                    <p class="preview-quiz-description">${quiz.description || 'No description'}</p>
+                    <div class="preview-quiz-meta mb-3">
+                        <small class="text-muted">
+                            ${quiz.questions ? quiz.questions.length : 0} questions • 
+                            Created: ${new Date(quiz.created_at).toLocaleDateString()}
+                        </small>
+                    </div>
+                    <hr>
+            `;
+            
+            if (quiz.questions && quiz.questions.length > 0) {
+                quiz.questions.forEach((question, index) => {
+                    html += `
+                        <div class="preview-question">
+                            <div class="preview-question-header">
+                                <span class="preview-question-number">Question ${index + 1}</span>
+                            </div>
+                            <div class="preview-question-text">${question.description || 'No question provided'}</div>
+                            <div class="preview-answer-text"><strong>Answer:</strong> ${question.term || 'No answer provided'}</div>
+                        </div>
+                    `;
+                });
+            } else {
+                html += `
+                    <div class="preview-empty-state">
+                        <i class="bi bi-question-circle" style="font-size: 2rem;"></i>
+                        <p class="mt-2">No questions found in this quiz</p>
+                    </div>
+                `;
+            }
+            
+            html += `</div>`;
+            previewContent.innerHTML = html;
+        } else {
+            throw new Error(data.message || 'Failed to load quiz');
+        }
+    } catch (error) {
+        throw new Error(`Could not load quiz preview: ${error.message}`);
+    }
+}
+
+
+async function loadFlashcardPreview(deckId, previewContent) {
+    try {
+        const response = await fetch(`api/get_deleted_deck.php?id=${deckId}`);
+        const data = await response.json();
+        
+        
+        if (data.success && data.deck) {
+            const deck = data.deck;
+            
+            
+            let html = `
+                <div class="preview-flashcard-deck">
+                    <h4 class="preview-quiz-title">${deck.title || 'Untitled Deck'}</h4>
+                    <p class="preview-quiz-description">${deck.description || 'No description'}</p>
+                    <div class="preview-quiz-meta mb-3">
+                        <small class="text-muted">
+                            ${deck.flashcards ? deck.flashcards.length : 0} flashcards • 
+                            Created: ${new Date(deck.created_at).toLocaleDateString()}
+                        </small>
+                    </div>
+                    <hr>
+            `;
+            
+            if (deck.flashcards && deck.flashcards.length > 0) {
+              
+                
+                // Show first 10 flashcards in full detail, rest in compact view
+                const showFullCount = Math.min(deck.flashcards.length, 10);
+                const remainingCount = deck.flashcards.length - showFullCount;
+                
+                // Full detail flashcards
+                deck.flashcards.slice(0, showFullCount).forEach((card, index) => {
+                    const frontContent = card.front ? card.front.replace(/\n/g, '<br>') : 'No content';
+                    const backContent = card.back ? card.back.replace(/\n/g, '<br>') : 'No content';
+                    
+                    html += `
+                        <div class="preview-flashcard">
+                            <div class="preview-flashcard-header">
+                                <span class="preview-flashcard-number">Card ${index + 1}</span>
+                            </div>
+                            <div class="preview-flashcard-content">
+                                <div class="preview-flashcard-side front">
+                                    <span class="preview-flashcard-label">Front</span>
+                                    <div class="preview-flashcard-text">${frontContent}</div>
+                                </div>
+                                <div class="preview-flashcard-side back">
+                                    <span class="preview-flashcard-label">Back</span>
+                                    <div class="preview-flashcard-text">${backContent}</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                // Compact view for remaining flashcards
+                if (remainingCount > 0) {
+                    html += `<div class="mt-3"><h6>+ ${remainingCount} more flashcards:</h6></div>`;
+                    deck.flashcards.slice(showFullCount).forEach((card, index) => {
+                        const cardNumber = showFullCount + index + 1;
+                        const frontPreview = card.front ? (card.front.length > 50 ? card.front.substring(0, 50) + '...' : card.front) : 'No content';
+                        const backPreview = card.back ? (card.back.length > 50 ? card.back.substring(0, 50) + '...' : card.back) : 'No content';
+                        
+                        html += `
+                            <div class="preview-flashcard preview-flashcard-compact">
+                                <div class="preview-flashcard-compact-side">
+                                    <span class="preview-flashcard-label">Front</span>
+                                    <div class="preview-flashcard-text">${frontPreview}</div>
+                                </div>
+                                <div class="preview-flashcard-compact-side">
+                                    <span class="preview-flashcard-label">Back</span>
+                                    <div class="preview-flashcard-text">${backPreview}</div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+            } else {
+               
+                html += `
+                    <div class="preview-empty-state">
+                        <i class="bi bi-card-text" style="font-size: 2rem;"></i>
+                        <p class="mt-2">No flashcards found in this deck</p>
+                    </div>
+                `;
+            }
+            
+            html += `</div>`;
+            previewContent.innerHTML = html;
+        } else {
+            console.error("Failed to load deck:", data.message);
+            throw new Error(data.message || 'Failed to load flashcard deck');
+        }
+    } catch (error) {
+        console.error("Error loading flashcard preview:", error);
+        throw new Error(`Could not load flashcard preview: ${error.message}`);
+    }
+}
+
+async function loadNotePreview(noteId, previewContent) {
+    try {
+        const response = await fetch(`api/get_deleted_note.php?id=${noteId}`);
+        const data = await response.json();
+        
+        
+        if (data.success && data.note) {
+            const note = data.note;
+            
+            const noteColor = note.color || 'default';
+            const formattedDate = new Date(note.created_at).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            
+            let html = `
+                <div class="preview-note note-color-preview-${noteColor}">
+                    <div class="preview-note-header">
+                        <h4 class="preview-note-title">${note.title || 'Untitled Note'}</h4>
+                        <div class="preview-note-meta">
+                            <span class="preview-note-date">${formattedDate}</span>
+                            <span class="preview-note-color note-color-preview-${noteColor}" title="${noteColor} color"></span>
+                        </div>
+                    </div>
+            `;
+            
+            if (note.content && note.content.trim()) {
+                const formattedContent = note.content.replace(/\n/g, '<br>');
+                html += `
+                    <div class="preview-note-content">${formattedContent}</div>
+                `;
+            } else {
+                html += `
+                    <div class="preview-note-content preview-note-content-empty">
+                        No content in this note
+                    </div>
+                `;
+            }
+            
+            html += `</div>`;
+            previewContent.innerHTML = html;
+        } else {
+            console.error("Failed to load note:", data.message);
+            throw new Error(data.message || 'Failed to load note');
+        }
+    } catch (error) {
+        console.error("Error loading note preview:", error);
+        throw new Error(`Could not load note preview: ${error.message}`);
+    }
+}
+
+async function loadPreviewContent(item) {
+    const previewContent = document.getElementById('previewContent');
+    
+    try {
+        switch (item.itemType) {
+            case 'quiz':
+                await loadQuizPreview(item.originalId, previewContent);
+                break;
+            case 'flashcard':
+                await loadFlashcardPreview(item.originalId, previewContent);
+                break;
+            case 'note':
+                await loadNotePreview(item.originalId, previewContent);
+                break;
+            case 'file':
+                await loadFilePreview(item.originalId, previewContent);
+                break;
+            default:
+                previewContent.innerHTML = `
+                    <div class="preview-empty-state">
+                        <i class="bi bi-question-circle" style="font-size: 3rem;"></i>
+                        <p class="mt-2">Preview not available for this item type</p>
+                    </div>
+                `;
+        }
+    } catch (error) {
+        console.error('Error loading preview:', error);
+        previewContent.innerHTML = `
+            <div class="preview-empty-state">
+                <i class="bi bi-exclamation-triangle" style="font-size: 3rem;"></i>
+                <p class="mt-2">Error loading preview</p>
+                <small class="text-muted">${error.message}</small>
+            </div>
+        `;
+    }
+}
+
+async function loadTextFilePreview(fileId) {
+    try {
+        // Get file info for display
+        const response = await fetch(`api/get_deleted_file.php?id=${fileId}`);
+        const data = await response.json();
+        
+        if (data.success && data.file) {
+            const file = data.file;
+            const fileType = file.type || getFileExtension(file.name);
+            const fileSize = file.size ? formatFileSize(file.size) : 'Unknown size';
+            const uploadDate = file.upload_date || file.deleted_at;
+            
+            return `
+                
+                <div class="preview-file-content">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i>
+                        <p><strong>Text Document</strong></p>
+                        <p>This is a text document. You can restore it to access the content.</p>
+                        <p class="text-muted small">File: ${file.name}</p>
+                    </div>
+                </div>
+            `;
+        } else {
+            throw new Error(data.message || 'Failed to load file information');
+        }
+    } catch (error) {
+        console.error("Error loading text file preview:", error);
+        return `
+            <div class="alert alert-warning">
+                <i class="bi bi-exclamation-triangle"></i>
+                <p>Unable to load file information.</p>
+                <p class="text-muted small">Error: ${error.message}</p>
+            </div>
+        `;
+    }
+}
+
+// Helper functions for files
+function getFileExtension(filename) {
+    return filename.split('.').pop().toLowerCase();
+}
+
+function getFileIcon(fileType) {
+    const icons = {
+        'pdf': 'bi-file-earmark-pdf',
+        'docx': 'bi-file-earmark-word',
+        'txt': 'bi-file-earmark-text',
+        'default': 'bi-file-earmark'
+    };
+    return icons[fileType] || icons['default'];
+}
+
+function getFileIconClass(fileType) {
+    const classes = {
+        'pdf': 'file-icon-pdf',
+        'docx': 'file-icon-docx', 
+        'txt': 'file-icon-txt',
+        'default': 'file-icon-other'
+    };
+    return classes[fileType] || classes['default'];
+}
+
+function formatFileSize(bytes) {
+    if (!bytes) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function openPdfInNewTab(fileId) {
+    window.open(`api/preview_file.php?id=${fileId}`, '_blank');
+}
+
 // Event listeners
 document.addEventListener('DOMContentLoaded', async function() {
     // Date filter buttons
@@ -321,6 +751,20 @@ document.addEventListener('DOMContentLoaded', async function() {
             renderItems();
         });
     });
+
+    document.querySelectorAll('#previewModal [data-dismiss="modal"]').forEach(btn => {
+    btn.addEventListener('click', hidePreviewModal);
+});
+
+document.querySelector('#previewModal .modal-overlay').addEventListener('click', hidePreviewModal);
+
+// Close preview modal with Escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        hidePreviewModal();
+        hideDeleteModal();
+    }
+});
 
     // Modal event listeners
     document.querySelectorAll('[data-dismiss="modal"]').forEach(btn => {

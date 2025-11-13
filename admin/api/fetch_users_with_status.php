@@ -4,11 +4,11 @@ error_reporting(0);
 ini_set('display_errors', 0);
 
 header('Content-Type: application/json');
-
+require_once 'check_admin_session.php'; 
 try {
     // Include database connection with proper path
     require_once __DIR__ . '/../home/db.php';
-    
+
     // Get parameters from request
     $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
     $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 10;

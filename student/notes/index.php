@@ -101,7 +101,7 @@
       <!-- Buttons -->
       <div class="mt-3 d-flex justify-content-end gap-2">
          
-        <button id="btn-close" class="btn btn-light">Close</button>
+        <button id="btn-close" class="btn btn-outline-secondary">Close</button>
         <button id="btn-save" class="btn btn-primary">Save</button>
       </div>
     </div>

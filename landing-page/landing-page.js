@@ -89,40 +89,40 @@ function handleLoginButton() {
 }
 
 // Optional: Check if user is already logged in
-function checkExistingSession() {
-  fetch('../Middleware/auth/ValidateUser.php', { 
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-      'X-Requested-With': 'XMLHttpRequest'
-    },
-    body: 'action=check-users'
-  })
-  .then(response => {
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    return response.text();
-  })
-  .then(text => {
-    try {
-      const data = JSON.parse(text);
-      if (data.isAuthenticate && data.status !== 'inactive') {
+// function checkExistingSession() {
+//   fetch('../Middleware/auth/ValidateUser.php', { 
+//     method: 'POST',
+//     headers: {
+//       'Content-Type': 'application/x-www-form-urlencoded',
+//       'X-Requested-With': 'XMLHttpRequest'
+//     },
+//     body: 'action=check-users'
+//   })
+//   .then(response => {
+//     if (!response.ok) {
+//       throw new Error(`HTTP error! status: ${response.status}`);
+//     }
+//     return response.text();
+//   })
+//   .then(text => {
+//     try {
+//       const data = JSON.parse(text);
+//       if (data.isAuthenticate && data.status !== 'inactive') {
 
-      }
-    } catch (e) {
-      console.error('Invalid JSON in session check:', text.substring(0, 100));
-    }
-  })
-  .catch(error => {
-    console.error('Session check failed:', error);
-  });
-}
+//       }
+//     } catch (e) {
+//       console.error('Invalid JSON in session check:', text.substring(0, 100));
+//     }
+//   })
+//   .catch(error => {
+//     console.error('Session check failed:', error);
+//   });
+// }
 
 // Initialize when DOM is loaded
 document.addEventListener("DOMContentLoaded", () => {
   // Optional: Check if user already has an active session
-  checkExistingSession();
+  // checkExistingSession();
   
   // Set up login button handlers
   handleLoginButton();

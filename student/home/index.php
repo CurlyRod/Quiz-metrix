@@ -106,7 +106,17 @@
           </div>
         </div>
       </div>
-
+<!-- Recent Decks Section -->
+<div class="card recent-decks-card" style="max-width: none;">
+  <div class="card-header">
+    <h3>Recent Decks</h3>
+  </div>
+  <div class="card-body">
+    <div class="row" id="recentDecks">
+      <!-- Deck cards will be generated here -->
+    </div>
+  </div>
+</div>
     </div>
 
     <!-- Right Column -->
@@ -178,6 +188,7 @@
 
   <!-- Custom JS -->
   <script src="js/recent.js"></script>
+  <script src="js/recent-decks.js"></script>
   <script src="js/calendar.js"></script>
   <script src="js/todo.js"></script>
   <!-- <script src="js/goals.js"></script> -->

@@ -7,6 +7,7 @@ let isFlipped = false
 let trackProgress = true
 let studyMode = "sequence"
 let showBackOnLoad = false
+let exitWarningModal = null;
 
 document.addEventListener("DOMContentLoaded", () => {
   const urlParams = new URLSearchParams(window.location.search)
@@ -69,6 +70,10 @@ function loadDeck(deckId) {
         }
 
         document.getElementById("deckTitle").textContent = currentDeck.title
+        
+        // Initialize the exit warning modal
+        initExitWarningModal();
+        
         updateUI()
         setupControlsBasedOnMode()
         applyCardDisplaySetting()
@@ -132,7 +137,7 @@ function setupEventListeners() {
   document.getElementById("nextBtn")?.addEventListener("click", nextCard)
   document.getElementById("dontKnowBtn")?.addEventListener("click", () => markCard("unknown"))
   document.getElementById("knowBtn")?.addEventListener("click", () => markCard("known"))
-  document.getElementById("exitBtn").addEventListener("click", exitDeck)
+  document.getElementById("exitBtn").addEventListener("click", showExitWarning)
   document.getElementById("closeResultsBtn").addEventListener("click", closeDeck)
   document.getElementById("retryBtn").addEventListener("click", retryDeck)
   document.getElementById("unknownOnlyBtn").addEventListener("click", reviewUnknownOnly)
@@ -140,6 +145,9 @@ function setupEventListeners() {
   // Completion modal event listeners
   document.getElementById("closeCompletionBtn").addEventListener("click", closeDeck)
   document.getElementById("retryCompletionBtn").addEventListener("click", retryCompletion)
+  
+  // Exit warning modal event listener
+  document.getElementById("confirmExitBtn").addEventListener("click", confirmExit)
 }
 
 function shuffleArray(array) {
@@ -149,6 +157,13 @@ function shuffleArray(array) {
         [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
     }
     return shuffled;
+}
+
+function initExitWarningModal() {
+  exitWarningModal = new bootstrap.Modal(document.getElementById('exitWarningModal'), {
+    backdrop: 'static',
+    keyboard: false
+  });
 }
 
 function setupKeyboardShortcuts() {
@@ -322,7 +337,9 @@ function updateUI() {
 
   const prevBtn = document.getElementById("prevBtn")
   const nextBtn = document.getElementById("nextBtn")
+  const knowBtn = document.getElementById("knowBtn")
   
+  // Update standard navigation buttons
   if (prevBtn && nextBtn) {
     prevBtn.disabled = currentCardIndex === 0
     
@@ -336,7 +353,21 @@ function updateUI() {
       nextBtn.classList.add('btn-outline-primary')
     }
   }
+  
+  // Update track progress "Know" button to "Submit" on last card
+  if (knowBtn && trackProgress) {
+    if (currentCardIndex === flashcards.length - 1) {
+      knowBtn.innerHTML = '<i class="bi bi-check-circle"></i> Submit'
+      knowBtn.classList.remove('btn-outline-success')
+      knowBtn.classList.add('btn-success')
+    } else {
+      knowBtn.innerHTML = '<i class="bi bi-check-circle"></i> Know'
+      knowBtn.classList.remove('btn-success')
+      knowBtn.classList.add('btn-outline-success')
+    }
+  }
 }
+
 
 function retryDeck() {
   const modal = bootstrap.Modal.getInstance(document.getElementById("resultsModal"))
@@ -396,13 +427,19 @@ function reviewUnknownOnly() {
   
   updateUI()
 }
+function showExitWarning() {
+  exitWarningModal.show();
+}
+
+function confirmExit() {
+  // Clear progress from storage since user is choosing to exit
+  clearProgressFromStorage(currentDeck.deck_id);
+  exitWarningModal.hide();
+  window.location.href = "index.php";
+}
 
 function exitDeck() {
-  if (confirm("Are you sure you want to exit? Your progress will be reset.")) {
-    // Clear progress from storage since user is choosing to exit
-    clearProgressFromStorage(currentDeck.deck_id)
-    window.location.href = "index.php"
-  }
+  showExitWarning();
 }
 
 function closeDeck() {
