@@ -6,20 +6,20 @@ class AdminAuth {
     private $table_name = "admin_users";
 
     public function __construct() {
-        $host = 'localhost';
-        $db_name = 'quizmetrix';
-        $username = 'root';
-        $password = '';
-        
-        try {
-            $this->conn = new \PDO("mysql:host=$host;dbname=$db_name;charset=utf8mb4", $username, $password);
-            $this->conn->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-            error_log("Database connection successful");
-        } catch(\PDOException $exception) {
-            error_log("Database connection failed: " . $exception->getMessage());
-            throw new \Exception("Database connection failed: " . $exception->getMessage());
-        }
+    $host = getenv('MYSQLHOST');
+    $db_name = getenv('MYSQLDATABASE');
+    $username = getenv('MYSQLUSER');
+    $password = getenv('MYSQLPASSWORD');
+    
+    try {
+        $this->conn = new \PDO("mysql:host=$host;dbname=$db_name;charset=utf8mb4", $username, $password);
+        $this->conn->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+        error_log("Database connection successful");
+    } catch(\PDOException $exception) {
+        error_log("Database connection failed: " . $exception->getMessage());
+        throw new \Exception("Database connection failed: " . $exception->getMessage());
     }
+}
 
     public function authenticate($username, $password) {
         try {
