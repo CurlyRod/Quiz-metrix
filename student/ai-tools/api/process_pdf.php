@@ -13,7 +13,7 @@ ini_set('max_execution_time', 180); // 3 minutes
 ini_set('memory_limit', '512M'); // 512MB
 
 // Your API Key - REPLACE THIS with your actual key
-$API_KEY = "ask key from Mj Despi";
+$API_KEY = getenv('AI_API_KEY');
 
 // Simple response function
 function sendResponse($success, $data = null, $error = null) {
@@ -121,7 +121,7 @@ PDF CONTENT:\n" . $limitedText;
             'Content-Type: application/json',
             'Authorization: Bearer ' . $API_KEY
         ],
-        CURLOPT_TIMEOUT => 90, // Increased to 90 seconds for long PDFs
+        CURLOPT_TIMEOUT => 120, // Increased to 120 seconds for long PDFs
         CURLOPT_CONNECTTIMEOUT => 15
     ]);
     

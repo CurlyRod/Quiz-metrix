@@ -7,6 +7,12 @@ class Config{
 
     public function VendorConfig()
     {
+
+        $APP_CLIENT_ID = getenv('MS_CLIENT_ID');
+        $APP_CLIENT_SECRET = getenv('MS_CLIENT_SECRET');
+        $APP_URI_CALLBACK = getenv('RAILWAY_PUBLIC_URL') . '/middleware/class/callback.php';
+
+
         define('CLIENT_ID', $APP_CLIENT_ID );  
         define('CLIENT_SECRET', $APP_CLIENT_SECRET ); 
         define('TENANT_ID', 'common'); 
