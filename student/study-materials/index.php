@@ -22,6 +22,9 @@
 <body>
     <?php
     session_start();
+    require_once 'includes/functions.php';
+    $storage = getUserStorageUsage();
+
     // Check if user is logged in
     if (!isset($_SESSION['user'])) {
         header("Location: ../../landing-page/");
@@ -520,6 +523,40 @@
 </div>
 
 
+<!-- Storage Indicator -->
+<div class="storage-indicator">
+    <div class="storage-content">
+        <div class="storage-header">
+            <div class="storage-info">
+                <span class="storage-text">
+                    <strong><?php echo $storage['used_formatted']; ?> used</strong> 
+                    of <?php echo $storage['limit_formatted']; ?>
+                </span>
+                <span class="storage-remaining">
+                    <?php echo $storage['remaining_formatted']; ?> remaining
+                </span>
+            </div>
+            <button class="storage-toggle-btn" title="Toggle storage info">
+                <i class="bx bx-chevron-right"></i>
+            </button>
+        </div>
+        <div class="storage-progress">
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: <?php echo min($storage['used_percentage'], 100); ?>%"></div>
+            </div>
+            <span class="storage-percentage"><?php echo $storage['used_percentage']; ?>%</span>
+        </div>
+    </div>
+    
+    <!-- Collapsed state -->
+    <div class="storage-collapsed">
+        <button class="storage-toggle-btn" title="Show storage info">
+            <i class="bx bx-pie-chart-alt-2"></i>
+            <span class="storage-collapsed-percentage"><?php echo $storage['used_percentage']; ?>%</span>
+            <i class="bx bx-chevron-left"></i>
+        </button>
+    </div>
+</div>
 
     <!-- Toast Container -->
     <div class="toast-container position-fixed bottom-0 end-0 p-3"></div>

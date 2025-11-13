@@ -1,5 +1,45 @@
+// Storage indicator toggle functionality
+function initStorageIndicator() {
+    const storageIndicator = document.querySelector('.storage-indicator');
+    const toggleButtons = document.querySelectorAll('.storage-toggle-btn');
+    
+    if (!storageIndicator || !toggleButtons.length) return;
+    
+    // Load saved state from localStorage
+    const isCollapsed = localStorage.getItem('storageIndicatorCollapsed') === 'true';
+    if (isCollapsed) {
+        storageIndicator.classList.add('collapsed');
+    }
+    
+    // Add click event to all toggle buttons
+    toggleButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.stopPropagation();
+            storageIndicator.classList.toggle('collapsed');
+            
+            // Save state to localStorage
+            const isNowCollapsed = storageIndicator.classList.contains('collapsed');
+            localStorage.setItem('storageIndicatorCollapsed', isNowCollapsed.toString());
+        });
+    });
+    
+    // Optional: Auto-collapse when near files (you can adjust this logic)
+    const autoCollapseThreshold = 80; // percentage
+    const currentUsage = parseFloat(document.querySelector('.storage-percentage')?.textContent || '0');
+    
+    if (currentUsage >= autoCollapseThreshold && !storageIndicator.classList.contains('collapsed')) {
+        // Auto-collapse when storage is nearly full to avoid blocking content
+        setTimeout(() => {
+            storageIndicator.classList.add('collapsed');
+            localStorage.setItem('storageIndicatorCollapsed', 'true');
+        }, 5000); // Collapse after 5 seconds
+    }
+}
+
+
 document.addEventListener("DOMContentLoaded", () => {
   // Initialize variables
+  
 
   const viewToggles = document.querySelectorAll(".view-toggle[data-view]")
   const uploadForm = document.getElementById("uploadForm")
@@ -21,7 +61,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const checked = Array.from(document.querySelectorAll(".select-file:checked"));
   const selectedIds = checked.map(cb => cb.dataset.id);
   const fileCards = document.querySelectorAll(".file-card");
-  
+
   const selectBtn = document.getElementById("selectItemsBtn")
   const bulkDeleteBtn = document.getElementById("bulkDeleteBtn")
   const selectAllBtn = document.getElementById("selectAllBtn");
@@ -199,30 +239,58 @@ if (prevBtn && nextBtn) {
   })
 
   // File explorer select
-  const MAX_FILE_SIZE_MB = 5;
+const MAX_FILE_SIZE_MB = 5;
 const MAX_FILE_SIZE = MAX_FILE_SIZE_MB * 1024 * 1024; // bytes
 
+// In your file upload event listener, update the storage check:
 if (fileInput) {
   fileInput.addEventListener("change", (e) => {
-    Array.from(e.target.files).forEach((file) => {
-      const ext = file.name.split(".").pop().toLowerCase();
-      if (["pdf", "docx", "txt"].includes(ext)) {
-        if (file.size > MAX_FILE_SIZE) {
-          showToast(
-            `❌ ${file.name} exceeds ${MAX_FILE_SIZE_MB} MB limit.`,
-            "danger"
-          );
-          return; // skip this file
-        }
+    // First check current storage usage
+    fetch('api/get-storage-usage.php')
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          const storage = data.storage;
+          const remainingSpace = storage.limit_bytes - storage.used_bytes;
+          
+          // Auto-expand storage indicator if upload might cause issues
+          if (remainingSpace < (5 * 1024 * 1024)) { // Less than 5MB remaining
+            const storageIndicator = document.querySelector('.storage-indicator');
+            if (storageIndicator && storageIndicator.classList.contains('collapsed')) {
+              storageIndicator.classList.remove('collapsed');
+              localStorage.setItem('storageIndicatorCollapsed', 'false');
+            }
+          }
+          
+          Array.from(e.target.files).forEach((file) => {
+            const ext = file.name.split(".").pop().toLowerCase();
+            
+            if (!["pdf", "docx", "txt"].includes(ext)) {
+              showToast(`Invalid file type: ${file.name}`, "danger");
+              return;
+            }
 
-        const uniqueName = getUniqueFileName(file.name);
-        const renamedFile = new File([file], uniqueName, { type: file.type });
-        selectedFiles.push(renamedFile);
-      } else {
-        showToast(`Invalid file type: ${file.name}`, "danger");
-      }
-    });
-    renderFileList();
+            if (file.size > MAX_FILE_SIZE) {
+              showToast(`❌ ${file.name} exceeds ${MAX_FILE_SIZE_MB} MB limit.`, "danger");
+              return;
+            }
+
+            // Check if file would exceed storage limit
+            if (file.size > remainingSpace) {
+              showToast(`❌ Not enough storage space for ${file.name}. You have ${storage.remaining_formatted} remaining.`, "danger");
+              return;
+            }
+
+            const uniqueName = getUniqueFileName(file.name);
+            const renamedFile = new File([file], uniqueName, { type: file.type });
+            selectedFiles.push(renamedFile);
+          });
+          renderFileList();
+        }
+      })
+      .catch(error => {
+        console.error('Error checking storage:', error);
+      });
   });
 }
 
@@ -1267,6 +1335,12 @@ if (bulkDeleteBtn) {
       })
     }
   }
+
+
+  
+
+
+
   
   /* ---------- Reset selection mode ---------- */
 function resetSelectionMode() {
@@ -1315,4 +1389,11 @@ function resetSelectionMode() {
         showToast("Error restoring file", "danger")
       })
   }
+
+setTimeout(() => {
+    initStorageIndicator();
+  }, 100);
+
+
 })
+

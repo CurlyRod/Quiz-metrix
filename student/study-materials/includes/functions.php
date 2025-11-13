@@ -199,6 +199,56 @@ function getRecentFiles($limit = 5) {
     return [];
 }
 
+// Add this function to functions.php
+function getUserStorageUsage() {
+    global $conn;
+    
+    try {
+        $user_id = getUserId();
+        
+        // Calculate total file size for user (excluding deleted files)
+        $sql = "SELECT COALESCE(SUM(size), 0) as total_size FROM files WHERE user_id = ? AND is_deleted = 0";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("i", $user_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        if ($result && $result->num_rows > 0) {
+            $row = $result->fetch_assoc();
+            $total_size = $row['total_size'];
+        } else {
+            $total_size = 0;
+        }
+        
+        $stmt->close();
+        
+        // Constants
+        $limit_bytes = 100 * 1024 * 1024; // 100MB in bytes
+        $used_percentage = ($total_size / $limit_bytes) * 100;
+        
+        return [
+            'used_bytes' => $total_size,
+            'limit_bytes' => $limit_bytes,
+            'used_percentage' => round($used_percentage, 1),
+            'used_formatted' => formatFileSize($total_size),
+            'limit_formatted' => '100 MB',
+            'remaining_bytes' => $limit_bytes - $total_size,
+            'remaining_formatted' => formatFileSize($limit_bytes - $total_size)
+        ];
+        
+    } catch (Exception $e) {
+        return [
+            'used_bytes' => 0,
+            'limit_bytes' => 100 * 1024 * 1024,
+            'used_percentage' => 0,
+            'used_formatted' => '0 Bytes',
+            'limit_formatted' => '100 MB',
+            'remaining_bytes' => 100 * 1024 * 1024,
+            'remaining_formatted' => '100 MB'
+        ];
+    }
+}
+
 function getFolderPath($folderId) {
     global $conn;
     
