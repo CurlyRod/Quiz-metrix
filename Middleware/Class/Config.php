@@ -8,8 +8,8 @@ class Config{
     public function VendorConfig()
     {
 
-        error_log("MS_CLIENT_ID: " . getenv('MS_CLIENT_ID'));
-        error_log("MS_CLIENT_SECRET: " . getenv('MS_CLIENT_SECRET'));
+        $APP_CLIENT_ID = getenv('MS_CLIENT_ID');
+        $APP_CLIENT_SECRET = getenv('MS_CLIENT_SECRET');
         $APP_URI_CALLBACK = getenv('RAILWAY_PUBLIC_URL') . '/middleware/class/callback.php';
 
 
