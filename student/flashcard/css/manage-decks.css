@@ -138,6 +138,26 @@ body {
     background: #d1d5db;
 }
 
+.btn-outline-secondary {
+  border: 2px solid var(--primary);
+  color: var(--primary);
+  background: white;
+  font-weight: 600;
+}
+
+.btn-outline-secondary:hover {
+  background-color: var(--primary);
+  color: white;
+  border-color: var(--primary);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn.btn-outline-primary {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
 .btn-close {
     background: none;
     border: none;

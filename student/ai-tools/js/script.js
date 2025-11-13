@@ -217,7 +217,6 @@ uploadForm.addEventListener('submit', function(e) {
 
 async function processPDF() {
     const processBtn = document.getElementById('processBtn');
-    const loading = document.getElementById('loading');
     const error = document.getElementById('error');
     
     // First check if user has extraction limit available
@@ -249,45 +248,21 @@ async function processPDF() {
     currentFileName = fileInput.files[0].name.replace('.pdf', '');
     processBtn.disabled = true;
     processBtn.textContent = 'Processing...';
-    loading.style.display = 'block';
     error.style.display = 'none';
     
-    const formData = new FormData();
-    formData.append('pdfFile', fileInput.files[0]);
+    // Store file info and redirect to loader immediately
+    const fileData = {
+        name: file.name,
+        size: file.size,
+        type: file.type
+    };
     
-    try {
-        const response = await fetch('api/process_pdf.php', {
-            method: 'POST',
-            body: formData
-        });
-        
-        const responseText = await response.text();
-        let data;
-        try {
-            data = JSON.parse(responseText);
-        } catch (parseError) {
-            throw new Error('Server returned invalid response.');
-        }
-        
-        if (data.success) {
-            // Increment extraction count AFTER successful processing
-            await incrementExtractionCount();
-            
-            // Store extraction data and redirect to results page
-            localStorage.setItem('extractedTerms', JSON.stringify(data.terms));
-            localStorage.setItem('extractedFileName', currentFileName);
-            window.location.href = 'extraction-results.php';
-        } else {
-            throw new Error(data.error || 'Processing failed');
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        showError('Error: ' + error.message);
-    } finally {
-        processBtn.disabled = false;
-        processBtn.textContent = 'Extract Terms';
-        loading.style.display = 'none';
-    }
+    // Store file data temporarily for processing
+    sessionStorage.setItem('pendingPdfFile', JSON.stringify(fileData));
+    sessionStorage.setItem('pendingPdfFileName', currentFileName);
+    
+    // Redirect to loader.php immediately
+    window.location.href = 'loader.php';
 }
 
 function showError(message) {

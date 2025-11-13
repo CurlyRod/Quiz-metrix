@@ -93,6 +93,29 @@
         </div>
     </div>
 
+    <!-- Exit Warning Modal -->
+    <div class="modal fade" id="exitWarningModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Leaving Quiz?</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to leave? Your progress will not be saved.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Stay</button>
+                    <button type="button" class="btn btn-primary" id="confirmExitBtn" style="
+  background: #6366f1 ;
+  color: white ;
+  font-weight: 600 ;
+">Leave</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Results Modal (for trackProgress = true) -->
     <div class="modal fade" id="resultsModal" tabindex="-1" aria-labelledby="resultsModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
         <div class="modal-dialog modal-dialog-centered">

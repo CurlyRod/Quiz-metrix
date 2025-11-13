@@ -23,7 +23,6 @@
 
     ?>
     <div class="container">
-        <a href="index.php" class="back-btn">Back to Extractor</a>
         
         <div class="header">
             <h1>Extraction Complete!</h1>
